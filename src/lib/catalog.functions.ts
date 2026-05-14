@@ -2,29 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-export type Category = {
-  id: string;
-  slug: string;
-  name: string;
-  image: string;
-  tint: string;
-  sort_order: number;
-};
-
-export type Product = {
-  id: string;
-  slug: string;
-  name: string;
-  category_slug: string;
-  image: string;
-  weight: string;
-  price: number;
-  mrp: number;
-  eta: string;
-  rating: number;
-  in_stock: boolean;
-};
+import type { Category, Product } from "./catalog-types";
 
 // ---------- Public reads (use admin client to bypass RLS for anon SSR) ----------
 // RLS allows public read on these tables anyway; using admin client avoids
