@@ -1,12 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, ShoppingCart, MapPin, ChevronDown, Zap } from "lucide-react";
+import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
+import { useAuth } from "@/lib/use-auth";
 
 export function Header() {
   const cart = useCart();
   const { itemsCount, subtotal } = cartTotals(cart);
   const path = useRouterState({ select: (r) => r.location.pathname });
   const onCart = path === "/cart";
+  const { user, loading } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
@@ -37,6 +39,36 @@ export function Header() {
             className="w-full rounded-xl border bg-secondary/40 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:bg-background focus:ring-focus"
           />
         </div>
+
+        {!loading && (user ? (
+          <Link
+            to="/account"
+            className="hidden items-center gap-2 rounded-xl border bg-secondary/40 px-3 py-2 text-xs font-semibold hover:bg-secondary sm:flex"
+          >
+            <div className="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+              {(user.user_metadata?.full_name || user.email || "U").slice(0, 1).toUpperCase()}
+            </div>
+            Account
+          </Link>
+        ) : (
+          <Link
+            to="/login"
+            className="hidden items-center gap-1.5 rounded-xl border bg-secondary/40 px-3 py-2 text-xs font-semibold hover:bg-secondary sm:flex"
+          >
+            <LogIn className="h-3.5 w-3.5" /> Sign in
+          </Link>
+        ))}
+
+        {/* mobile: account icon */}
+        {!loading && (
+          <Link
+            to={user ? "/account" : "/login"}
+            className="grid h-10 w-10 place-items-center rounded-xl border bg-secondary/40 hover:bg-secondary sm:hidden"
+            aria-label={user ? "Account" : "Sign in"}
+          >
+            <UserIcon className="h-4 w-4" />
+          </Link>
+        )}
 
         <Link
           to="/cart"
