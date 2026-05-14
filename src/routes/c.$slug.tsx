@@ -1,9 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
-import { categories, productsByCategory } from "@/lib/products";
+import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
+import { listCategories, productsByCategory } from "@/lib/catalog.functions";
 
 type Sort = "popular" | "price-asc" | "price-desc" | "discount";
 
@@ -18,9 +21,17 @@ export const Route = createFileRoute("/c/$slug")({
 
 function CategoryPage() {
   const { slug } = Route.useParams();
+  const cats = useServerFn(listCategories);
+  const byCat = useServerFn(productsByCategory);
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
+  const itemsQ = useQuery({
+    queryKey: ["products", "by-cat", slug],
+    queryFn: () => byCat({ data: { slug } }),
+  });
+
+  const categories = catsQ.data ?? [];
+  const items = itemsQ.data ?? [];
   const category = categories.find((c) => c.slug === slug);
-  if (!category) throw notFound();
-  const items = productsByCategory(slug);
 
   const [sort, setSort] = useState<Sort>("popular");
   const [onlyDeals, setOnlyDeals] = useState(false);
@@ -38,6 +49,8 @@ function CategoryPage() {
     return list;
   }, [items, sort, onlyDeals]);
 
+  if (catsQ.isSuccess && !category) throw notFound();
+
   const sortOpts: { id: Sort; label: string }[] = [
     { id: "popular", label: "Popular" },
     { id: "price-asc", label: "Price: Low to High" },
@@ -50,18 +63,20 @@ function CategoryPage() {
       <Header />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="text-xs text-muted-foreground">
-          <Link to="/" className="hover:underline">Home</Link> / {category.name}
+          <Link to="/" className="hover:underline">Home</Link> / {category?.name ?? slug}
         </div>
-        <div
-          className="mt-4 flex items-center gap-4 rounded-2xl border p-5"
-          style={{ backgroundColor: category.tint }}
-        >
-          <img src={category.image} alt={category.name} className="h-20 w-20 rounded-xl object-cover" />
-          <div>
-            <h1 className="font-display text-2xl font-bold md:text-3xl">{category.name}</h1>
-            <p className="text-sm text-foreground/70">{items.length} products · delivery in 11 mins</p>
+        {category && (
+          <div
+            className="mt-4 flex items-center gap-4 rounded-2xl border p-5"
+            style={{ backgroundColor: category.tint }}
+          >
+            <img src={category.image} alt={category.name} className="h-20 w-20 rounded-xl object-cover" />
+            <div>
+              <h1 className="font-display text-2xl font-bold md:text-3xl">{category.name}</h1>
+              <p className="text-sm text-foreground/70">{items.length} products · delivery in 11 mins</p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="mt-8 grid gap-6 md:grid-cols-[200px_1fr]">
           <aside className="hidden md:block">
@@ -120,7 +135,9 @@ function CategoryPage() {
                 </label>
               </div>
             </div>
-            {visible.length > 0 ? (
+            {itemsQ.isLoading ? (
+              <ProductGridSkeleton />
+            ) : visible.length > 0 ? (
               <ProductGrid products={visible} />
             ) : (
               <div className="rounded-2xl border p-10 text-center text-sm text-muted-foreground">

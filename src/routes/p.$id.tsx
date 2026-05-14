@@ -1,8 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
-import { findProduct, productsByCategory } from "@/lib/products";
+import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
+import { getProduct, productsByCategory } from "@/lib/catalog.functions";
 import { cartStore, useCart } from "@/lib/cart-store";
 import { Clock, Minus, Plus, ShieldCheck, Truck, Leaf } from "lucide-react";
 
@@ -17,12 +20,43 @@ export const Route = createFileRoute("/p/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
-  const product = findProduct(id);
-  if (!product) throw notFound();
+  const get = useServerFn(getProduct);
+  const byCat = useServerFn(productsByCategory);
+  const productQ = useQuery({ queryKey: ["product", id], queryFn: () => get({ data: { slug: id } }) });
+
+  const product = productQ.data;
+  const relatedQ = useQuery({
+    queryKey: ["products", "by-cat", product?.category_slug],
+    queryFn: () => byCat({ data: { slug: product!.category_slug } }),
+    enabled: !!product,
+  });
+
+  if (productQ.isSuccess && !product) throw notFound();
+
   const cart = useCart();
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="mx-auto max-w-7xl px-4 py-10">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="aspect-square animate-pulse rounded-3xl bg-muted" />
+            <div className="space-y-3">
+              <div className="h-6 w-2/3 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-1/3 animate-pulse rounded bg-muted" />
+              <div className="h-10 w-1/2 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const qty = cart[product.id]?.qty ?? 0;
   const off = Math.round(((product.mrp - product.price) / product.mrp) * 100);
-  const related = productsByCategory(product.category).filter((p) => p.id !== product.id).slice(0, 5);
+  const related = (relatedQ.data ?? []).filter((p) => p.id !== product.id).slice(0, 5);
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,7 +64,7 @@ function ProductPage() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="text-xs text-muted-foreground">
           <Link to="/">Home</Link> /{" "}
-          <Link to="/c/$slug" params={{ slug: product.category }}>{product.category}</Link> / {product.name}
+          <Link to="/c/$slug" params={{ slug: product.category_slug }}>{product.category_slug}</Link> / {product.name}
         </div>
         <div className="mt-6 grid gap-8 md:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border bg-secondary/40 p-6">
@@ -93,14 +127,12 @@ function ProductPage() {
           </div>
         </div>
 
-        {related.length > 0 && (
-          <section className="mt-16">
-            <h2 className="font-display text-2xl font-bold">You might also like</h2>
-            <div className="mt-5">
-              <ProductGrid products={related} />
-            </div>
-          </section>
-        )}
+        <section className="mt-16">
+          <h2 className="font-display text-2xl font-bold">You might also like</h2>
+          <div className="mt-5">
+            {relatedQ.isLoading ? <ProductGridSkeleton count={5} /> : related.length > 0 && <ProductGrid products={related} />}
+          </div>
+        </section>
       </div>
       <Footer />
     </div>

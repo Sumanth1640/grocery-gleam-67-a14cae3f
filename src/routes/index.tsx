@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
+import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { BannerCarousel } from "@/components/site/BannerCarousel";
-import { categories, products } from "@/lib/products";
+import { listCategories, listProducts } from "@/lib/catalog.functions";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { Clock, Leaf, ShieldCheck, Truck } from "lucide-react";
 
@@ -18,8 +21,18 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const cats = useServerFn(listCategories);
+  const prods = useServerFn(listProducts);
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
+  const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => prods() });
+
+  const categories = catsQ.data ?? [];
+  const products = prodsQ.data ?? [];
   const trending = products.slice(0, 10);
-  const dairyAndBakery = [...products.filter(p => p.category === "dairy"), ...products.filter(p => p.category === "bakery")].slice(0, 10);
+  const dairyAndBakery = [
+    ...products.filter((p) => p.category_slug === "dairy"),
+    ...products.filter((p) => p.category_slug === "bakery"),
+  ].slice(0, 10);
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,24 +92,35 @@ function HomePage() {
       {/* CATEGORIES */}
       <section id="categories" className="mx-auto max-w-7xl px-4 py-12">
         <SectionHeader title="Shop by category" subtitle="Everything you need, neatly stacked" />
-        <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4 md:gap-4 lg:grid-cols-8">
-          {categories.map((c) => (
-            <Link
-              key={c.slug}
-              to="/c/$slug"
-              params={{ slug: c.slug }}
-              className="group flex flex-col items-center rounded-2xl border bg-card p-3 text-center shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
-            >
-              <div
-                className="grid h-20 w-20 place-items-center rounded-xl"
-                style={{ backgroundColor: c.tint }}
-              >
-                <img src={c.image} alt={c.name} loading="lazy" className="h-full w-full rounded-xl object-cover" />
+        {catsQ.isLoading ? (
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4 md:gap-4 lg:grid-cols-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border bg-card p-3">
+                <div className="aspect-square w-full animate-pulse rounded-xl bg-muted" />
+                <div className="mt-2 h-3 w-3/4 animate-pulse rounded bg-muted" />
               </div>
-              <div className="mt-2 text-xs font-semibold leading-tight">{c.name}</div>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4 md:gap-4 lg:grid-cols-8">
+            {categories.map((c) => (
+              <Link
+                key={c.slug}
+                to="/c/$slug"
+                params={{ slug: c.slug }}
+                className="group flex flex-col items-center rounded-2xl border bg-card p-3 text-center shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+              >
+                <div
+                  className="grid h-20 w-20 place-items-center rounded-xl"
+                  style={{ backgroundColor: c.tint }}
+                >
+                  <img src={c.image} alt={c.name} loading="lazy" className="h-full w-full rounded-xl object-cover" />
+                </div>
+                <div className="mt-2 text-xs font-semibold leading-tight">{c.name}</div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* OFFER STRIP */}
@@ -112,7 +136,7 @@ function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-12">
         <SectionHeader title="Trending in your area" subtitle="What everyone's adding to cart" />
         <div className="mt-6">
-          <ProductGrid products={trending} />
+          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={trending} />}
         </div>
       </section>
 
@@ -120,7 +144,7 @@ function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-6">
         <SectionHeader title="Dairy, bread & eggs" subtitle="Stock up on the fridge basics" />
         <div className="mt-6">
-          <ProductGrid products={dairyAndBakery} />
+          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={dairyAndBakery} />}
         </div>
       </section>
 

@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
-import { products, categories } from "@/lib/products";
+import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
+import { listCategories, searchProducts } from "@/lib/catalog.functions";
 import { Search as SearchIcon } from "lucide-react";
 
-const searchSchema = z.object({
-  q: z.string().optional().default(""),
-});
+const searchSchema = z.object({ q: z.string().optional().default("") });
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s) => searchSchema.parse(s),
@@ -21,18 +22,22 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const { q } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const query = q.trim().toLowerCase();
-  const results = query
-    ? products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query),
-      )
-    : [];
+  const query = q.trim();
 
-  const matchedCats = query
-    ? categories.filter((c) => c.name.toLowerCase().includes(query) || c.slug.includes(query))
-    : [];
+  const cats = useServerFn(listCategories);
+  const search = useServerFn(searchProducts);
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
+  const resultsQ = useQuery({
+    queryKey: ["search", query],
+    queryFn: () => search({ data: { q: query } }),
+    enabled: query.length > 0,
+  });
+
+  const lower = query.toLowerCase();
+  const matchedCats = (catsQ.data ?? []).filter(
+    (c) => c.name.toLowerCase().includes(lower) || c.slug.includes(lower),
+  );
+  const results = resultsQ.data ?? [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,9 +82,14 @@ function SearchPage() {
 
             <div className="mt-6">
               <div className="mb-3 text-sm text-muted-foreground">
-                {results.length} result{results.length === 1 ? "" : "s"} for <span className="font-semibold text-foreground">"{q}"</span>
+                {resultsQ.isLoading
+                  ? "Searching…"
+                  : `${results.length} result${results.length === 1 ? "" : "s"} for `}
+                {!resultsQ.isLoading && <span className="font-semibold text-foreground">"{q}"</span>}
               </div>
-              {results.length > 0 ? (
+              {resultsQ.isLoading ? (
+                <ProductGridSkeleton count={10} />
+              ) : results.length > 0 ? (
                 <ProductGrid products={results} />
               ) : (
                 <div className="rounded-2xl border p-10 text-center">
