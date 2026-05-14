@@ -1,8 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { categories, productsByCategory } from "@/lib/products";
+
+type Sort = "popular" | "price-asc" | "price-desc" | "discount";
 
 export const Route = createFileRoute("/c/$slug")({
   component: CategoryPage,
@@ -18,6 +21,29 @@ function CategoryPage() {
   const category = categories.find((c) => c.slug === slug);
   if (!category) throw notFound();
   const items = productsByCategory(slug);
+
+  const [sort, setSort] = useState<Sort>("popular");
+  const [onlyDeals, setOnlyDeals] = useState(false);
+
+  const visible = useMemo(() => {
+    let list = [...items];
+    if (onlyDeals) list = list.filter((p) => p.mrp > p.price);
+    switch (sort) {
+      case "price-asc": list.sort((a, b) => a.price - b.price); break;
+      case "price-desc": list.sort((a, b) => b.price - a.price); break;
+      case "discount":
+        list.sort((a, b) => (b.mrp - b.price) / b.mrp - (a.mrp - a.price) / a.mrp);
+        break;
+    }
+    return list;
+  }, [items, sort, onlyDeals]);
+
+  const sortOpts: { id: Sort; label: string }[] = [
+    { id: "popular", label: "Popular" },
+    { id: "price-asc", label: "Price: Low to High" },
+    { id: "price-desc", label: "Price: High to Low" },
+    { id: "discount", label: "Biggest Discount" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,9 +81,52 @@ function CategoryPage() {
                 </li>
               ))}
             </ul>
+
+            <h3 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted-foreground">Filter</h3>
+            <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={onlyDeals}
+                onChange={(e) => setOnlyDeals(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              On deal only
+            </label>
           </aside>
           <div>
-            <ProductGrid products={items} />
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{visible.length}</span> of {items.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-muted-foreground">Sort</label>
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as Sort)}
+                  className="rounded-xl border bg-background px-3 py-2 text-xs font-semibold outline-none focus:ring-focus"
+                >
+                  {sortOpts.map((o) => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </select>
+                <label className="ml-2 inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold md:hidden">
+                  <input
+                    type="checkbox"
+                    checked={onlyDeals}
+                    onChange={(e) => setOnlyDeals(e.target.checked)}
+                    className="h-3.5 w-3.5 accent-primary"
+                  />
+                  Deals
+                </label>
+              </div>
+            </div>
+            {visible.length > 0 ? (
+              <ProductGrid products={visible} />
+            ) : (
+              <div className="rounded-2xl border p-10 text-center text-sm text-muted-foreground">
+                No products match your filters.
+              </div>
+            )}
           </div>
         </div>
       </div>
