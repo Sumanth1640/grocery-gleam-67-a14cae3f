@@ -12,8 +12,9 @@ import {
   listOrders,
 } from "@/lib/account.functions";
 import { signOut } from "@/lib/use-auth";
+import { isAdmin } from "@/lib/catalog.functions";
 
-import { LogOut, MapPin, Package, Plus, Trash2, User as UserIcon, Loader2 } from "lucide-react";
+import { LogOut, MapPin, Package, Plus, Trash2, User as UserIcon, Loader2, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -29,16 +30,22 @@ function AccountPage() {
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display text-2xl font-bold md:text-3xl">Your account</h1>
-          <button
-            onClick={async () => {
-              await signOut();
-              toast.success("Signed out");
-              navigate({ to: "/" });
-            }}
-            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold hover:bg-secondary"
-          >
-            <LogOut className="h-3.5 w-3.5" /> Sign out
-          </button>
+          <div className="flex items-center gap-2">
+            <AdminLink />
+            <Link to="/orders" className="hidden items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold hover:bg-secondary sm:inline-flex">
+              <Package className="h-3.5 w-3.5" /> Orders
+            </Link>
+            <button
+              onClick={async () => {
+                await signOut();
+                toast.success("Signed out");
+                navigate({ to: "/" });
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold hover:bg-secondary"
+            >
+              <LogOut className="h-3.5 w-3.5" /> Sign out
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
@@ -54,6 +61,16 @@ function AccountPage() {
   );
 }
 
+function AdminLink() {
+  const check = useServerFn(isAdmin);
+  const { data } = useQuery({ queryKey: ["is-admin"], queryFn: () => check(), retry: false });
+  if (!data?.isAdmin) return null;
+  return (
+    <Link to="/admin" className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-pop">
+      <Shield className="h-3.5 w-3.5" /> Admin
+    </Link>
+  );
+}
 function SectionHeader({ icon: Icon, title, action }: { icon: typeof MapPin; title: string; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
