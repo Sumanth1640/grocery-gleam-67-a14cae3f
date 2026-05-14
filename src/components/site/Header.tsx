@@ -1,4 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useAuth } from "@/lib/use-auth";
@@ -9,6 +10,8 @@ export function Header() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const onCart = path === "/cart";
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
