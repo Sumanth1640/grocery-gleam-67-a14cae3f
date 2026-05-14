@@ -47,7 +47,7 @@ function CartPage() {
               <div key={product.id} className="flex items-center gap-4 rounded-2xl border bg-card p-3 shadow-card">
                 <img src={product.image} alt={product.name} className="h-20 w-20 rounded-xl object-cover" />
                 <div className="min-w-0 flex-1">
-                  <Link to="/p/$id" params={{ id: product.id }} className="line-clamp-2 text-sm font-semibold">
+                  <Link to="/p/$id" params={{ id: product.slug }} className="line-clamp-2 text-sm font-semibold">
                     {product.name}
                   </Link>
                   <div className="text-xs text-muted-foreground">{product.weight}</div>
