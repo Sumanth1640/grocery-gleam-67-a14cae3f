@@ -120,17 +120,33 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const { isAdmin } = useIsAdmin();
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthSync router={router} />
+      <AdminGuard isAdmin={!!isAdmin} />
       <div className="pb-16 md:pb-0">
         <Outlet />
       </div>
-      <BottomNav />
+      {!isAdmin && <BottomNav />}
       <Toaster />
     </QueryClientProvider>
   );
+}
+
+const CUSTOMER_BLOCKED = ["/cart", "/checkout", "/order-success", "/search", "/c/", "/p/"];
+
+function AdminGuard({ isAdmin }: { isAdmin: boolean }) {
+  const path = useRouterState({ select: (r) => r.location.pathname });
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isAdmin) return;
+    const blocked =
+      path === "/" || CUSTOMER_BLOCKED.some((p) => (p.endsWith("/") ? path.startsWith(p) : path === p));
+    if (blocked) navigate({ to: "/admin", replace: true });
+  }, [isAdmin, path, navigate]);
+  return null;
 }
 
 function AuthSync({ router }: { router: ReturnType<typeof useRouter> }) {
