@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as OrderSuccessRouteImport } from './routes/order-success'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -19,6 +20,11 @@ import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderSuccessRoute = OrderSuccessRouteImport.update({
   id: '/order-success',
   path: '/order-success',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
+  '/search': typeof SearchRoute
   '/account': typeof AuthenticatedAccountRoute
   '/c/$slug': typeof CSlugRoute
   '/p/$id': typeof PIdRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
+  '/search': typeof SearchRoute
   '/account': typeof AuthenticatedAccountRoute
   '/c/$slug': typeof CSlugRoute
   '/p/$id': typeof PIdRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
+  '/search': typeof SearchRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/c/$slug': typeof CSlugRoute
   '/p/$id': typeof PIdRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/order-success'
+    | '/search'
     | '/account'
     | '/c/$slug'
     | '/p/$id'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/order-success'
+    | '/search'
     | '/account'
     | '/c/$slug'
     | '/p/$id'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/order-success'
+    | '/search'
     | '/_authenticated/account'
     | '/c/$slug'
     | '/p/$id'
@@ -137,12 +149,20 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
   OrderSuccessRoute: typeof OrderSuccessRoute
+  SearchRoute: typeof SearchRoute
   CSlugRoute: typeof CSlugRoute
   PIdRoute: typeof PIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order-success': {
       id: '/order-success'
       path: '/order-success'
@@ -228,6 +248,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
   OrderSuccessRoute: OrderSuccessRoute,
+  SearchRoute: SearchRoute,
   CSlugRoute: CSlugRoute,
   PIdRoute: PIdRoute,
 }
