@@ -154,11 +154,16 @@ function AuthSync({ router }: { router: ReturnType<typeof useRouter> }) {
   const navigate = useNavigate();
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        qc.cancelQueries();
+        qc.removeQueries({ queryKey: ["admin"] });
+        qc.removeQueries({ queryKey: ["admin-stats"] });
+        qc.removeQueries({ queryKey: ["is-admin"] });
+        navigate({ to: "/login", replace: true });
+        return;
+      }
       qc.invalidateQueries();
       router.invalidate();
-      if (event === "SIGNED_OUT") {
-        navigate({ to: "/login", replace: true });
-      }
     });
     return () => data.subscription.unsubscribe();
   }, [qc, router, navigate]);

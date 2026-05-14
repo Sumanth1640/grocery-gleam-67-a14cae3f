@@ -11,15 +11,17 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 
 function AdminDashboard() {
   const fetchStats = useServerFn(adminStats);
-  const { session } = useAuth();
+  const { session, loading: authLoading } = useAuth();
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-stats"],
+    queryKey: ["admin-stats", session?.user.id],
     queryFn: () => fetchStats(),
-    enabled: !!session,
+    enabled: !authLoading && !!session,
     retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return <div className="grid h-40 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   }
 

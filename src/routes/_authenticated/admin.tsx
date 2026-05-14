@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-r
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { isAdmin } from "@/lib/catalog.functions";
+import { useAuth } from "@/lib/use-auth";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -13,10 +14,18 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminLayout() {
   const check = useServerFn(isAdmin);
-  const { data, isLoading } = useQuery({ queryKey: ["is-admin"], queryFn: () => check() });
+  const { session, loading: authLoading } = useAuth();
+  const { data, isLoading } = useQuery({
+    queryKey: ["is-admin", session?.user.id],
+    queryFn: () => check(),
+    enabled: !authLoading && !!session,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const path = useRouterState({ select: (r) => r.location.pathname });
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
