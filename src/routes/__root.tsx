@@ -11,6 +11,8 @@ import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/site/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import { useRouterState, useNavigate } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 
