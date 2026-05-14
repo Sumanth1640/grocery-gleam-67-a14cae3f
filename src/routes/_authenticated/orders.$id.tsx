@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { getOrder } from "@/lib/account.functions";
 import { cartStore } from "@/lib/cart-store";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog-types";
@@ -27,10 +29,34 @@ function OrderDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const fetchOrder = useServerFn(getOrder);
+  const qc = useQueryClient();
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", id],
     queryFn: () => fetchOrder({ data: { id } }),
   });
+
+  // Live tracking — refresh when admin updates this order's status
+  useEffect(() => {
+    const prevStatus = order?.status;
+    const channel = supabase
+      .channel(`order-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
+        (payload) => {
+          const next = (payload.new as { status?: string } | null)?.status;
+          if (next && next !== prevStatus) {
+            const label = next.replace(/_/g, " ");
+            toast.success(`Order ${label}`);
+          }
+          qc.invalidateQueries({ queryKey: ["order", id] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, qc, order?.status]);
 
   const items = ((order?.items as unknown as OrderItem[]) ?? []);
   const address = order?.address as unknown as {
