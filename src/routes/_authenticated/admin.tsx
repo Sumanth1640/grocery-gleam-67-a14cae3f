@@ -46,9 +46,9 @@ function AdminLayout() {
 
   const tabs = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { to: "/admin/products", label: "Products", icon: Package },
-    { to: "/admin/categories", label: "Categories", icon: FolderTree },
-    { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
+    { to: "/admin/products", label: "Products", icon: Package, exact: false },
+    { to: "/admin/categories", label: "Categories", icon: FolderTree, exact: false },
+    { to: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false },
   ] as const;
 
   return (
