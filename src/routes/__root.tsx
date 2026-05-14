@@ -151,12 +151,16 @@ function AdminGuard({ isAdmin }: { isAdmin: boolean }) {
 
 function AuthSync({ router }: { router: ReturnType<typeof useRouter> }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
       qc.invalidateQueries();
       router.invalidate();
+      if (event === "SIGNED_OUT") {
+        navigate({ to: "/login", replace: true });
+      }
     });
     return () => data.subscription.unsubscribe();
-  }, [qc, router]);
+  }, [qc, router, navigate]);
   return null;
 }
