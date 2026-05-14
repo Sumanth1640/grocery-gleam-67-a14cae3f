@@ -35,13 +35,21 @@ export function Header() {
           <ChevronDown className="ml-1 h-4 w-4" />
         </button>
 
-        <div className="relative flex-1">
+        <form
+          className="relative flex-1"
+          onSubmit={(e) => {
+            e.preventDefault();
+            navigate({ to: "/search", search: { q } });
+          }}
+        >
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
             placeholder='Search "milk", "bananas", "chips"…'
             className="w-full rounded-xl border bg-secondary/40 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:bg-background focus:ring-focus"
           />
-        </div>
+        </form>
 
         {!loading && (user ? (
           <Link
