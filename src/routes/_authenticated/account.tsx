@@ -9,12 +9,14 @@ import {
   updateProfile,
   listAddresses,
   deleteAddress,
+  setDefaultAddress,
   listOrders,
 } from "@/lib/account.functions";
 import { signOut } from "@/lib/use-auth";
 import { isAdmin } from "@/lib/catalog.functions";
+import { AddressDialog } from "@/components/site/AddressDialog";
 
-import { LogOut, MapPin, Package, Plus, Trash2, User as UserIcon, Loader2, Shield } from "lucide-react";
+import { LogOut, MapPin, Package, Pencil, Plus, Star, Trash2, User as UserIcon, Loader2, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -154,13 +156,24 @@ function ProfileCard() {
 function AddressesCard() {
   const fetchAddrs = useServerFn(listAddresses);
   const deleteFn = useServerFn(deleteAddress);
+  const setDefaultFn = useServerFn(setDefaultAddress);
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["addresses"], queryFn: () => fetchAddrs() });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<NonNullable<typeof data>[number] | null>(null);
 
   const del = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
     onSuccess: () => {
       toast.success("Address removed");
+      qc.invalidateQueries({ queryKey: ["addresses"] });
+    },
+  });
+
+  const setDefault = useMutation({
+    mutationFn: (id: string) => setDefaultFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Default address updated");
       qc.invalidateQueries({ queryKey: ["addresses"] });
     },
   });
@@ -171,15 +184,18 @@ function AddressesCard() {
         icon={MapPin}
         title="Saved addresses"
         action={
-          <Link to="/checkout" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-            <Plus className="h-3 w-3" /> Add via checkout
-          </Link>
+          <button
+            onClick={() => { setEditing(null); setDialogOpen(true); }}
+            className="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1.5 text-xs font-bold text-primary-foreground shadow-pop"
+          >
+            <Plus className="h-3 w-3" /> Add
+          </button>
         }
       />
       {isLoading ? (
         <div className="grid h-24 place-items-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
       ) : !data || data.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">No saved addresses yet. Add one when you check out.</p>
+        <p className="mt-4 text-sm text-muted-foreground">No saved addresses yet. Add one to speed up checkout.</p>
       ) : (
         <ul className="mt-3 space-y-2">
           {data.map((a) => (
@@ -196,18 +212,38 @@ function AddressesCard() {
                   </div>
                   <div className="text-xs text-muted-foreground">+91 {a.phone}</div>
                 </div>
-                <button
-                  onClick={() => del.mutate(a.id)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                  aria-label="Delete address"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex shrink-0 items-center gap-0.5">
+                  {!a.is_default && (
+                    <button
+                      onClick={() => setDefault.mutate(a.id)}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      aria-label="Set as default"
+                      title="Set as default"
+                    >
+                      <Star className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setEditing(a); setDialogOpen(true); }}
+                    className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary"
+                    aria-label="Edit address"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => del.mutate(a.id)}
+                    className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Delete address"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </li>
           ))}
         </ul>
       )}
+      <AddressDialog open={dialogOpen} onOpenChange={setDialogOpen} address={editing} />
     </div>
   );
 }
