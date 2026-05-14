@@ -1,9 +1,13 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
+import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,6 +22,13 @@ import {
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — freshcart" }] }),
+  beforeLoad: async ({ location }) => {
+    if (typeof window === "undefined") return;
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+  },
   component: CheckoutPage,
 });
 
@@ -67,23 +78,61 @@ function CheckoutPage() {
     address.city.trim().length > 1 &&
     /^\d{6}$/.test(address.pincode);
 
+  const placeOrderRpc = useServerFn(placeOrderFn);
+  const saveAddressRpc = useServerFn(createAddress);
+  const [saveAddr, setSaveAddr] = useState(true);
+
   const placeOrder = async () => {
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 700));
-    const order = {
-      id: "FC" + Math.random().toString(36).slice(2, 8).toUpperCase(),
-      items: totals.items,
-      address,
-      payment,
-      subtotal: totals.subtotal,
-      delivery: totals.delivery,
-      total: totals.total,
-      placedAt: Date.now(),
-      eta: "11 minutes",
-    };
-    orderStore.place(order);
-    cartStore.clear();
-    navigate({ to: "/order-success" });
+    try {
+      const payload = {
+        items: totals.items.map((i) => ({
+          product: {
+            id: i.product.id,
+            name: i.product.name,
+            weight: i.product.weight,
+            price: i.product.price,
+            mrp: i.product.mrp,
+            image: i.product.image,
+          },
+          qty: i.qty,
+        })),
+        address: {
+          full_name: address.fullName.trim(),
+          phone: address.phone,
+          line1: address.line1.trim(),
+          line2: address.line2?.trim() || null,
+          city: address.city.trim(),
+          pincode: address.pincode,
+          type: address.type,
+          is_default: false,
+        },
+        payment,
+        subtotal: totals.subtotal,
+        delivery: totals.delivery,
+        total: totals.total,
+      };
+      const row = await placeOrderRpc({ data: payload });
+      if (saveAddr) {
+        try { await saveAddressRpc({ data: payload.address }); } catch { /* ignore */ }
+      }
+      orderStore.place({
+        id: row.id,
+        items: totals.items,
+        address,
+        payment,
+        subtotal: totals.subtotal,
+        delivery: totals.delivery,
+        total: totals.total,
+        placedAt: new Date(row.created_at).getTime(),
+        eta: "11 minutes",
+      });
+      cartStore.clear();
+      navigate({ to: "/order-success" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not place order");
+      setSubmitting(false);
+    }
   };
 
   return (
