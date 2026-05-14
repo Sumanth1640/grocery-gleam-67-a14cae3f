@@ -32,7 +32,7 @@ export function ProductCard({ product }: { product: Product }) {
       </button>
       <Link
         to="/p/$id"
-        params={{ id: product.id }}
+        params={{ id: product.slug }}
         className="relative block aspect-square overflow-hidden rounded-xl bg-secondary/60"
       >
         <img
@@ -46,7 +46,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
         <Clock className="h-3 w-3" /> {product.eta}
       </div>
-      <Link to="/p/$id" params={{ id: product.id }} className="mt-1 line-clamp-2 text-sm font-semibold leading-tight">
+      <Link to="/p/$id" params={{ id: product.slug }} className="mt-1 line-clamp-2 text-sm font-semibold leading-tight">
         {product.name}
       </Link>
       <div className="text-xs text-muted-foreground">{product.weight}</div>
