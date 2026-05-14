@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { BottomNav } from "@/components/site/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
@@ -121,7 +122,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthSync router={router} />
-      <Outlet />
+      <div className="pb-16 md:pb-0">
+        <Outlet />
+      </div>
+      <BottomNav />
       <Toaster />
     </QueryClientProvider>
   );
