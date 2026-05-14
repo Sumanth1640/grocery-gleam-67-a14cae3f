@@ -89,9 +89,12 @@ function CartPage() {
               <div className="font-display text-lg font-bold">To pay</div>
               <div className="font-display text-xl font-extrabold">₹{total}</div>
             </div>
-            <button className="mt-5 w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground shadow-pop transition hover:opacity-95">
+            <Link
+              to="/checkout"
+              className="mt-5 block w-full rounded-xl bg-primary py-3 text-center text-sm font-bold text-primary-foreground shadow-pop transition hover:opacity-95"
+            >
               Proceed to checkout
-            </button>
+            </Link>
             <button onClick={() => cartStore.clear()} className="mt-2 w-full rounded-xl border py-2.5 text-xs font-semibold text-muted-foreground hover:bg-secondary">
               Clear cart
             </button>
