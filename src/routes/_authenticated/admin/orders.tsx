@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListOrders, adminUpdateOrderStatus } from "@/lib/admin.functions";
+import { useAuth } from "@/lib/use-auth";
 import { Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,7 +39,8 @@ function OrdersAdmin() {
   const list = useServerFn(adminListOrders);
   const update = useServerFn(adminUpdateOrderStatus);
   const qc = useQueryClient();
-  const orders = useQuery({ queryKey: ["admin", "orders"], queryFn: () => list() });
+  const { session, loading: authLoading } = useAuth();
+  const orders = useQuery({ queryKey: ["admin", "orders", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | Status>("all");
 
@@ -66,7 +68,7 @@ function OrdersAdmin() {
         ))}
       </div>
 
-      {orders.isLoading ? (
+      {authLoading || orders.isLoading ? (
         <div className="grid h-32 place-items-center"><Loader2 className="h-5 w-5 animate-spin" /></div>
       ) : rows.length === 0 ? (
         <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground shadow-card">No orders found.</div>

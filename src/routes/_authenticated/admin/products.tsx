@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListProducts, adminSaveProduct, adminDeleteProduct, adminListCategories } from "@/lib/admin.functions";
+import { useAuth } from "@/lib/use-auth";
 import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -50,9 +51,11 @@ function ProductsAdmin() {
   const save = useServerFn(adminSaveProduct);
   const remove = useServerFn(adminDeleteProduct);
   const qc = useQueryClient();
+  const { session, loading: authLoading } = useAuth();
 
-  const products = useQuery({ queryKey: ["admin", "products"], queryFn: () => list() });
-  const categories = useQuery({ queryKey: ["admin", "categories"], queryFn: () => cats() });
+  const queryEnabled = !authLoading && !!session;
+  const products = useQuery({ queryKey: ["admin", "products", session?.user.id], queryFn: () => list(), enabled: queryEnabled, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const categories = useQuery({ queryKey: ["admin", "categories", session?.user.id], queryFn: () => cats(), enabled: queryEnabled, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
 
   const [form, setForm] = useState<FormState | null>(null);
   const [q, setQ] = useState("");
@@ -96,7 +99,7 @@ function ProductsAdmin() {
         </button>
       </div>
 
-      {products.isLoading ? (
+      {authLoading || products.isLoading ? (
         <div className="grid h-32 place-items-center"><Loader2 className="h-5 w-5 animate-spin" /></div>
       ) : (
         <div className="overflow-hidden rounded-2xl border bg-card shadow-card">

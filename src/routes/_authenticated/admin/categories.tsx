@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListCategories, adminSaveCategory, adminDeleteCategory } from "@/lib/admin.functions";
+import { useAuth } from "@/lib/use-auth";
 import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -20,7 +21,8 @@ function CategoriesAdmin() {
   const save = useServerFn(adminSaveCategory);
   const remove = useServerFn(adminDeleteCategory);
   const qc = useQueryClient();
-  const cats = useQuery({ queryKey: ["admin", "categories"], queryFn: () => list() });
+  const { session, loading: authLoading } = useAuth();
+  const cats = useQuery({ queryKey: ["admin", "categories", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   const [form, setForm] = useState<Form | null>(null);
 
   const saveMut = useMutation({
@@ -42,7 +44,7 @@ function CategoriesAdmin() {
         </button>
       </div>
 
-      {cats.isLoading ? (
+      {authLoading || cats.isLoading ? (
         <div className="grid h-32 place-items-center"><Loader2 className="h-5 w-5 animate-spin" /></div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
