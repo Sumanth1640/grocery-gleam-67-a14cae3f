@@ -38,28 +38,34 @@ function OrdersPage() {
             {data.map((o: any) => {
               const items = (o.items ?? []) as { product: { name: string; image?: string }; qty: number }[];
               return (
-                <li key={o.id} className="rounded-2xl border bg-card p-4 shadow-card">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">{o.status}</span>
-                        <span className="text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
-                        <span className="text-xs text-muted-foreground">· {new Date(o.created_at).toLocaleString()}</span>
+                <li key={o.id}>
+                  <Link
+                    to="/orders/$id"
+                    params={{ id: o.id }}
+                    className="block rounded-2xl border bg-card p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">{o.status}</span>
+                          <span className="text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
+                          <span className="text-xs text-muted-foreground">· {new Date(o.created_at).toLocaleString()}</span>
+                        </div>
+                        <div className="mt-1 text-sm font-semibold">{items.length} item{items.length !== 1 ? "s" : ""}</div>
                       </div>
-                      <div className="mt-1 text-sm font-semibold">{items.length} item{items.length !== 1 ? "s" : ""}</div>
+                      <div className="font-display text-lg font-extrabold">₹{o.total}</div>
                     </div>
-                    <div className="font-display text-lg font-extrabold">₹{o.total}</div>
-                  </div>
-                  <div className="mt-3 flex gap-2 overflow-x-auto">
-                    {items.slice(0, 5).map((it, i) => (
-                      it.product.image ? (
-                        <img key={i} src={it.product.image} alt="" className="h-12 w-12 shrink-0 rounded-md object-cover" />
-                      ) : null
-                    ))}
-                    {items.length > 5 && (
-                      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-secondary text-xs font-bold text-muted-foreground">+{items.length - 5}</div>
-                    )}
-                  </div>
+                    <div className="mt-3 flex gap-2 overflow-x-auto">
+                      {items.slice(0, 5).map((it, i) => (
+                        it.product.image ? (
+                          <img key={i} src={it.product.image} alt="" className="h-12 w-12 shrink-0 rounded-md object-cover" />
+                        ) : null
+                      ))}
+                      {items.length > 5 && (
+                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-secondary text-xs font-bold text-muted-foreground">+{items.length - 5}</div>
+                      )}
+                    </div>
+                  </Link>
                 </li>
               );
             })}

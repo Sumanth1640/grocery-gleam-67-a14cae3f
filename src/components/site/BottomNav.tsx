@@ -1,17 +1,27 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, ShoppingCart, User } from "lucide-react";
+import { Heart, Home, Search, ShoppingCart, User } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
+import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
 
 export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const cart = useCart();
+  const wishlist = useWishlist();
   const { itemsCount } = cartTotals(cart);
+  const wishCount = Object.keys(wishlist).length;
   const { user } = useAuth();
 
   const items = [
     { to: "/", icon: Home, label: "Home", match: (p: string) => p === "/" },
     { to: "/search", icon: Search, label: "Search", match: (p: string) => p.startsWith("/search") },
+    {
+      to: "/wishlist",
+      icon: Heart,
+      label: "Wishlist",
+      match: (p: string) => p.startsWith("/wishlist"),
+      badge: wishCount,
+    },
     {
       to: "/cart",
       icon: ShoppingCart,
@@ -29,7 +39,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur-md md:hidden">
-      <ul className="mx-auto grid max-w-md grid-cols-4">
+      <ul className="mx-auto grid max-w-md grid-cols-5">
         {items.map((it) => {
           const active = it.match(path);
           const Icon = it.icon;
