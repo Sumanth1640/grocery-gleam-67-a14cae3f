@@ -1,11 +1,14 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn } from "lucide-react";
+import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
+import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
 
 export function Header() {
   const cart = useCart();
+  const wishlist = useWishlist();
+  const wishCount = Object.keys(wishlist).length;
   const { itemsCount, subtotal } = cartTotals(cart);
   const path = useRouterState({ select: (r) => r.location.pathname });
   const onCart = path === "/cart";
@@ -80,6 +83,19 @@ export function Header() {
             <UserIcon className="h-4 w-4" />
           </Link>
         )}
+
+        <Link
+          to="/wishlist"
+          aria-label="Wishlist"
+          className="relative hidden h-10 w-10 place-items-center rounded-xl border bg-secondary/40 hover:bg-secondary sm:grid"
+        >
+          <Heart className={`h-4 w-4 ${wishCount > 0 ? "fill-discount text-discount" : ""}`} />
+          {wishCount > 0 && (
+            <span className="absolute -right-1.5 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-discount px-1 text-[9px] font-bold text-white">
+              {wishCount}
+            </span>
+          )}
+        </Link>
 
         <Link
           to="/cart"

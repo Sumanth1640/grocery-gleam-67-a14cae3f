@@ -1,11 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, Minus, Clock } from "lucide-react";
+import { Plus, Minus, Clock, Heart } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { cartStore, useCart } from "@/lib/cart-store";
+import { wishlistStore, useWishlist } from "@/lib/wishlist-store";
 
 export function ProductCard({ product }: { product: Product }) {
   const cart = useCart();
+  const wishlist = useWishlist();
   const qty = cart[product.id]?.qty ?? 0;
+  const wished = !!wishlist[product.id];
   const off = Math.round(((product.mrp - product.price) / product.mrp) * 100);
 
   return (
@@ -15,6 +18,18 @@ export function ProductCard({ product }: { product: Product }) {
           {off}% OFF
         </div>
       )}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          wishlistStore.toggle(product);
+        }}
+        aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+        className={`absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full border bg-background/85 backdrop-blur transition hover:scale-105 ${
+          wished ? "text-discount" : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        <Heart className={`h-4 w-4 ${wished ? "fill-discount" : ""}`} />
+      </button>
       <Link
         to="/p/$id"
         params={{ id: product.id }}
