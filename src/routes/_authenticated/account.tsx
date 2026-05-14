@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import {
@@ -75,12 +75,12 @@ function ProfileCard() {
   const [phone, setPhone] = useState("");
   const [edited, setEdited] = useState(false);
 
-  // initialise form when data arrives
-  useState(() => {});
-  if (data && !edited && (name === "" && phone === "")) {
-    if (data.full_name) setName(data.full_name);
-    if (data.phone) setPhone(data.phone);
-  }
+  useEffect(() => {
+    if (data && !edited) {
+      setName(data.full_name ?? "");
+      setPhone(data.phone ?? "");
+    }
+  }, [data, edited]);
 
   const mut = useMutation({
     mutationFn: (vars: { full_name: string; phone: string }) => updateFn({ data: vars }),
