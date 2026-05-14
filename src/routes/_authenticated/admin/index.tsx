@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { adminStats } from "@/lib/admin.functions";
+import { useAuth } from "@/lib/use-auth";
 import { IndianRupee, Package, FolderTree, ShoppingBag, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -10,7 +11,13 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 
 function AdminDashboard() {
   const fetchStats = useServerFn(adminStats);
-  const { data, isLoading } = useQuery({ queryKey: ["admin-stats"], queryFn: () => fetchStats() });
+  const { session } = useAuth();
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: () => fetchStats(),
+    enabled: !!session,
+    retry: false,
+  });
 
   if (isLoading) {
     return <div className="grid h-40 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
