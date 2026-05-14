@@ -243,7 +243,11 @@ function AddressesCard() {
           ))}
         </ul>
       )}
-      <AddressDialog open={dialogOpen} onOpenChange={setDialogOpen} address={editing} />
+      <AddressDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        address={editing ? { ...editing, type: editing.type as "Home" | "Work" | "Other" } : null}
+      />
     </div>
   );
 }
