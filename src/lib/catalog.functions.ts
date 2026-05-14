@@ -111,14 +111,31 @@ export const deleteProduct = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const isAdmin = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data } = await context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    return { isAdmin: !!data };
-  });
+export const isAdmin = createServerFn({ method: "GET" }).handler(async () => {
+  // Tolerant check: returns { isAdmin: false } when there's no session,
+  // instead of throwing — safe to call from any component.
+  const { getRequest } = await import("@tanstack/react-start/server");
+  const req = getRequest();
+  const authHeader = req?.headers?.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) return { isAdmin: false };
+  const token = authHeader.slice(7);
+  if (!token) return { isAdmin: false };
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+  const { data: claims } = await supabase.auth.getClaims(token);
+  const userId = claims?.claims?.sub;
+  if (!userId) return { isAdmin: false };
+
+  const { data } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  return { isAdmin: !!data };
+});
