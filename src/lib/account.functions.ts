@@ -117,8 +117,8 @@ export const placeOrder = createServerFn({ method: "POST" })
       .from("orders")
       .insert({
         user_id: userId,
-        items: data.items,
-        address: data.address,
+        items: data.items as unknown as never,
+        address: data.address as unknown as never,
         payment: data.payment,
         subtotal: data.subtotal,
         delivery: data.delivery,
