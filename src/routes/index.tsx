@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
+import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { categories, products } from "@/lib/products";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { Clock, Leaf, ShieldCheck, Truck } from "lucide-react";
@@ -72,6 +73,8 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      <BannerCarousel />
 
       {/* CATEGORIES */}
       <section id="categories" className="mx-auto max-w-7xl px-4 py-12">
