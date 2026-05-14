@@ -12,7 +12,7 @@ import {
   listOrders,
 } from "@/lib/account.functions";
 import { signOut } from "@/lib/use-auth";
-import { findProduct } from "@/lib/products";
+
 import { LogOut, MapPin, Package, Plus, Trash2, User as UserIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -212,14 +212,13 @@ function OrdersCard() {
       ) : (
         <ul className="mt-3 divide-y">
           {data.map((o) => {
-            const items = (o.items as unknown as { product: { id: string; name: string }; qty: number }[]) ?? [];
+            const items = (o.items as unknown as { product: { id: string; name: string; image?: string }; qty: number }[]) ?? [];
             const first = items[0];
-            const firstProduct = first ? findProduct(first.product.id) : undefined;
             const moreCount = Math.max(0, items.length - 1);
             return (
               <li key={o.id} className="flex items-center gap-3 py-3">
-                {firstProduct && (
-                  <img src={firstProduct.image} alt="" className="h-12 w-12 rounded-md object-cover" />
+                {first?.product.image && (
+                  <img src={first.product.image} alt="" className="h-12 w-12 rounded-md object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
