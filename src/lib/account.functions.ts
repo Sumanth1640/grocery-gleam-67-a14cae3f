@@ -97,6 +97,41 @@ export const createAddress = createServerFn({ method: "POST" })
     return row;
   });
 
+export const updateAddress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    addressSchema.extend({ id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { id, ...rest } = data;
+    if (rest.is_default) {
+      await supabase.from("addresses").update({ is_default: false }).eq("user_id", userId);
+    }
+    const { data: row, error } = await supabase
+      .from("addresses")
+      .update(rest)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const setDefaultAddress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await supabase.from("addresses").update({ is_default: false }).eq("user_id", userId);
+    const { error } = await supabase
+      .from("addresses")
+      .update({ is_default: true })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
@@ -105,6 +140,20 @@ export const deleteAddress = createServerFn({ method: "POST" })
     const { error } = await supabase.from("addresses").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export const getOrder = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: row, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row;
   });
 
 // ---------- Orders ----------
