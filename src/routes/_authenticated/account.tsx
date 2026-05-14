@@ -61,6 +61,16 @@ function AccountPage() {
   );
 }
 
+function AdminLink() {
+  const check = useServerFn(isAdmin);
+  const { data } = useQuery({ queryKey: ["is-admin"], queryFn: () => check(), retry: false });
+  if (!data?.isAdmin) return null;
+  return (
+    <Link to="/admin" className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-pop">
+      <Shield className="h-3.5 w-3.5" /> Admin
+    </Link>
+  );
+}
 function SectionHeader({ icon: Icon, title, action }: { icon: typeof MapPin; title: string; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
