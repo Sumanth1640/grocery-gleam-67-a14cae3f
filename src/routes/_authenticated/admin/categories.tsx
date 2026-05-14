@@ -5,6 +5,7 @@ import { useState } from "react";
 import { adminListCategories, adminSaveCategory, adminDeleteCategory } from "@/lib/admin.functions";
 import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/admin/categories")({
   component: CategoriesAdmin,
@@ -83,7 +84,7 @@ function CategoriesAdmin() {
             <div className="mt-4 grid gap-3">
               <F label="Name"><input className={cls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></F>
               <F label="Slug"><input className={cls} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase() })} /></F>
-              <F label="Image URL"><input className={cls} value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} /></F>
+              <F label="Image"><ImageUpload value={form.image} onChange={(v) => setForm({ ...form, image: v })} folder="categories" /></F>
               <F label="Tint (CSS color, e.g. oklch(0.95 0.05 145))"><input className={cls} value={form.tint} onChange={(e) => setForm({ ...form, tint: e.target.value })} /></F>
               <F label="Sort order"><input inputMode="numeric" className={cls} value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value.replace(/\D/g, "") })} /></F>
             </div>

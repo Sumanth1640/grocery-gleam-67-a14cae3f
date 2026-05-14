@@ -5,6 +5,7 @@ import { useState } from "react";
 import { adminListProducts, adminSaveProduct, adminDeleteProduct, adminListCategories } from "@/lib/admin.functions";
 import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: ProductsAdmin,
@@ -215,7 +216,9 @@ function ProductDrawer({
               {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
             </select>
           </Field>
-          <Field label="Image URL" full><input className={cls} value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="/cat-fruits.jpg or https://…" /></Field>
+          <Field label="Image" full>
+            <ImageUpload value={form.image} onChange={(v) => set("image", v)} folder="products" />
+          </Field>
           <Field label="Weight"><input className={cls} value={form.weight} onChange={(e) => set("weight", e.target.value)} placeholder="500 g" /></Field>
           <Field label="ETA"><input className={cls} value={form.eta} onChange={(e) => set("eta", e.target.value)} /></Field>
           <Field label="Price (₹)"><input inputMode="numeric" className={cls} value={form.price} onChange={(e) => set("price", e.target.value.replace(/\D/g, ""))} /></Field>
