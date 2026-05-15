@@ -38,6 +38,10 @@ function ProductPage() {
 
   const cart = useCart();
 
+  useEffect(() => {
+    if (product) recentlyViewedStore.push(product);
+  }, [product]);
+
   if (!product) {
     return (
       <div className="min-h-screen bg-background">
