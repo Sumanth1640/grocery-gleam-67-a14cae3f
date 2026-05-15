@@ -17,12 +17,16 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
+import { Route as FoodCartRouteImport } from './routes/food/cart'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
@@ -67,9 +71,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FoodIndexRoute = FoodIndexRouteImport.update({
+  id: '/food/',
+  path: '/food/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodCheckoutRoute = FoodCheckoutRouteImport.update({
+  id: '/food/checkout',
+  path: '/food/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodCartRoute = FoodCartRouteImport.update({
+  id: '/food/cart',
+  path: '/food/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CSlugRoute = CSlugRouteImport.update({
@@ -96,6 +115,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const FoodRSlugRoute = FoodRSlugRouteImport.update({
+  id: '/food/r/$slug',
+  path: '/food/r/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
   id: '/$id',
@@ -133,11 +157,15 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/c/$slug': typeof CSlugRoute
+  '/food/cart': typeof FoodCartRoute
+  '/food/checkout': typeof FoodCheckoutRoute
   '/p/$id': typeof PIdRoute
+  '/food/': typeof FoodIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -151,11 +179,15 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/c/$slug': typeof CSlugRoute
+  '/food/cart': typeof FoodCartRoute
+  '/food/checkout': typeof FoodCheckoutRoute
   '/p/$id': typeof PIdRoute
+  '/food': typeof FoodIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -172,11 +204,15 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/c/$slug': typeof CSlugRoute
+  '/food/cart': typeof FoodCartRoute
+  '/food/checkout': typeof FoodCheckoutRoute
   '/p/$id': typeof PIdRoute
+  '/food/': typeof FoodIndexRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -193,11 +229,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/orders'
     | '/c/$slug'
+    | '/food/cart'
+    | '/food/checkout'
     | '/p/$id'
+    | '/food/'
     | '/admin/categories'
     | '/admin/orders'
     | '/admin/products'
     | '/orders/$id'
+    | '/food/r/$slug'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -211,11 +251,15 @@ export interface FileRouteTypes {
     | '/account'
     | '/orders'
     | '/c/$slug'
+    | '/food/cart'
+    | '/food/checkout'
     | '/p/$id'
+    | '/food'
     | '/admin/categories'
     | '/admin/orders'
     | '/admin/products'
     | '/orders/$id'
+    | '/food/r/$slug'
     | '/admin'
   id:
     | '__root__'
@@ -231,11 +275,15 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/orders'
     | '/c/$slug'
+    | '/food/cart'
+    | '/food/checkout'
     | '/p/$id'
+    | '/food/'
     | '/_authenticated/admin/categories'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/orders/$id'
+    | '/food/r/$slug'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -249,7 +297,11 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   WishlistRoute: typeof WishlistRoute
   CSlugRoute: typeof CSlugRoute
+  FoodCartRoute: typeof FoodCartRoute
+  FoodCheckoutRoute: typeof FoodCheckoutRoute
   PIdRoute: typeof PIdRoute
+  FoodIndexRoute: typeof FoodIndexRoute
+  FoodRSlugRoute: typeof FoodRSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -310,11 +362,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/food/': {
+      id: '/food/'
+      path: '/food'
+      fullPath: '/food/'
+      preLoaderRoute: typeof FoodIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$id': {
       id: '/p/$id'
       path: '/p/$id'
       fullPath: '/p/$id'
       preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/checkout': {
+      id: '/food/checkout'
+      path: '/food/checkout'
+      fullPath: '/food/checkout'
+      preLoaderRoute: typeof FoodCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/cart': {
+      id: '/food/cart'
+      path: '/food/cart'
+      fullPath: '/food/cart'
+      preLoaderRoute: typeof FoodCartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/c/$slug': {
@@ -351,6 +424,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/food/r/$slug': {
+      id: '/food/r/$slug'
+      path: '/food/r/$slug'
+      fullPath: '/food/r/$slug'
+      preLoaderRoute: typeof FoodRSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/orders/$id': {
       id: '/_authenticated/orders/$id'
@@ -437,18 +517,12 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   WishlistRoute: WishlistRoute,
   CSlugRoute: CSlugRoute,
+  FoodCartRoute: FoodCartRoute,
+  FoodCheckoutRoute: FoodCheckoutRoute,
   PIdRoute: PIdRoute,
+  FoodIndexRoute: FoodIndexRoute,
+  FoodRSlugRoute: FoodRSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
