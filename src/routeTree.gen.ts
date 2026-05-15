@@ -17,12 +17,14 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
@@ -67,6 +69,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FoodIndexRoute = FoodIndexRouteImport.update({
+  id: '/food/',
+  path: '/food/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
@@ -96,6 +103,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const FoodRSlugRoute = FoodRSlugRouteImport.update({
+  id: '/food/r/$slug',
+  path: '/food/r/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
   id: '/$id',
@@ -134,10 +146,12 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/p/$id': typeof PIdRoute
+  '/food/': typeof FoodIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -152,10 +166,12 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/p/$id': typeof PIdRoute
+  '/food': typeof FoodIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -173,10 +189,12 @@ export interface FileRoutesById {
   '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/p/$id': typeof PIdRoute
+  '/food/': typeof FoodIndexRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -194,10 +212,12 @@ export interface FileRouteTypes {
     | '/orders'
     | '/c/$slug'
     | '/p/$id'
+    | '/food/'
     | '/admin/categories'
     | '/admin/orders'
     | '/admin/products'
     | '/orders/$id'
+    | '/food/r/$slug'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -212,10 +232,12 @@ export interface FileRouteTypes {
     | '/orders'
     | '/c/$slug'
     | '/p/$id'
+    | '/food'
     | '/admin/categories'
     | '/admin/orders'
     | '/admin/products'
     | '/orders/$id'
+    | '/food/r/$slug'
     | '/admin'
   id:
     | '__root__'
@@ -232,10 +254,12 @@ export interface FileRouteTypes {
     | '/_authenticated/orders'
     | '/c/$slug'
     | '/p/$id'
+    | '/food/'
     | '/_authenticated/admin/categories'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/orders/$id'
+    | '/food/r/$slug'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -250,6 +274,8 @@ export interface RootRouteChildren {
   WishlistRoute: typeof WishlistRoute
   CSlugRoute: typeof CSlugRoute
   PIdRoute: typeof PIdRoute
+  FoodIndexRoute: typeof FoodIndexRoute
+  FoodRSlugRoute: typeof FoodRSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -310,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/food/': {
+      id: '/food/'
+      path: '/food'
+      fullPath: '/food/'
+      preLoaderRoute: typeof FoodIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$id': {
       id: '/p/$id'
       path: '/p/$id'
@@ -351,6 +384,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/food/r/$slug': {
+      id: '/food/r/$slug'
+      path: '/food/r/$slug'
+      fullPath: '/food/r/$slug'
+      preLoaderRoute: typeof FoodRSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/orders/$id': {
       id: '/_authenticated/orders/$id'
@@ -438,6 +478,8 @@ const rootRouteChildren: RootRouteChildren = {
   WishlistRoute: WishlistRoute,
   CSlugRoute: CSlugRoute,
   PIdRoute: PIdRoute,
+  FoodIndexRoute: FoodIndexRoute,
+  FoodRSlugRoute: FoodRSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
