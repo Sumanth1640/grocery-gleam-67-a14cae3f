@@ -149,6 +149,8 @@ function HomePage() {
         </div>
       </section>
 
+      <RecentlyViewed />
+
       <Footer />
     </div>
   );
