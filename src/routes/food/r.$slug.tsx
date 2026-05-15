@@ -99,11 +99,20 @@ function RestaurantPage() {
                 <MapPin className="h-3.5 w-3.5" /> {r.area} · {r.distanceKm} km
               </div>
             </div>
-            <div className="rounded-xl border p-3 text-center">
-              <div className="inline-flex items-center gap-0.5 rounded-md bg-success px-2 py-0.5 text-xs font-bold text-success-foreground">
-                <Star className="h-3 w-3 fill-current" /> {r.rating}
+            <div className="flex items-start gap-2">
+              <button
+                onClick={() => { restaurantFavsStore.toggle(r); toast.success(useRestaurantFavs && restaurantFavsStore.has(r.id) ? "Saved to favourites" : "Removed from favourites"); }}
+                aria-label="Toggle favourite"
+                className="grid h-10 w-10 place-items-center rounded-full border bg-card hover:bg-secondary"
+              >
+                <FavHeart id={r.id} />
+              </button>
+              <div className="rounded-xl border p-3 text-center">
+                <div className="inline-flex items-center gap-0.5 rounded-md bg-success px-2 py-0.5 text-xs font-bold text-success-foreground">
+                  <Star className="h-3 w-3 fill-current" /> {r.rating}
+                </div>
+                <div className="mt-1 text-[10px] text-muted-foreground">{r.reviewsCount.toLocaleString()} ratings</div>
               </div>
-              <div className="mt-1 text-[10px] text-muted-foreground">{r.reviewsCount.toLocaleString()} ratings</div>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-4 border-t pt-4 text-xs">
