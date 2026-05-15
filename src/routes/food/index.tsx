@@ -91,6 +91,9 @@ function FoodHome() {
             <Link to="/food/favourites" className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-xs font-bold hover:bg-secondary">
               <Heart className="h-3 w-3" /> Favourites
             </Link>
+            <Link to="/food/orders" className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-xs font-bold hover:bg-secondary">
+              🧾 Past orders
+            </Link>
           </div>
         </div>
       </section>
