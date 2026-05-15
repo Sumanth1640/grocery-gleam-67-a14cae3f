@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
@@ -7,9 +8,11 @@ import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { listCategories, searchProducts } from "@/lib/catalog.functions";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, SlidersHorizontal } from "lucide-react";
 
 const searchSchema = z.object({ q: z.string().optional().default("") });
+
+type Sort = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s) => searchSchema.parse(s),
@@ -38,6 +41,38 @@ function SearchPage() {
     (c) => c.name.toLowerCase().includes(lower) || c.slug.includes(lower),
   );
   const results = resultsQ.data ?? [];
+
+  const [sort, setSort] = useState<Sort>("relevance");
+  const [onlyDeals, setOnlyDeals] = useState(false);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [minRating, setMinRating] = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const maxPrice = useMemo(
+    () => results.reduce((m, p) => Math.max(m, p.price), 0) || 1000,
+    [results],
+  );
+  const [priceCap, setPriceCap] = useState<number | null>(null);
+  const effectiveCap = priceCap ?? maxPrice;
+
+  const visible = useMemo(() => {
+    let list = [...results];
+    if (onlyDeals) list = list.filter((p) => p.mrp > p.price);
+    if (inStockOnly) list = list.filter((p) => p.in_stock);
+    if (minRating > 0) list = list.filter((p) => (p.rating ?? 0) >= minRating);
+    list = list.filter((p) => p.price <= effectiveCap);
+    switch (sort) {
+      case "price-asc": list.sort((a, b) => a.price - b.price); break;
+      case "price-desc": list.sort((a, b) => b.price - a.price); break;
+      case "rating": list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)); break;
+      case "discount":
+        list.sort((a, b) => (b.mrp - b.price) / b.mrp - (a.mrp - a.price) / a.mrp);
+        break;
+    }
+    return list;
+  }, [results, sort, onlyDeals, inStockOnly, minRating, effectiveCap]);
+
+  const activeFilters = (onlyDeals ? 1 : 0) + (inStockOnly ? 1 : 0) + (minRating > 0 ? 1 : 0) + (priceCap !== null ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,21 +115,103 @@ function SearchPage() {
               </div>
             )}
 
+            {results.length > 0 && (
+              <div className="mt-6 flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setFiltersOpen((v) => !v)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border bg-background px-3 py-2 text-xs font-semibold hover:bg-secondary"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Filters{activeFilters > 0 ? ` · ${activeFilters}` : ""}
+                </button>
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as Sort)}
+                  className="rounded-xl border bg-background px-3 py-2 text-xs font-semibold outline-none focus:ring-focus"
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="rating">Top rated</option>
+                  <option value="discount">Biggest discount</option>
+                </select>
+                {activeFilters > 0 && (
+                  <button
+                    onClick={() => {
+                      setOnlyDeals(false);
+                      setInStockOnly(false);
+                      setMinRating(0);
+                      setPriceCap(null);
+                    }}
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+            )}
+
+            {filtersOpen && results.length > 0 && (
+              <div className="mt-3 grid gap-4 rounded-2xl border bg-card p-4 shadow-card sm:grid-cols-2 lg:grid-cols-4">
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input type="checkbox" checked={onlyDeals} onChange={(e) => setOnlyDeals(e.target.checked)} className="h-4 w-4 accent-primary" />
+                  On deal only
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} className="h-4 w-4 accent-primary" />
+                  In stock only
+                </label>
+                <div>
+                  <div className="mb-1.5 text-xs font-semibold text-muted-foreground">Minimum rating</div>
+                  <div className="flex flex-wrap gap-1">
+                    {[0, 3, 4, 4.5].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setMinRating(r)}
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                          minRating === r ? "bg-foreground text-background" : "bg-secondary hover:bg-accent"
+                        }`}
+                      >
+                        {r === 0 ? "Any" : `${r}★+`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                    <span>Max price</span>
+                    <span className="text-foreground">₹{effectiveCap}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={maxPrice}
+                    step={10}
+                    value={effectiveCap}
+                    onChange={(e) => setPriceCap(Number(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="mt-6">
               <div className="mb-3 text-sm text-muted-foreground">
                 {resultsQ.isLoading
                   ? "Searching…"
-                  : `${results.length} result${results.length === 1 ? "" : "s"} for `}
+                  : `${visible.length} result${visible.length === 1 ? "" : "s"} for `}
                 {!resultsQ.isLoading && <span className="font-semibold text-foreground">"{q}"</span>}
               </div>
               {resultsQ.isLoading ? (
                 <ProductGridSkeleton count={10} />
-              ) : results.length > 0 ? (
-                <ProductGrid products={results} />
+              ) : visible.length > 0 ? (
+                <ProductGrid products={visible} />
               ) : (
                 <div className="rounded-2xl border p-10 text-center">
                   <div className="font-display text-lg font-bold">No products found</div>
-                  <p className="mt-1 text-sm text-muted-foreground">Try a different keyword or browse categories.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {results.length > 0 ? "Try clearing some filters." : "Try a different keyword or browse categories."}
+                  </p>
                   <Link to="/" className="mt-4 inline-block rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-pop">
                     Browse home
                   </Link>
