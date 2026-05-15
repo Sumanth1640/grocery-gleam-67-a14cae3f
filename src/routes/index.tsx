@@ -9,7 +9,7 @@ import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
 import heroImg from "@/assets/hero-grocery.jpg";
-import { Clock, Leaf, ShieldCheck, Truck } from "lucide-react";
+import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -89,6 +89,33 @@ function HomePage() {
       </section>
 
       <BannerCarousel />
+
+      {/* FOOD DELIVERY PROMO */}
+      <section className="mx-auto max-w-7xl px-4 pt-8">
+        <Link
+          to="/food"
+          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-3xl border bg-discount/10 p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft md:p-8"
+        >
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-discount px-3 py-1 text-xs font-bold text-white shadow-pop">
+              <Utensils className="h-3.5 w-3.5" /> NEW · Food delivery
+            </div>
+            <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight md:text-3xl">
+              Hungry? Order from your favourite restaurants.
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">Pizzas, biryanis, burgers, salads — delivered in 30 minutes.</p>
+            <span className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-foreground px-4 py-2 text-xs font-bold text-background">
+              Browse restaurants <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </span>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=70"
+            alt=""
+            className="hidden aspect-square w-44 rounded-2xl object-cover shadow-pop md:block"
+            loading="lazy"
+          />
+        </Link>
+      </section>
 
       {/* CATEGORIES */}
       <section id="categories" className="mx-auto max-w-7xl px-4 py-12">
