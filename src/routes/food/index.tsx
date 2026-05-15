@@ -78,6 +78,16 @@ function FoodHome() {
               className="w-full rounded-xl border bg-background py-3 pl-9 pr-3 text-sm shadow-card outline-none focus:ring-focus"
             />
           </div>
+
+          {/* Quick links */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link to="/food/dishes" className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-xs font-bold hover:bg-secondary">
+              🍽 All dishes
+            </Link>
+            <Link to="/food/offers" className="inline-flex items-center gap-1.5 rounded-full border border-discount/40 bg-discount/10 px-3 py-1.5 text-xs font-bold text-discount hover:bg-discount/15">
+              🎁 Offers & coupons
+            </Link>
+          </div>
         </div>
       </section>
 
