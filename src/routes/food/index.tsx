@@ -88,6 +88,9 @@ function FoodHome() {
             <Link to="/food/offers" className="inline-flex items-center gap-1.5 rounded-full border border-discount/40 bg-discount/10 px-3 py-1.5 text-xs font-bold text-discount hover:bg-discount/15">
               🎁 Offers & coupons
             </Link>
+            <Link to="/food/favourites" className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-xs font-bold hover:bg-secondary">
+              <Heart className="h-3 w-3" /> Favourites
+            </Link>
           </div>
         </div>
       </section>
