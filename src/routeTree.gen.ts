@@ -19,6 +19,8 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as FoodOffersRouteImport } from './routes/food/offers'
+import { Route as FoodDishesRouteImport } from './routes/food/dishes'
 import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
@@ -79,6 +81,16 @@ const FoodIndexRoute = FoodIndexRouteImport.update({
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodOffersRoute = FoodOffersRouteImport.update({
+  id: '/food/offers',
+  path: '/food/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodDishesRoute = FoodDishesRouteImport.update({
+  id: '/food/dishes',
+  path: '/food/dishes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FoodCheckoutRoute = FoodCheckoutRouteImport.update({
@@ -159,6 +171,8 @@ export interface FileRoutesByFullPath {
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
+  '/food/dishes': typeof FoodDishesRoute
+  '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
@@ -181,6 +195,8 @@ export interface FileRoutesByTo {
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
+  '/food/dishes': typeof FoodDishesRoute
+  '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
@@ -206,6 +222,8 @@ export interface FileRoutesById {
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
+  '/food/dishes': typeof FoodDishesRoute
+  '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
@@ -231,6 +249,8 @@ export interface FileRouteTypes {
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
+    | '/food/dishes'
+    | '/food/offers'
     | '/p/$id'
     | '/food/'
     | '/admin/categories'
@@ -253,6 +273,8 @@ export interface FileRouteTypes {
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
+    | '/food/dishes'
+    | '/food/offers'
     | '/p/$id'
     | '/food'
     | '/admin/categories'
@@ -277,6 +299,8 @@ export interface FileRouteTypes {
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
+    | '/food/dishes'
+    | '/food/offers'
     | '/p/$id'
     | '/food/'
     | '/_authenticated/admin/categories'
@@ -299,6 +323,8 @@ export interface RootRouteChildren {
   CSlugRoute: typeof CSlugRoute
   FoodCartRoute: typeof FoodCartRoute
   FoodCheckoutRoute: typeof FoodCheckoutRoute
+  FoodDishesRoute: typeof FoodDishesRoute
+  FoodOffersRoute: typeof FoodOffersRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
   FoodRSlugRoute: typeof FoodRSlugRoute
@@ -374,6 +400,20 @@ declare module '@tanstack/react-router' {
       path: '/p/$id'
       fullPath: '/p/$id'
       preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/offers': {
+      id: '/food/offers'
+      path: '/food/offers'
+      fullPath: '/food/offers'
+      preLoaderRoute: typeof FoodOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/dishes': {
+      id: '/food/dishes'
+      path: '/food/dishes'
+      fullPath: '/food/dishes'
+      preLoaderRoute: typeof FoodDishesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/food/checkout': {
@@ -519,6 +559,8 @@ const rootRouteChildren: RootRouteChildren = {
   CSlugRoute: CSlugRoute,
   FoodCartRoute: FoodCartRoute,
   FoodCheckoutRoute: FoodCheckoutRoute,
+  FoodDishesRoute: FoodDishesRoute,
+  FoodOffersRoute: FoodOffersRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
   FoodRSlugRoute: FoodRSlugRoute,
