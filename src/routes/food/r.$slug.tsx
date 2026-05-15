@@ -278,3 +278,20 @@ function Stat({ icon, text }: { icon: React.ReactNode; text: string }) {
     </div>
   );
 }
+
+function FavHeart({ restaurant }: { restaurant: Restaurant }) {
+  const favs = useRestaurantFavs();
+  const isFav = !!favs[restaurant.id];
+  return (
+    <button
+      onClick={() => {
+        restaurantFavsStore.toggle(restaurant);
+        toast.success(restaurantFavsStore.has(restaurant.id) ? "Saved to favourites" : "Removed");
+      }}
+      aria-label="Toggle favourite"
+      className="grid h-10 w-10 place-items-center rounded-full border bg-card hover:bg-secondary"
+    >
+      <Heart className={`h-4 w-4 ${isFav ? "fill-discount text-discount" : "text-muted-foreground"}`} />
+    </button>
+  );
+}
