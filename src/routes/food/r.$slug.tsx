@@ -100,13 +100,7 @@ function RestaurantPage() {
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <button
-                onClick={() => { restaurantFavsStore.toggle(r); toast.success(useRestaurantFavs && restaurantFavsStore.has(r.id) ? "Saved to favourites" : "Removed from favourites"); }}
-                aria-label="Toggle favourite"
-                className="grid h-10 w-10 place-items-center rounded-full border bg-card hover:bg-secondary"
-              >
-                <FavHeart id={r.id} />
-              </button>
+              <FavHeart restaurant={r} />
               <div className="rounded-xl border p-3 text-center">
                 <div className="inline-flex items-center gap-0.5 rounded-md bg-success px-2 py-0.5 text-xs font-bold text-success-foreground">
                   <Star className="h-3 w-3 fill-current" /> {r.rating}
