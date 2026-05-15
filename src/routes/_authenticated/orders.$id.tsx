@@ -33,6 +33,11 @@ function OrderDetailPage() {
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", id],
     queryFn: () => fetchOrder({ data: { id } }),
+    staleTime: 0,
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   // Live tracking — refresh when admin updates this order's status.
@@ -52,12 +57,14 @@ function OrderDetailPage() {
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
           (payload) => {
-            const next = (payload.new as { status?: string } | null)?.status;
+            const updatedOrder = payload.new as typeof order | null;
+            const next = updatedOrder?.status;
             if (next && lastStatus && next !== lastStatus) {
               toast.success(`Order ${next.replace(/_/g, " ")}`);
             }
             if (next) lastStatus = next;
-            qc.invalidateQueries({ queryKey: ["order", id] });
+            if (updatedOrder) qc.setQueryData(["order", id], updatedOrder);
+            qc.refetchQueries({ queryKey: ["order", id], type: "active" });
           },
         )
         .subscribe();
@@ -65,11 +72,11 @@ function OrderDetailPage() {
 
     start();
 
-    // Safety net: poll every 15s in case the realtime socket is dropped
+    // Safety net: poll frequently in case the realtime socket is dropped
     // (mobile networks, background tabs, proxies that close idle WS).
     const poll = setInterval(() => {
-      qc.invalidateQueries({ queryKey: ["order", id] });
-    }, 15000);
+      qc.refetchQueries({ queryKey: ["order", id], type: "active" });
+    }, 3000);
 
     return () => {
       clearInterval(poll);
