@@ -1,20 +1,23 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Heart, Home, Search, ShoppingCart, User } from "lucide-react";
+import { Heart, Home, ShoppingCart, User, Utensils } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
+import { useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
 
 export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const cart = useCart();
+  const foodCart = useFoodCart();
   const wishlist = useWishlist();
   const { itemsCount } = cartTotals(cart);
+  const foodCount = foodCartTotals(foodCart).itemsCount;
   const wishCount = Object.keys(wishlist).length;
   const { user } = useAuth();
 
   const items = [
     { to: "/", icon: Home, label: "Home", match: (p: string) => p === "/" },
-    { to: "/search", icon: Search, label: "Search", match: (p: string) => p.startsWith("/search") },
+    { to: "/food", icon: Utensils, label: "Food", match: (p: string) => p.startsWith("/food"), badge: foodCount },
     {
       to: "/wishlist",
       icon: Heart,

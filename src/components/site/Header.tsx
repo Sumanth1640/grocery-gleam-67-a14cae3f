@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart } from "lucide-react";
+import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart, Utensils } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
@@ -37,6 +37,13 @@ export function Header() {
           </div>
           <ChevronDown className="ml-1 h-4 w-4" />
         </button>
+
+        <Link
+          to="/food"
+          className="hidden items-center gap-1.5 rounded-xl border bg-discount/10 px-3 py-2 text-xs font-bold text-discount hover:bg-discount/15 lg:flex"
+        >
+          <Utensils className="h-3.5 w-3.5" /> Food
+        </Link>
 
         <form
           className="relative flex-1"
