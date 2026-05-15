@@ -35,28 +35,47 @@ function OrderDetailPage() {
     queryFn: () => fetchOrder({ data: { id } }),
   });
 
-  // Live tracking — refresh when admin updates this order's status
+  // Live tracking — refresh when admin updates this order's status.
+  // Realtime respects RLS, so the socket must carry the user's access token.
   useEffect(() => {
-    const prevStatus = order?.status;
-    const channel = supabase
-      .channel(`order-${id}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
-        (payload) => {
-          const next = (payload.new as { status?: string } | null)?.status;
-          if (next && next !== prevStatus) {
-            const label = next.replace(/_/g, " ");
-            toast.success(`Order ${label}`);
-          }
-          qc.invalidateQueries({ queryKey: ["order", id] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let lastStatus: string | undefined;
+
+    const start = async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (token) supabase.realtime.setAuth(token);
+
+      channel = supabase
+        .channel(`order-${id}`)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
+          (payload) => {
+            const next = (payload.new as { status?: string } | null)?.status;
+            if (next && lastStatus && next !== lastStatus) {
+              toast.success(`Order ${next.replace(/_/g, " ")}`);
+            }
+            if (next) lastStatus = next;
+            qc.invalidateQueries({ queryKey: ["order", id] });
+          },
+        )
+        .subscribe();
     };
-  }, [id, qc, order?.status]);
+
+    start();
+
+    // Safety net: poll every 15s in case the realtime socket is dropped
+    // (mobile networks, background tabs, proxies that close idle WS).
+    const poll = setInterval(() => {
+      qc.invalidateQueries({ queryKey: ["order", id] });
+    }, 15000);
+
+    return () => {
+      clearInterval(poll);
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [id, qc]);
 
   const items = ((order?.items as unknown as OrderItem[]) ?? []);
   const address = order?.address as unknown as {
