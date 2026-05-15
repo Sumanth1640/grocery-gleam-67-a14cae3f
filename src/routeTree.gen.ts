@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as FoodOffersRouteImport } from './routes/food/offers'
+import { Route as FoodFavouritesRouteImport } from './routes/food/favourites'
 import { Route as FoodDishesRouteImport } from './routes/food/dishes'
 import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
@@ -86,6 +87,11 @@ const PIdRoute = PIdRouteImport.update({
 const FoodOffersRoute = FoodOffersRouteImport.update({
   id: '/food/offers',
   path: '/food/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodFavouritesRoute = FoodFavouritesRouteImport.update({
+  id: '/food/favourites',
+  path: '/food/favourites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FoodDishesRoute = FoodDishesRouteImport.update({
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
+  '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
+  '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
+  '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
+    | '/food/favourites'
     | '/food/offers'
     | '/p/$id'
     | '/food/'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
+    | '/food/favourites'
     | '/food/offers'
     | '/p/$id'
     | '/food'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
+    | '/food/favourites'
     | '/food/offers'
     | '/p/$id'
     | '/food/'
@@ -324,6 +336,7 @@ export interface RootRouteChildren {
   FoodCartRoute: typeof FoodCartRoute
   FoodCheckoutRoute: typeof FoodCheckoutRoute
   FoodDishesRoute: typeof FoodDishesRoute
+  FoodFavouritesRoute: typeof FoodFavouritesRoute
   FoodOffersRoute: typeof FoodOffersRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
@@ -407,6 +420,13 @@ declare module '@tanstack/react-router' {
       path: '/food/offers'
       fullPath: '/food/offers'
       preLoaderRoute: typeof FoodOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/favourites': {
+      id: '/food/favourites'
+      path: '/food/favourites'
+      fullPath: '/food/favourites'
+      preLoaderRoute: typeof FoodFavouritesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/food/dishes': {
@@ -560,6 +580,7 @@ const rootRouteChildren: RootRouteChildren = {
   FoodCartRoute: FoodCartRoute,
   FoodCheckoutRoute: FoodCheckoutRoute,
   FoodDishesRoute: FoodDishesRoute,
+  FoodFavouritesRoute: FoodFavouritesRoute,
   FoodOffersRoute: FoodOffersRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
@@ -568,3 +589,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
