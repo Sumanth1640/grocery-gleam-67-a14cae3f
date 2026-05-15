@@ -6,7 +6,8 @@ import { BottomNav } from "@/components/site/BottomNav";
 import { findRestaurant, type Dish, type Restaurant } from "@/lib/food-data";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
 import { DishCustomizeDialog, VegBadge, QtyStepper } from "@/components/site/DishCustomizeDialog";
-import { ArrowLeft, Star, Clock, MapPin, Plus, Flame, Award, ShoppingBag, MessageSquare } from "lucide-react";
+import { ArrowLeft, Star, Clock, MapPin, Plus, Flame, Award, ShoppingBag, MessageSquare, Heart } from "lucide-react";
+import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/food/r/$slug")({
