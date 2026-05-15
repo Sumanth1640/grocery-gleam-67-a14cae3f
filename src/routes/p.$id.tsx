@@ -141,6 +141,7 @@ function ProductPage() {
           </div>
         </section>
       </div>
+      <RecentlyViewed excludeId={product.id} />
       <Footer />
     </div>
   );
