@@ -109,16 +109,74 @@ function CategoryPage() {
               ))}
             </ul>
 
-            <h3 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted-foreground">Filter</h3>
-            <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={onlyDeals}
-                onChange={(e) => setOnlyDeals(e.target.checked)}
-                className="h-4 w-4 accent-primary"
-              />
-              On deal only
-            </label>
+            <h3 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted-foreground">Filters</h3>
+            <div className="mt-3 space-y-3">
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={onlyDeals}
+                  onChange={(e) => setOnlyDeals(e.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                On deal only
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={inStockOnly}
+                  onChange={(e) => setInStockOnly(e.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                In stock only
+              </label>
+
+              <div>
+                <div className="mb-1.5 text-xs font-semibold text-muted-foreground">Minimum rating</div>
+                <div className="flex flex-wrap gap-1">
+                  {[0, 3, 4, 4.5].map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setMinRating(r)}
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                        minRating === r ? "bg-foreground text-background" : "bg-secondary hover:bg-accent"
+                      }`}
+                    >
+                      {r === 0 ? "Any" : `${r}★+`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                  <span>Max price</span>
+                  <span className="text-foreground">₹{effectiveCap}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={maxPrice}
+                  step={10}
+                  value={effectiveCap}
+                  onChange={(e) => setPriceCap(Number(e.target.value))}
+                  className="w-full accent-primary"
+                />
+              </div>
+
+              {(onlyDeals || inStockOnly || minRating > 0 || priceCap !== null) && (
+                <button
+                  onClick={() => {
+                    setOnlyDeals(false);
+                    setInStockOnly(false);
+                    setMinRating(0);
+                    setPriceCap(null);
+                  }}
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
           </aside>
           <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
