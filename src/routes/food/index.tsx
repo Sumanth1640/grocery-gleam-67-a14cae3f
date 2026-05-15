@@ -223,33 +223,41 @@ function Chip({ active, onClick, children }: { active?: boolean; onClick?: () =>
 }
 
 function RestaurantCard({ r }: { r: Restaurant }) {
+  const favs = useRestaurantFavs();
+  const isFav = !!favs[r.id];
   return (
-    <Link
-      to="/food/r/$slug" params={{ slug: r.slug }}
-      className="group overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
-    >
-      <div className="relative aspect-[16/10] overflow-hidden">
-        <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
-        {r.offer && (
-          <div className="absolute left-3 top-3 rounded-md bg-discount px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">
-            {r.offer}
+    <div className="group relative overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-soft">
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); restaurantFavsStore.toggle(r); }}
+        aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+        className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-background/90 shadow-card backdrop-blur transition hover:scale-105"
+      >
+        <Heart className={`h-4 w-4 ${isFav ? "fill-discount text-discount" : "text-muted-foreground"}`} />
+      </button>
+      <Link to="/food/r/$slug" params={{ slug: r.slug }} className="block">
+        <div className="relative aspect-[16/10] overflow-hidden">
+          <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+          {r.offer && (
+            <div className="absolute left-3 top-3 rounded-md bg-discount px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">
+              {r.offer}
+            </div>
+          )}
+        </div>
+        <div className="p-4">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-display text-base font-bold">{r.name}</h3>
+            <div className="inline-flex items-center gap-0.5 rounded-md bg-success px-1.5 py-0.5 text-[11px] font-bold text-success-foreground">
+              <Star className="h-3 w-3 fill-current" /> {r.rating}
+            </div>
           </div>
-        )}
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display text-base font-bold">{r.name}</h3>
-          <div className="inline-flex items-center gap-0.5 rounded-md bg-success px-1.5 py-0.5 text-[11px] font-bold text-success-foreground">
-            <Star className="h-3 w-3 fill-current" /> {r.rating}
+          <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">{r.cuisines.join(" · ")}</div>
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {r.etaMins} min</span>
+            <span>₹{r.costForTwo} for two</span>
+            <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {r.distanceKm} km</span>
           </div>
         </div>
-        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">{r.cuisines.join(" · ")}</div>
-        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {r.etaMins} min</span>
-          <span>₹{r.costForTwo} for two</span>
-          <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {r.distanceKm} km</span>
-        </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
