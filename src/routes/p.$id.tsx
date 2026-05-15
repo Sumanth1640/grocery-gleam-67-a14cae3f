@@ -1,12 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
+import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { getProduct, productsByCategory } from "@/lib/catalog.functions";
 import { cartStore, useCart } from "@/lib/cart-store";
+import { recentlyViewedStore } from "@/lib/recently-viewed-store";
 import { Clock, Minus, Plus, ShieldCheck, Truck, Leaf } from "lucide-react";
 
 export const Route = createFileRoute("/p/$id")({
@@ -34,6 +37,10 @@ function ProductPage() {
   if (productQ.isSuccess && !product) throw notFound();
 
   const cart = useCart();
+
+  useEffect(() => {
+    if (product) recentlyViewedStore.push(product);
+  }, [product]);
 
   if (!product) {
     return (
@@ -134,6 +141,7 @@ function ProductPage() {
           </div>
         </section>
       </div>
+      <RecentlyViewed excludeId={product.id} />
       <Footer />
     </div>
   );
