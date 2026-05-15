@@ -13,6 +13,7 @@ import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as OrderSuccessRouteImport } from './routes/order-success'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -20,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as FoodOffersRouteImport } from './routes/food/offers'
+import { Route as FoodFavouritesRouteImport } from './routes/food/favourites'
 import { Route as FoodDishesRouteImport } from './routes/food/dishes'
 import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
@@ -54,6 +56,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -86,6 +93,11 @@ const PIdRoute = PIdRouteImport.update({
 const FoodOffersRoute = FoodOffersRouteImport.update({
   id: '/food/offers',
   path: '/food/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodFavouritesRoute = FoodFavouritesRouteImport.update({
+  id: '/food/favourites',
+  path: '/food/favourites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FoodDishesRoute = FoodDishesRouteImport.update({
@@ -161,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/search': typeof SearchRoute
@@ -172,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
+  '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
@@ -186,6 +200,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/search': typeof SearchRoute
@@ -196,6 +211,7 @@ export interface FileRoutesByTo {
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
+  '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
@@ -212,6 +228,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/search': typeof SearchRoute
@@ -223,6 +240,7 @@ export interface FileRoutesById {
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
+  '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
@@ -239,6 +257,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cart'
     | '/checkout'
+    | '/help'
     | '/login'
     | '/order-success'
     | '/search'
@@ -250,6 +269,7 @@ export interface FileRouteTypes {
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
+    | '/food/favourites'
     | '/food/offers'
     | '/p/$id'
     | '/food/'
@@ -264,6 +284,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cart'
     | '/checkout'
+    | '/help'
     | '/login'
     | '/order-success'
     | '/search'
@@ -274,6 +295,7 @@ export interface FileRouteTypes {
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
+    | '/food/favourites'
     | '/food/offers'
     | '/p/$id'
     | '/food'
@@ -289,6 +311,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/cart'
     | '/checkout'
+    | '/help'
     | '/login'
     | '/order-success'
     | '/search'
@@ -300,6 +323,7 @@ export interface FileRouteTypes {
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
+    | '/food/favourites'
     | '/food/offers'
     | '/p/$id'
     | '/food/'
@@ -316,6 +340,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
+  HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
   OrderSuccessRoute: typeof OrderSuccessRoute
   SearchRoute: typeof SearchRoute
@@ -324,6 +349,7 @@ export interface RootRouteChildren {
   FoodCartRoute: typeof FoodCartRoute
   FoodCheckoutRoute: typeof FoodCheckoutRoute
   FoodDishesRoute: typeof FoodDishesRoute
+  FoodFavouritesRoute: typeof FoodFavouritesRoute
   FoodOffersRoute: typeof FoodOffersRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
@@ -358,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -407,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/food/offers'
       fullPath: '/food/offers'
       preLoaderRoute: typeof FoodOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/favourites': {
+      id: '/food/favourites'
+      path: '/food/favourites'
+      fullPath: '/food/favourites'
+      preLoaderRoute: typeof FoodFavouritesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/food/dishes': {
@@ -552,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
+  HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
   OrderSuccessRoute: OrderSuccessRoute,
   SearchRoute: SearchRoute,
@@ -560,6 +601,7 @@ const rootRouteChildren: RootRouteChildren = {
   FoodCartRoute: FoodCartRoute,
   FoodCheckoutRoute: FoodCheckoutRoute,
   FoodDishesRoute: FoodDishesRoute,
+  FoodFavouritesRoute: FoodFavouritesRoute,
   FoodOffersRoute: FoodOffersRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
