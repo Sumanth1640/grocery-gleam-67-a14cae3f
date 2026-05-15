@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
-import { findRestaurant, type Dish } from "@/lib/food-data";
+import { findRestaurant, type Dish, type Restaurant } from "@/lib/food-data";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
 import { DishCustomizeDialog, VegBadge, QtyStepper } from "@/components/site/DishCustomizeDialog";
 import { ArrowLeft, Star, Clock, MapPin, Plus, Flame, Award, ShoppingBag, MessageSquare } from "lucide-react";
@@ -40,7 +40,7 @@ const SAMPLE_REVIEWS = [
 ];
 
 function RestaurantPage() {
-  const r = Route.useLoaderData();
+  const r = Route.useLoaderData() as Restaurant;
   const [vegOnly, setVegOnly] = useState(false);
   const [openDish, setOpenDish] = useState<Dish | null>(null);
   const cart = useFoodCart();
