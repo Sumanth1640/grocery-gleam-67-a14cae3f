@@ -35,10 +35,22 @@ function CategoryPage() {
 
   const [sort, setSort] = useState<Sort>("popular");
   const [onlyDeals, setOnlyDeals] = useState(false);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [minRating, setMinRating] = useState(0);
+
+  const maxPrice = useMemo(
+    () => items.reduce((m, p) => Math.max(m, p.price), 0) || 1000,
+    [items],
+  );
+  const [priceCap, setPriceCap] = useState<number | null>(null);
+  const effectiveCap = priceCap ?? maxPrice;
 
   const visible = useMemo(() => {
     let list = [...items];
     if (onlyDeals) list = list.filter((p) => p.mrp > p.price);
+    if (inStockOnly) list = list.filter((p) => p.in_stock);
+    if (minRating > 0) list = list.filter((p) => (p.rating ?? 0) >= minRating);
+    list = list.filter((p) => p.price <= effectiveCap);
     switch (sort) {
       case "price-asc": list.sort((a, b) => a.price - b.price); break;
       case "price-desc": list.sort((a, b) => b.price - a.price); break;
@@ -47,7 +59,7 @@ function CategoryPage() {
         break;
     }
     return list;
-  }, [items, sort, onlyDeals]);
+  }, [items, sort, onlyDeals, inStockOnly, minRating, effectiveCap]);
 
   if (catsQ.isSuccess && !category) throw notFound();
 
