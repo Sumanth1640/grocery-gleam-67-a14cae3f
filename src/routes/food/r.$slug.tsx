@@ -226,26 +226,9 @@ function RestaurantPage() {
 
       {/* Reviews */}
       <section className="mx-auto max-w-5xl px-4 py-6">
-        <h2 className="font-display text-lg font-bold">Ratings & reviews</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          {SAMPLE_REVIEWS.map((rv, i) => (
-            <div key={i} className="rounded-2xl border bg-card p-4 shadow-card">
-              <div className="flex items-center gap-2">
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{rv.name[0]}</div>
-                <div>
-                  <div className="text-sm font-bold">{rv.name}</div>
-                  <div className="inline-flex items-center text-xs text-success">
-                    {Array.from({ length: 5 }).map((_, k) => (
-                      <Star key={k} className={`h-3 w-3 ${k < rv.stars ? "fill-current" : "opacity-30"}`} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground"><MessageSquare className="mr-1 inline h-3 w-3" />{rv.text}</p>
-            </div>
-          ))}
-        </div>
+        <ReviewsSection targetType="restaurant" targetId={r.id} seedRating={r.rating} />
       </section>
+
 
       <Footer />
       <BottomNav />
