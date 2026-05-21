@@ -28,21 +28,21 @@ export const Route = createFileRoute("/food/r/$slug")({
       partner_dish_addons?: Array<{ id: string; name: string; price: number }>;
     }>;
     const menu: Dish[] = dishes.map((d) => ({
-      id: d.id, name: d.name, description: d.description ?? "", image: d.image || "",
+      id: d.id, name: d.name, desc: d.description ?? "", image: d.image || "",
       price: d.price, mrp: d.mrp ?? undefined,
-      veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, inStock: d.in_stock,
+      veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section,
       rating: Number(d.rating ?? 4.5),
       variants: (d.partner_dish_variants ?? []).map((v) => ({ id: v.id, name: v.name, price: v.price })),
       addons: (d.partner_dish_addons ?? []).map((a) => ({ id: a.id, name: a.name, price: a.price })),
-    } as Dish));
+    }));
     const r: Restaurant = {
       id: db.id, slug: db.slug, name: db.name,
       image: db.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
       cover: db.cover || db.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
       cuisines: db.cuisines ?? [], rating: Number(db.rating ?? 4.5), reviewsCount: db.reviews_count ?? 0,
       etaMins: db.eta_mins, distanceKm: Number(db.distance_km), costForTwo: db.cost_for_two,
-      priceTier: db.price_tier as 1 | 2 | 3, veg: db.veg, isOpen: db.is_open, area: db.area,
-      offer: db.offer ?? undefined, opensAt: db.opens_at ?? undefined, closesAt: db.closes_at ?? undefined,
+      priceTier: db.price_tier as 1 | 2 | 3, veg: db.veg, area: db.area,
+      offer: db.offer ?? undefined,
       menu,
     };
     return r;
