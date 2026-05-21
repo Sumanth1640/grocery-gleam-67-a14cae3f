@@ -53,12 +53,22 @@ const emptyAddress: Address = {
 
 function CheckoutPage() {
   const cart = useCart();
-  const totals = cartTotals(cart);
+  const baseTotals = cartTotals(cart);
+  const search = Route.useSearch();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [payment, setPayment] = useState<PaymentMethod>("upi");
   const [submitting, setSubmitting] = useState(false);
+
+  const couponData: Coupon | null = useMemo(() => {
+    if (!search.coupon) return null;
+    const r = applyCoupon(search.coupon, baseTotals.subtotal);
+    return r.ok ? r.coupon! : null;
+  }, [search.coupon, baseTotals.subtotal]);
+  const discount = couponData ? applyCoupon(couponData.code, baseTotals.subtotal).discount : 0;
+  const totals = { ...baseTotals, total: baseTotals.subtotal + baseTotals.delivery - discount };
+
 
   if (totals.itemsCount === 0) {
     return (
