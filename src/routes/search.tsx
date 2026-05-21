@@ -8,7 +8,8 @@ import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { listCategories, searchProducts } from "@/lib/catalog.functions";
-import { Search as SearchIcon, SlidersHorizontal } from "lucide-react";
+import { RESTAURANTS } from "@/lib/food-data";
+import { Search as SearchIcon, SlidersHorizontal, Utensils, Star, Clock } from "lucide-react";
 
 const searchSchema = z.object({ q: z.string().optional().default("") });
 
