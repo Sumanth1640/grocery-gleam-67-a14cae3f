@@ -11,6 +11,9 @@ import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-st
 import { toast } from "sonner";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { getApprovedRestaurant } from "@/lib/partner-public.functions";
+import { listOutletsForRestaurant } from "@/lib/outlets.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/food/r/$slug")({
   head: ({ params }) => ({
