@@ -10,6 +10,7 @@ import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functio
 import { resolveWarehouseForPincode } from "@/lib/fulfillment.functions";
 import { useQuery } from "@tanstack/react-query";
 import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
+import { listMyCouponUsage } from "@/lib/coupons.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import { toast } from "sonner";
@@ -66,13 +67,18 @@ function CheckoutPage() {
     queryKey: ["active-coupons"],
     queryFn: listActiveCoupons,
   });
+  const myUsageRpc = useServerFn(listMyCouponUsage);
+  const { data: myUsage = {} } = useQuery({
+    queryKey: ["my-coupon-usage"],
+    queryFn: () => myUsageRpc(),
+  });
 
   const couponData: Coupon | null = useMemo(() => {
     if (!search.coupon) return null;
-    const r = applyCoupon(availableCoupons, search.coupon, baseTotals.subtotal);
+    const r = applyCoupon(availableCoupons, search.coupon, baseTotals.subtotal, myUsage);
     return r.ok ? r.coupon! : null;
-  }, [availableCoupons, search.coupon, baseTotals.subtotal]);
-  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, baseTotals.subtotal).discount : 0;
+  }, [availableCoupons, search.coupon, baseTotals.subtotal, myUsage]);
+  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, baseTotals.subtotal, myUsage).discount : 0;
   const totals = { ...baseTotals, total: baseTotals.subtotal + baseTotals.delivery - discount };
 
 
@@ -142,6 +148,8 @@ function CheckoutPage() {
         subtotal: totals.subtotal,
         delivery: totals.delivery,
         total: totals.total,
+        coupon_id: couponData?.id ?? null,
+        coupon_discount: discount,
       };
       const row = await placeOrderRpc({ data: payload });
       if (saveAddr) {
