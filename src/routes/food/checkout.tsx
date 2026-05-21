@@ -259,6 +259,12 @@ function AddressStep({ address, setAddress, saveAddr, setSaveAddr }: { address: 
   return (
     <div>
       <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /><h2 className="font-display text-lg font-bold">Delivery address</h2></div>
+      <div className="mt-4">
+        <SavedAddressPicker
+          activeSignature={`${address.line1}|${address.pincode}`}
+          onPick={(a) => setAddress({ fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, pincode: a.pincode, type: a.type })}
+        />
+      </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <Field label="Full name"><input value={address.fullName} onChange={(e) => set("fullName", e.target.value)} className={inputCls} placeholder="Jane Doe" /></Field>
         <Field label="Phone (10 digits)"><input value={address.phone} onChange={(e) => set("phone", e.target.value.replace(/\D/g, "").slice(0, 10))} inputMode="numeric" className={inputCls} placeholder="9876543210" /></Field>
