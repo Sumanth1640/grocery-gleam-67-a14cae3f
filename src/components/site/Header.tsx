@@ -115,6 +115,23 @@ export function Header() {
           )}
         </Link>
 
+        {user && (
+          <Link
+            to="/notifications"
+            aria-label="Notifications"
+            className="relative hidden h-10 w-10 place-items-center rounded-xl border bg-secondary/40 hover:bg-secondary sm:grid"
+          >
+            <Bell className="h-4 w-4" />
+            {unread > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+                {unread}
+              </span>
+            )}
+          </Link>
+        )}
+
+
+
         <Link
           to="/cart"
           className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
