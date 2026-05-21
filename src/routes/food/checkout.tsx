@@ -81,6 +81,15 @@ function FoodCheckoutPage() {
 
   const placeOrderRpc = useServerFn(placeOrderFn);
   const saveAddressRpc = useServerFn(createAddress);
+  const resolveOutletRpc = useServerFn(resolveOutletForRestaurant);
+
+  const restaurantId = totals.items[0]?.restaurantId;
+  const outletQ = useQuery({
+    queryKey: ["resolve-outlet", restaurantId],
+    queryFn: () => resolveOutletRpc({ data: { restaurant_id: restaurantId! } }),
+    enabled: !!restaurantId,
+    staleTime: 60_000,
+  });
 
   const placeOrder = async () => {
     setSubmitting(true);
