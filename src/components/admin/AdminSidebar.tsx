@@ -16,15 +16,15 @@ import {
 import { signOut } from "@/lib/use-auth";
 
 const items = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/products", label: "Products", icon: Package, exact: false },
-  { to: "/admin/categories", label: "Categories", icon: FolderTree, exact: false },
-  { to: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false },
-  { to: "/admin/restaurants", label: "Restaurants", icon: UtensilsCrossed, exact: false },
-  { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse, exact: false },
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, adminOnly: false },
+  { to: "/admin/products", label: "Products", icon: Package, exact: false, adminOnly: true },
+  { to: "/admin/categories", label: "Categories", icon: FolderTree, exact: false, adminOnly: true },
+  { to: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false, adminOnly: false },
+  { to: "/admin/restaurants", label: "Restaurants", icon: UtensilsCrossed, exact: false, adminOnly: true },
+  { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse, exact: false, adminOnly: true },
 ] as const;
 
-export function AdminSidebar() {
+export function AdminSidebar({ isAdminUser = true }: { isAdminUser?: boolean }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const path = useRouterState({ select: (r) => r.location.pathname });
