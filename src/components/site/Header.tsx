@@ -25,7 +25,7 @@ export function Header() {
     enabled: !!user,
     refetchInterval: 60_000,
   });
-  const unread = unreadQ.data ?? 0;
+  const unread = unreadQ.data?.count ?? 0;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
