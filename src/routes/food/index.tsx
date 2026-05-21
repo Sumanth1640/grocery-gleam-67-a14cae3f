@@ -81,7 +81,7 @@ function FoodHome() {
       case "cost-desc": list.sort((a, b) => b.costForTwo - a.costForTwo); break;
     }
     return list;
-  }, [q, vegOnly, cuisine, minRating, maxEta, sort]);
+  }, [allRestaurants, q, vegOnly, cuisine, minRating, maxEta, sort]);
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
