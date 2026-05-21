@@ -116,6 +116,7 @@ function OrdersPage() {
                       </div>
                       <div className="font-display text-lg font-extrabold">₹{o.total}</div>
                     </div>
+                    <OrderTracker status={o.status} />
                     <div className="mt-3 flex gap-2 overflow-x-auto">
                       {items.slice(0, 5).map((it, i) => (
                         it.product.image ? (
