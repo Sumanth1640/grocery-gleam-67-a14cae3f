@@ -26,6 +26,7 @@ import { Route as FoodDishesRouteImport } from './routes/food/dishes'
 import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
+import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -122,6 +123,11 @@ const CSlugRoute = CSlugRouteImport.update({
   path: '/c/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
+  '/partner': typeof AuthenticatedPartnerRoute
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
+  '/partner': typeof AuthenticatedPartnerRoute
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
+  '/_authenticated/partner': typeof AuthenticatedPartnerRoute
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/notifications'
     | '/orders'
+    | '/partner'
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/notifications'
     | '/orders'
+    | '/partner'
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/notifications'
     | '/_authenticated/orders'
+    | '/_authenticated/partner'
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
@@ -502,6 +514,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/partner': {
+      id: '/_authenticated/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof AuthenticatedPartnerRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/orders': {
       id: '/_authenticated/orders'
       path: '/orders'
@@ -615,6 +634,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRouteWithChildren
+  AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRoute
   AuthenticatedFoodOrdersRoute: typeof AuthenticatedFoodOrdersRoute
 }
 
@@ -623,6 +643,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRouteWithChildren,
+  AuthenticatedPartnerRoute: AuthenticatedPartnerRoute,
   AuthenticatedFoodOrdersRoute: AuthenticatedFoodOrdersRoute,
 }
 
