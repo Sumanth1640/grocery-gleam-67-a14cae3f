@@ -18,6 +18,14 @@ export function Header() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const unreadFn = useServerFn(unreadCount);
+  const unreadQ = useQuery({
+    queryKey: ["notifications", "unread"],
+    queryFn: () => unreadFn(),
+    enabled: !!user,
+    refetchInterval: 60_000,
+  });
+  const unread = unreadQ.data ?? 0;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
