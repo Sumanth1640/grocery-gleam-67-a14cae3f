@@ -1,12 +1,15 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
+import { applyCoupon, type Coupon } from "@/lib/food-data";
 import { supabase } from "@/integrations/supabase/client";
+import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -18,10 +21,14 @@ import {
   MapPin,
   Smartphone,
   Wallet,
+
 } from "lucide-react";
+
+const searchSchema = z.object({ coupon: z.string().optional() });
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — freshcart" }] }),
+  validateSearch: (s) => searchSchema.parse(s),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();
@@ -46,12 +53,22 @@ const emptyAddress: Address = {
 
 function CheckoutPage() {
   const cart = useCart();
-  const totals = cartTotals(cart);
+  const baseTotals = cartTotals(cart);
+  const search = Route.useSearch();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [payment, setPayment] = useState<PaymentMethod>("upi");
   const [submitting, setSubmitting] = useState(false);
+
+  const couponData: Coupon | null = useMemo(() => {
+    if (!search.coupon) return null;
+    const r = applyCoupon(search.coupon, baseTotals.subtotal);
+    return r.ok ? r.coupon! : null;
+  }, [search.coupon, baseTotals.subtotal]);
+  const discount = couponData ? applyCoupon(couponData.code, baseTotals.subtotal).discount : 0;
+  const totals = { ...baseTotals, total: baseTotals.subtotal + baseTotals.delivery - discount };
+
 
   if (totals.itemsCount === 0) {
     return (
@@ -149,8 +166,15 @@ function CheckoutPage() {
         <div className="mt-6 grid gap-6 md:grid-cols-[1fr_360px]">
           <div className="rounded-2xl border bg-card p-5 shadow-card md:p-6">
             {step === 1 && (
-              <AddressStep address={address} setAddress={setAddress} />
+              <>
+                <SavedAddressPicker
+                  onPick={(a) => setAddress({ ...address, fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, pincode: a.pincode, type: a.type })}
+                  activeSignature={address.line1 ? `${address.line1}|${address.pincode}` : undefined}
+                />
+                <AddressStep address={address} setAddress={setAddress} />
+              </>
             )}
+
             {step === 2 && (
               <PaymentStep payment={payment} setPayment={setPayment} />
             )}
