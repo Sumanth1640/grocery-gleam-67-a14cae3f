@@ -7,6 +7,7 @@ import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
+import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { getProduct, productsByCategory } from "@/lib/catalog.functions";
 import { cartStore, useCart } from "@/lib/cart-store";
 import { recentlyViewedStore } from "@/lib/recently-viewed-store";
