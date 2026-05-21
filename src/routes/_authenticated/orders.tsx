@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/site/Header";
@@ -73,8 +73,17 @@ export const Route = createFileRoute("/_authenticated/orders")({
 });
 
 function OrdersPage() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const fetchOrders = useServerFn(listOrders);
-  const { data, isLoading } = useQuery({ queryKey: ["orders"], queryFn: () => fetchOrders() });
+  const { data, isLoading } = useQuery({
+    queryKey: ["orders"],
+    queryFn: () => fetchOrders(),
+    enabled: pathname === "/orders",
+  });
+
+  if (pathname !== "/orders") {
+    return <Outlet />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
