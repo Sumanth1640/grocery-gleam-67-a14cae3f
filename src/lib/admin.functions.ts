@@ -191,7 +191,8 @@ export const adminSetRestaurantStatus = createServerFn({ method: "POST" })
     if (data.status === "approved") patch.rejection_reason = null;
     const { data: r, error } = await supabaseAdmin
       .from("partner_restaurants")
-      .update(patch)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(patch as any)
       .eq("id", data.id)
       .select("owner_id, name")
       .single();
