@@ -162,3 +162,24 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { scrollbar-width: none; }
 }
+
+@layer utilities {
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--success) 60%, transparent); }
+    70% { box-shadow: 0 0 0 12px color-mix(in oklch, var(--success) 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--success) 0%, transparent); }
+  }
+  .animate-pulse-ring { animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+  @keyframes progress-grow {
+    from { width: 0%; }
+  }
+  .animate-progress-grow { animation: progress-grow 1.2s ease-out; }
+
+  @keyframes check-pop {
+    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    60% { transform: scale(1.2) rotate(0deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .animate-check-pop { animation: check-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+}
