@@ -9,7 +9,7 @@ import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store"
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
 import { resolveWarehouseForPincode } from "@/lib/fulfillment.functions";
 import { useQuery } from "@tanstack/react-query";
-import { applyCoupon, type Coupon } from "@/lib/food-data";
+import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
 import { supabase } from "@/integrations/supabase/client";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import { toast } from "sonner";
@@ -62,13 +62,17 @@ function CheckoutPage() {
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [payment, setPayment] = useState<PaymentMethod>("upi");
   const [submitting, setSubmitting] = useState(false);
+  const { data: availableCoupons = [] } = useQuery({
+    queryKey: ["active-coupons"],
+    queryFn: listActiveCoupons,
+  });
 
   const couponData: Coupon | null = useMemo(() => {
     if (!search.coupon) return null;
-    const r = applyCoupon(search.coupon, baseTotals.subtotal);
+    const r = applyCoupon(availableCoupons, search.coupon, baseTotals.subtotal);
     return r.ok ? r.coupon! : null;
-  }, [search.coupon, baseTotals.subtotal]);
-  const discount = couponData ? applyCoupon(couponData.code, baseTotals.subtotal).discount : 0;
+  }, [availableCoupons, search.coupon, baseTotals.subtotal]);
+  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, baseTotals.subtotal).discount : 0;
   const totals = { ...baseTotals, total: baseTotals.subtotal + baseTotals.delivery - discount };
 
 
