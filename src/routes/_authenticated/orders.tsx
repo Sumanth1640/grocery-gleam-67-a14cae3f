@@ -4,7 +4,68 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { listOrders } from "@/lib/account.functions";
-import { Loader2, Package } from "lucide-react";
+import { Loader2, Package, Check } from "lucide-react";
+
+const STATUS_STEPS = ["placed", "packed", "out_for_delivery", "delivered"] as const;
+type StepId = typeof STATUS_STEPS[number];
+const STEP_LABELS: Record<StepId, string> = {
+  placed: "Placed",
+  packed: "Packed",
+  out_for_delivery: "Shipped",
+  delivered: "Delivered",
+};
+
+function OrderTracker({ status }: { status: string }) {
+  const idx = STATUS_STEPS.indexOf(status as StepId);
+  const activeIndex = idx === -1 ? 0 : idx;
+  const pct = (activeIndex / (STATUS_STEPS.length - 1)) * 100;
+  const isCancelled = status === "cancelled";
+
+  if (isCancelled) {
+    return (
+      <div className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-xs font-bold text-destructive">
+        Order cancelled
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 px-1 pb-1">
+      <div className="relative">
+        <div className="absolute left-[10%] right-[10%] top-3 h-[3px] rounded-full bg-secondary" />
+        <div
+          className="absolute left-[10%] top-3 h-[3px] rounded-full bg-success transition-[width] duration-1000 ease-out"
+          style={{ width: `calc(${pct} * 0.8%)` }}
+        />
+        <ol className="relative grid grid-cols-4 gap-1">
+          {STATUS_STEPS.map((s, i) => {
+            const done = i <= activeIndex;
+            const isCurrent = i === activeIndex && status !== "delivered";
+            return (
+              <li key={s} className="flex flex-col items-center text-center">
+                <div
+                  className={`grid h-6 w-6 place-items-center rounded-full ring-2 ring-card transition-all duration-500 ${
+                    done ? "bg-success text-success-foreground" : "bg-secondary text-muted-foreground"
+                  } ${isCurrent ? "animate-pulse-ring" : ""}`}
+                  style={{ transitionDelay: `${i * 150}ms` }}
+                >
+                  {done ? (
+                    <Check className="h-3 w-3 animate-check-pop" strokeWidth={3} />
+                  ) : (
+                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-50" />
+                  )}
+                </div>
+                <div className={`mt-1.5 text-[10px] font-semibold ${done ? "text-success" : "text-muted-foreground"}`}>
+                  {STEP_LABELS[s]}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/orders")({
   head: () => ({ meta: [{ title: "Your orders — freshcart" }] }),
