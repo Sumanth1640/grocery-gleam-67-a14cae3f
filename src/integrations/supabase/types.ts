@@ -709,6 +709,35 @@ export type Database = {
         }
         Relationships: []
       }
+      warehouse_managers: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          warehouse_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          warehouse_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warehouse_managers_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       warehouse_pincodes: {
         Row: {
           created_at: string
@@ -800,6 +829,11 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_warehouse_manager: { Args: { _user_id: string }; Returns: boolean }
+      manages_warehouse: {
+        Args: { _user_id: string; _warehouse_id: string }
         Returns: boolean
       }
       owns_restaurant: {
