@@ -49,13 +49,10 @@ function FoodHome() {
       costForTwo: r.cost_for_two,
       priceTier: r.price_tier as 1 | 2 | 3,
       veg: r.veg,
-      isOpen: r.is_open,
       area: r.area,
       offer: r.offer ?? undefined,
-      opensAt: r.opens_at ?? undefined,
-      closesAt: r.closes_at ?? undefined,
       menu: [],
-    } as Restaurant));
+    }));
     return [...partners, ...RESTAURANTS];
   }, [partnerQ.data]);
 
