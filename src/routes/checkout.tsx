@@ -7,6 +7,8 @@ import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
+import { resolveWarehouseForPincode } from "@/lib/fulfillment.functions";
+import { useQuery } from "@tanstack/react-query";
 import { applyCoupon, type Coupon } from "@/lib/food-data";
 import { supabase } from "@/integrations/supabase/client";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
