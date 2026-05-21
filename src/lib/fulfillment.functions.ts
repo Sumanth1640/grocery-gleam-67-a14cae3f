@@ -25,8 +25,8 @@ export const resolveOutletForRestaurant = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { data: row, error } = await supabaseAdmin.rpc("resolve_outlet_for_restaurant", {
       _restaurant_id: data.restaurant_id,
-      _lat: data.lat ?? null,
-      _lng: data.lng ?? null,
+      _lat: data.lat ?? undefined,
+      _lng: data.lng ?? undefined,
     });
     if (error) throw new Error(error.message);
     const outletId = row as unknown as string | null;
