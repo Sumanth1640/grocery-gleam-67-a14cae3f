@@ -1,12 +1,15 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
+import { applyCoupon, type Coupon } from "@/lib/food-data";
 import { supabase } from "@/integrations/supabase/client";
+import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -18,10 +21,14 @@ import {
   MapPin,
   Smartphone,
   Wallet,
+  Tag,
 } from "lucide-react";
+
+const searchSchema = z.object({ coupon: z.string().optional() });
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — freshcart" }] }),
+  validateSearch: (s) => searchSchema.parse(s),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();
