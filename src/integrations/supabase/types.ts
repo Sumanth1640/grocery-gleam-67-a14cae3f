@@ -301,72 +301,135 @@ export type Database = {
       }
       partner_restaurants: {
         Row: {
+          agreement_accepted_at: string | null
+          agreement_signature: string | null
+          agreement_version: string | null
           area: string
+          bank_account_name: string
+          bank_account_number: string
+          bank_ifsc: string
+          bank_proof_url: string
           closes_at: string | null
+          commission_rate: number
           cost_for_two: number
           cover: string
           created_at: string
           cuisines: string[]
           distance_km: number
           eta_mins: number
+          fssai_doc_url: string
+          fssai_expiry: string | null
+          fssai_number: string
+          gst_doc_url: string | null
+          gst_number: string | null
           id: string
           image: string
           is_open: boolean
           name: string
           offer: string | null
+          onboarding_step: number
           opens_at: string | null
+          owner_email: string
           owner_id: string
+          owner_name: string
+          owner_phone: string
+          pan_doc_url: string
+          pan_number: string
           price_tier: number
           rating: number
+          rejection_reason: string | null
           reviews_count: number
+          shop_license_doc_url: string
           slug: string
           status: string
           updated_at: string
           veg: boolean
         }
         Insert: {
+          agreement_accepted_at?: string | null
+          agreement_signature?: string | null
+          agreement_version?: string | null
           area?: string
+          bank_account_name?: string
+          bank_account_number?: string
+          bank_ifsc?: string
+          bank_proof_url?: string
           closes_at?: string | null
+          commission_rate?: number
           cost_for_two?: number
           cover?: string
           created_at?: string
           cuisines?: string[]
           distance_km?: number
           eta_mins?: number
+          fssai_doc_url?: string
+          fssai_expiry?: string | null
+          fssai_number?: string
+          gst_doc_url?: string | null
+          gst_number?: string | null
           id?: string
           image?: string
           is_open?: boolean
           name: string
           offer?: string | null
+          onboarding_step?: number
           opens_at?: string | null
+          owner_email?: string
           owner_id: string
+          owner_name?: string
+          owner_phone?: string
+          pan_doc_url?: string
+          pan_number?: string
           price_tier?: number
           rating?: number
+          rejection_reason?: string | null
           reviews_count?: number
+          shop_license_doc_url?: string
           slug: string
           status?: string
           updated_at?: string
           veg?: boolean
         }
         Update: {
+          agreement_accepted_at?: string | null
+          agreement_signature?: string | null
+          agreement_version?: string | null
           area?: string
+          bank_account_name?: string
+          bank_account_number?: string
+          bank_ifsc?: string
+          bank_proof_url?: string
           closes_at?: string | null
+          commission_rate?: number
           cost_for_two?: number
           cover?: string
           created_at?: string
           cuisines?: string[]
           distance_km?: number
           eta_mins?: number
+          fssai_doc_url?: string
+          fssai_expiry?: string | null
+          fssai_number?: string
+          gst_doc_url?: string | null
+          gst_number?: string | null
           id?: string
           image?: string
           is_open?: boolean
           name?: string
           offer?: string | null
+          onboarding_step?: number
           opens_at?: string | null
+          owner_email?: string
           owner_id?: string
+          owner_name?: string
+          owner_phone?: string
+          pan_doc_url?: string
+          pan_number?: string
           price_tier?: number
           rating?: number
+          rejection_reason?: string | null
           reviews_count?: number
+          shop_license_doc_url?: string
           slug?: string
           status?: string
           updated_at?: string

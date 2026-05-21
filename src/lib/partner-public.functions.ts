@@ -8,6 +8,7 @@ export const listApprovedRestaurants = createServerFn({ method: "GET" })
       .from("partner_restaurants")
       .select("*")
       .eq("status", "approved")
+      .not("agreement_accepted_at", "is", null)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -20,6 +21,7 @@ export const getApprovedRestaurant = createServerFn({ method: "GET" })
       .from("partner_restaurants")
       .select("*, partner_dishes(*, partner_dish_variants(*), partner_dish_addons(*))")
       .eq("status", "approved")
+      .not("agreement_accepted_at", "is", null)
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw new Error(error.message);
