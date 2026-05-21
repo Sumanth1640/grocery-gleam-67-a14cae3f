@@ -119,7 +119,16 @@ function OrderDetailPage() {
           <>
             <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h1 className="font-display text-2xl font-bold md:text-3xl">Order #{order.id.slice(0, 8)}</h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-display text-2xl font-bold md:text-3xl">Order #{order.id.slice(0, 8)}</h1>
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                    order.status === "delivered" ? "bg-success/15 text-success" :
+                    order.status === "cancelled" ? "bg-destructive/15 text-destructive" :
+                    "bg-primary/15 text-primary"
+                  }`}>
+                    {(order.status ?? "placed").replace(/_/g, " ")}
+                  </span>
+                </div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   Placed {new Date(order.created_at).toLocaleString()}
                 </div>
