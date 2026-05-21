@@ -99,7 +99,15 @@ function CheckoutPage() {
 
   const placeOrderRpc = useServerFn(placeOrderFn);
   const saveAddressRpc = useServerFn(createAddress);
+  const resolveWhRpc = useServerFn(resolveWarehouseForPincode);
   const [saveAddr, setSaveAddr] = useState(true);
+
+  const whQ = useQuery({
+    queryKey: ["resolve-warehouse", address.pincode],
+    queryFn: () => resolveWhRpc({ data: { pincode: address.pincode } }),
+    enabled: /^\d{6}$/.test(address.pincode),
+    staleTime: 60_000,
+  });
 
   const placeOrder = async () => {
     setSubmitting(true);
