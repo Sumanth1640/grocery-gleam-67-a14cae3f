@@ -3,7 +3,8 @@ import { useState, useMemo } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
-import { applyCoupon, COUPONS, type Coupon } from "@/lib/food-data";
+import { applyCoupon, couponDescription, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
+import { useQuery } from "@tanstack/react-query";
 import { Minus, Plus, Trash2, ShoppingBag, Clock, Tag, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/cart")({
@@ -18,10 +19,14 @@ function CartPage() {
   const [code, setCode] = useState("");
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { data: availableCoupons = [] } = useQuery({
+    queryKey: ["active-coupons"],
+    queryFn: listActiveCoupons,
+  });
 
   const couponResult = useMemo(
-    () => (coupon ? applyCoupon(coupon.code, subtotal) : null),
-    [coupon, subtotal],
+    () => (coupon ? applyCoupon(availableCoupons, coupon.code, subtotal) : null),
+    [availableCoupons, coupon, subtotal],
   );
   const discount = couponResult?.ok ? couponResult.discount : 0;
   const total = subtotal + delivery - discount;
@@ -30,7 +35,7 @@ function CartPage() {
     setError(null);
     const c = (raw ?? code).trim();
     if (!c) return;
-    const res = applyCoupon(c, subtotal);
+    const res = applyCoupon(availableCoupons, c, subtotal);
     if (!res.ok) { setError(res.reason ?? "Invalid coupon"); setCoupon(null); return; }
     setCoupon(res.coupon!);
     setCode(c.toUpperCase());
@@ -123,7 +128,11 @@ function CartPage() {
               )}
               <div className="mt-4 space-y-2">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Available offers</div>
-                {COUPONS.map((c) => (
+                {availableCoupons.length === 0 ? (
+                  <div className="rounded-xl border border-dashed p-3 text-xs text-muted-foreground">
+                    No coupons available right now.
+                  </div>
+                ) : availableCoupons.map((c) => (
                   <button
                     key={c.code}
                     onClick={() => handleApply(c.code)}
@@ -131,7 +140,7 @@ function CartPage() {
                   >
                     <div>
                       <div className="text-sm font-bold">{c.code}</div>
-                      <div className="text-xs text-muted-foreground">{c.desc}</div>
+                      <div className="text-xs text-muted-foreground">{couponDescription(c)}</div>
                     </div>
                     <span className="rounded-md bg-discount/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-discount">Apply</span>
                   </button>
