@@ -133,28 +133,66 @@ function OrderDetailPage() {
             </div>
 
             {/* Status timeline */}
-            <div className="mt-6 rounded-2xl border bg-card p-5 shadow-card">
-              <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Tracking</div>
-              <ol className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {STATUS_STEPS.map((step, i) => {
-                  const done = i <= activeIndex;
-                  const Icon = done ? step.icon : Circle;
-                  return (
-                    <li key={step.id} className="relative flex flex-col items-center text-center">
-                      <div
-                        className={`grid h-9 w-9 place-items-center rounded-full ${
-                          done ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className={`mt-2 text-[11px] font-semibold ${done ? "text-foreground" : "text-muted-foreground"}`}>
-                        {step.label}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
+            <div className="mt-6 rounded-2xl border bg-card p-6 shadow-card">
+              <div className="text-sm font-bold text-foreground">Track your Order</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Order Code: <span className="font-mono font-semibold text-foreground">{order.id.slice(0, 12)}</span>
+              </div>
+
+              <div className="relative mt-8 px-2 pb-2">
+                {/* Background line */}
+                <div className="absolute left-[12.5%] right-[12.5%] top-5 h-1 rounded-full bg-secondary" />
+                {/* Animated progress line */}
+                <div
+                  className="absolute left-[12.5%] top-5 h-1 rounded-full bg-success transition-[width] duration-1000 ease-out"
+                  style={{
+                    width: `calc(${(activeIndex / (STATUS_STEPS.length - 1)) * 75}%)`,
+                  }}
+                />
+                <ol className="relative grid grid-cols-4 gap-2">
+                  {STATUS_STEPS.map((step, i) => {
+                    const done = i <= activeIndex;
+                    const isCurrent = i === activeIndex && order.status !== "delivered";
+                    return (
+                      <li key={step.id} className="flex flex-col items-center text-center">
+                        <div
+                          className={`grid h-10 w-10 place-items-center rounded-full ring-4 ring-card transition-all duration-500 ${
+                            done
+                              ? "bg-success text-success-foreground"
+                              : "bg-secondary text-muted-foreground"
+                          } ${isCurrent ? "animate-pulse-ring" : ""}`}
+                          style={{ transitionDelay: `${i * 200}ms` }}
+                        >
+                          {done ? (
+                            <CheckCircle2
+                              key={`done-${i}`}
+                              className="h-5 w-5 animate-check-pop"
+                              strokeWidth={2.5}
+                            />
+                          ) : (
+                            <Circle className="h-4 w-4" />
+                          )}
+                        </div>
+                        <div
+                          className={`mt-2 text-xs font-semibold transition-colors ${
+                            done ? "text-success" : "text-muted-foreground"
+                          }`}
+                        >
+                          {step.label}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+
+              <div key={order.status} className="mt-6 animate-fade-in">
+                <div className="text-sm font-bold text-foreground">
+                  {order.status === "delivered"
+                    ? "Your order has been delivered"
+                    : `Your order is ${(STATUS_STEPS[activeIndex]?.label ?? "being processed").toLowerCase()}`}
+                </div>
+              </div>
             </div>
 
             <div className="mt-5 grid gap-5 md:grid-cols-[1fr_320px]">
