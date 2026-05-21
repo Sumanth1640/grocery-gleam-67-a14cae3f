@@ -89,6 +89,41 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          discount: number
+          id: string
+          order_id: string | null
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          discount?: number
+          id?: string
+          order_id?: string | null
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          discount?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           code: string
@@ -100,6 +135,7 @@ export type Database = {
           is_active: boolean
           max_discount: number | null
           min_order: number
+          per_user_limit: number | null
           updated_at: string
           usage_limit: number | null
           used_count: number
@@ -116,6 +152,7 @@ export type Database = {
           is_active?: boolean
           max_discount?: number | null
           min_order?: number
+          per_user_limit?: number | null
           updated_at?: string
           usage_limit?: number | null
           used_count?: number
@@ -132,6 +169,7 @@ export type Database = {
           is_active?: boolean
           max_discount?: number | null
           min_order?: number
+          per_user_limit?: number | null
           updated_at?: string
           usage_limit?: number | null
           used_count?: number
