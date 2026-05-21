@@ -73,7 +73,9 @@ function AdminLayout() {
               <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Admin</div>
               <h1 className="font-display text-base font-bold leading-tight">{title}</h1>
             </div>
+            <AdminOrderAlertsControl />
           </header>
+          <AdminOrderAlerts />
           <main className="flex-1 px-4 py-6 md:px-8">
             <Outlet />
           </main>
