@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin } from "lucide-react";
+import { OrderAlerts, OrderAlertsControl } from "@/components/partner/OrderAlerts";
 
 export const Route = createFileRoute("/_authenticated/partner")({
   head: () => ({ meta: [{ title: "Partner portal — freshcart" }] }),
