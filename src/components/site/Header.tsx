@@ -1,9 +1,12 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart, Utensils } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart, Utensils, Bell } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
+import { unreadCount } from "@/lib/notifications.functions";
 
 export function Header() {
   const cart = useCart();
@@ -15,6 +18,14 @@ export function Header() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const unreadFn = useServerFn(unreadCount);
+  const unreadQ = useQuery({
+    queryKey: ["notifications", "unread"],
+    queryFn: () => unreadFn(),
+    enabled: !!user,
+    refetchInterval: 60_000,
+  });
+  const unread = unreadQ.data?.count ?? 0;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
@@ -103,6 +114,23 @@ export function Header() {
             </span>
           )}
         </Link>
+
+        {user && (
+          <Link
+            to="/notifications"
+            aria-label="Notifications"
+            className="relative hidden h-10 w-10 place-items-center rounded-xl border bg-secondary/40 hover:bg-secondary sm:grid"
+          >
+            <Bell className="h-4 w-4" />
+            {unread > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+                {unread}
+              </span>
+            )}
+          </Link>
+        )}
+
+
 
         <Link
           to="/cart"

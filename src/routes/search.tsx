@@ -8,7 +8,8 @@ import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { listCategories, searchProducts } from "@/lib/catalog.functions";
-import { Search as SearchIcon, SlidersHorizontal } from "lucide-react";
+import { RESTAURANTS } from "@/lib/food-data";
+import { Search as SearchIcon, SlidersHorizontal, Utensils, Star, Clock } from "lucide-react";
 
 const searchSchema = z.object({ q: z.string().optional().default("") });
 
@@ -41,6 +42,16 @@ function SearchPage() {
     (c) => c.name.toLowerCase().includes(lower) || c.slug.includes(lower),
   );
   const results = resultsQ.data ?? [];
+
+  const foodMatches = useMemo(() => {
+    if (!query) return [];
+    return RESTAURANTS.filter((r) =>
+      r.name.toLowerCase().includes(lower) ||
+      r.cuisines.some((c) => c.toLowerCase().includes(lower)) ||
+      r.menu.some((d) => d.name.toLowerCase().includes(lower))
+    ).slice(0, 6);
+  }, [query, lower]);
+
 
   const [sort, setSort] = useState<Sort>("relevance");
   const [onlyDeals, setOnlyDeals] = useState(false);
@@ -114,6 +125,39 @@ function SearchPage() {
                 </div>
               </div>
             )}
+
+            {foodMatches.length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  <Utensils className="h-3.5 w-3.5 text-discount" /> Restaurants & dishes
+                </div>
+                <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {foodMatches.map((r) => (
+                    <li key={r.id}>
+                      <Link
+                        to="/food/r/$slug"
+                        params={{ slug: r.slug }}
+                        className="flex items-center gap-3 rounded-2xl border bg-card p-3 shadow-card transition hover:bg-secondary"
+                      >
+                        <img src={r.image} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />
+                        <div className="min-w-0 flex-1">
+                          <div className="line-clamp-1 text-sm font-bold">{r.name}</div>
+                          <div className="line-clamp-1 text-[11px] text-muted-foreground">{r.cuisines.join(" · ")}</div>
+                          <div className="mt-1 flex items-center gap-2 text-[11px] font-semibold text-muted-foreground">
+                            <span className="inline-flex items-center gap-0.5 rounded-md bg-success/10 px-1.5 py-0.5 text-success">
+                              <Star className="h-2.5 w-2.5 fill-current" /> {r.rating}
+                            </span>
+                            <span className="inline-flex items-center gap-0.5"><Clock className="h-3 w-3" /> {r.etaMins} min</span>
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+
 
             {results.length > 0 && (
               <div className="mt-6 flex flex-wrap items-center gap-2">
