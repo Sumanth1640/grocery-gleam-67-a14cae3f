@@ -34,7 +34,8 @@ function AdminLayout() {
     );
   }
 
-  if (!data?.isAdmin) {
+  const allowed = !!(data?.isAdmin || data?.isWarehouseManager);
+  if (!allowed) {
     return (
       <div className="grid min-h-screen place-items-center bg-background px-4">
         <div className="max-w-md text-center">
@@ -65,7 +66,7 @@ function AdminLayout() {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-muted/30">
-        <AdminSidebar />
+        <AdminSidebar isAdminUser={!!data?.isAdmin} />
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-3 backdrop-blur">
             <SidebarTrigger />
