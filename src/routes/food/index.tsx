@@ -31,8 +31,36 @@ function FoodHome() {
   const [sort, setSort] = useState<Sort>("relevance");
   const [showFilters, setShowFilters] = useState(false);
 
+  const partnerFn = useServerFn(listApprovedRestaurants);
+  const partnerQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => partnerFn() });
+
+  const allRestaurants = useMemo<Restaurant[]>(() => {
+    const partners: Restaurant[] = (partnerQ.data ?? []).map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      name: r.name,
+      image: r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+      cover: r.cover || r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
+      cuisines: r.cuisines ?? [],
+      rating: Number(r.rating ?? 4.5),
+      reviewsCount: r.reviews_count ?? 0,
+      etaMins: r.eta_mins,
+      distanceKm: Number(r.distance_km),
+      costForTwo: r.cost_for_two,
+      priceTier: r.price_tier as 1 | 2 | 3,
+      veg: r.veg,
+      isOpen: r.is_open,
+      area: r.area,
+      offer: r.offer ?? undefined,
+      opensAt: r.opens_at ?? undefined,
+      closesAt: r.closes_at ?? undefined,
+      menu: [],
+    } as Restaurant));
+    return [...partners, ...RESTAURANTS];
+  }, [partnerQ.data]);
+
   const visible = useMemo(() => {
-    let list = RESTAURANTS.slice();
+    let list = allRestaurants.slice();
     if (q.trim()) {
       const needle = q.toLowerCase();
       list = list.filter(
