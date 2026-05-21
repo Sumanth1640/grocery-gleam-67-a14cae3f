@@ -114,6 +114,7 @@ function FoodCheckoutPage() {
         subtotal: totals.subtotal,
         delivery: totals.delivery + totals.packaging + totals.taxes - discount,
         total: totals.total,
+        restaurant_id: totals.items[0]?.restaurantId,
       };
       const row = await placeOrderRpc({ data: payload });
       if (saveAddr) { try { await saveAddressRpc({ data: payload.address }); } catch { /* ignore */ } }
