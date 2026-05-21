@@ -23,6 +23,7 @@ const couponInput = z.object({
   min_order: z.number().int().min(0).max(1_000_000).default(0),
   max_discount: z.number().int().min(0).max(1_000_000).nullable().optional(),
   usage_limit: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  per_user_limit: z.number().int().min(0).max(1_000_000).nullable().optional(),
   valid_from: z.string().optional(),
   valid_until: z.string().nullable().optional(),
   is_active: z.boolean().default(true),
@@ -63,4 +64,21 @@ export const adminDeleteCoupon = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("coupons").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// Returns a map of { coupon_id: timesUsed } for the current user.
+export const listMyCouponUsage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("coupon_redemptions")
+      .select("coupon_id")
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    const map: Record<string, number> = {};
+    for (const r of (data ?? []) as { coupon_id: string }[]) {
+      map[r.coupon_id] = (map[r.coupon_id] ?? 0) + 1;
+    }
+    return map;
   });
