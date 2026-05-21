@@ -53,7 +53,7 @@ export function AdminSidebar({ isAdminUser = true }: { isAdminUser?: boolean }) 
           <SidebarGroupLabel>Manage</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((it) => {
+              {items.filter((it) => isAdminUser || !it.adminOnly).map((it) => {
                 const active = isActive(it.to, it.exact);
                 const Icon = it.icon;
                 return (
