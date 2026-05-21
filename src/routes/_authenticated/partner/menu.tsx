@@ -80,7 +80,7 @@ function MenuPage() {
             <div className="mt-4 grid gap-3">
               <input required placeholder="Dish name" value={editing.form.name} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, name: e.target.value } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
               <textarea placeholder="Description" value={editing.form.description} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, description: e.target.value } })} className="rounded-xl border bg-background px-3 py-2 text-sm" rows={2} />
-              <input placeholder="Image URL" value={editing.form.image} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, image: e.target.value } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
+              <ImageUpload value={editing.form.image} onChange={(url) => setEditing({ ...editing, form: { ...editing.form, image: url } })} folder="dishes" />
               <div className="grid grid-cols-3 gap-2">
                 <input required type="number" placeholder="Price" value={editing.form.price} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, price: Number(e.target.value) } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
                 <input type="number" placeholder="MRP" value={editing.form.mrp ?? ""} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, mrp: e.target.value ? Number(e.target.value) : null } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
