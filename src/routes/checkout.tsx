@@ -224,6 +224,17 @@ function CheckoutPage() {
             <div className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">
               <Clock className="h-3.5 w-3.5" /> Delivery in 11 minutes
             </div>
+            {whQ.data?.serviceable && whQ.data.warehouse && (
+              <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+                <div className="font-bold text-primary">Delivered from {whQ.data.warehouse.name}</div>
+                <div className="text-muted-foreground">{whQ.data.warehouse.city} · {whQ.data.warehouse.pincode}</div>
+              </div>
+            )}
+            {whQ.data && !whQ.data.serviceable && (
+              <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs font-semibold text-destructive">
+                We don't deliver to {address.pincode} yet.
+              </div>
+            )}
             <h3 className="mt-4 font-display text-lg font-bold">Order summary</h3>
             <ul className="mt-3 max-h-56 space-y-2 overflow-auto pr-1 text-xs">
               {totals.items.map(({ product, qty }) => (
