@@ -254,6 +254,9 @@ function RestaurantPage() {
         ))}
       </section>
 
+      {/* Outlets */}
+      <OutletsSection restaurantId={r.id} />
+
       {/* Reviews */}
       <section className="mx-auto max-w-5xl px-4 py-6">
         <ReviewsSection targetType="restaurant" targetId={r.id} seedRating={r.rating} />
