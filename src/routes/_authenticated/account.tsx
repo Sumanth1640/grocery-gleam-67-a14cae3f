@@ -66,10 +66,11 @@ function AccountPage() {
 function AdminLink() {
   const check = useServerFn(isAdmin);
   const { data } = useQuery({ queryKey: ["is-admin"], queryFn: () => check(), retry: false });
-  if (!data?.isAdmin) return null;
+  if (!data?.isAdmin && !data?.isWarehouseManager) return null;
+  const label = data?.isAdmin ? "Admin" : "Warehouse";
   return (
     <Link to="/admin" className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-pop">
-      <Shield className="h-3.5 w-3.5" /> Admin
+      <Shield className="h-3.5 w-3.5" /> {label}
     </Link>
   );
 }
