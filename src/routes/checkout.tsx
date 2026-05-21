@@ -166,8 +166,15 @@ function CheckoutPage() {
         <div className="mt-6 grid gap-6 md:grid-cols-[1fr_360px]">
           <div className="rounded-2xl border bg-card p-5 shadow-card md:p-6">
             {step === 1 && (
-              <AddressStep address={address} setAddress={setAddress} />
+              <>
+                <SavedAddressPicker
+                  onPick={(a) => setAddress({ ...address, fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, pincode: a.pincode, type: a.type })}
+                  activeSignature={address.line1 ? `${address.line1}|${address.pincode}` : undefined}
+                />
+                <AddressStep address={address} setAddress={setAddress} />
+              </>
             )}
+
             {step === 2 && (
               <PaymentStep payment={payment} setPayment={setPayment} />
             )}
