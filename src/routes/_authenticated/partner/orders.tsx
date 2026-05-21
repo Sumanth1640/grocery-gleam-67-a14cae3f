@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useMemo, useState } from "react";
 import { listMyRestaurantOrders, updateOrderStatus } from "@/lib/partner.functions";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2, Clock, Search } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/partner/orders")({
@@ -60,6 +61,22 @@ function PartnerOrdersPage() {
     created_at: string; payment: string;
   }>;
 
+  const [filter, setFilter] = useState<"all" | Status>("all");
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    return orders.filter((o) => {
+      if (filter !== "all" && (o.status as Status) !== filter) return false;
+      if (!s) return true;
+      return (
+        o.id.toLowerCase().includes(s) ||
+        (o.address?.full_name ?? "").toLowerCase().includes(s) ||
+        (o.address?.phone ?? "").toLowerCase().includes(s)
+      );
+    });
+  }, [orders, filter, search]);
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -67,13 +84,38 @@ function PartnerOrdersPage() {
         <div className="text-xs text-muted-foreground">Auto-refreshes every 15s</div>
       </div>
 
-      {orders.length === 0 ? (
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by order id, customer, phone"
+            className="w-full rounded-xl border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:ring-focus"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {(["all", ...STATUSES] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition ${
+                filter === s ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {s === "all" ? "All" : STATUS_LABEL[s]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
         <div className="mt-6 rounded-2xl border bg-card p-12 text-center text-sm text-muted-foreground">
-          No orders yet. New orders will appear here automatically.
+          {orders.length === 0 ? "No orders yet. New orders will appear here automatically." : "No orders match your filters."}
         </div>
       ) : (
         <ul className="mt-6 grid gap-3">
-          {orders.map((o) => {
+          {filtered.map((o) => {
             const status = (o.status as Status) ?? "placed";
             const items = Array.isArray(o.items) ? o.items : [];
             return (

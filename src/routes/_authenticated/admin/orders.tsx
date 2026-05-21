@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { adminListOrders, adminUpdateOrderStatus } from "@/lib/admin.functions";
 import { useAuth } from "@/lib/use-auth";
-import { Loader2, ChevronDown, ChevronRight } from "lucide-react";
+import { Loader2, ChevronDown, ChevronRight, Search } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
@@ -43,6 +43,7 @@ function OrdersAdmin() {
   const orders = useQuery({ queryKey: ["admin", "orders", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | Status>("all");
+  const [search, setSearch] = useState("");
 
   const mut = useMutation({
     mutationFn: (v: { id: string; status: Status }) => update({ data: v }),
@@ -50,10 +51,34 @@ function OrdersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const rows = ((orders.data as OrderRow[] | undefined) ?? []).filter((o) => filter === "all" || o.status === filter);
+  const rows = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    return ((orders.data as OrderRow[] | undefined) ?? []).filter((o) => {
+      if (filter !== "all" && o.status !== filter) return false;
+      if (!s) return true;
+      const addr = (o.address ?? {}) as { full_name?: string; phone?: string; pincode?: string };
+      return (
+        o.id.toLowerCase().includes(s) ||
+        (addr.full_name ?? "").toLowerCase().includes(s) ||
+        (addr.phone ?? "").toLowerCase().includes(s) ||
+        (addr.pincode ?? "").toLowerCase().includes(s)
+      );
+    });
+  }, [orders.data, filter, search]);
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by order id, name, phone or pincode"
+            className="w-full rounded-xl border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:ring-focus"
+          />
+        </div>
+      </div>
       <div className="flex flex-wrap gap-2">
         {(["all", ...STATUSES] as const).map((s) => (
           <button
