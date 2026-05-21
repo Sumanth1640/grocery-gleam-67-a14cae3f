@@ -11,6 +11,9 @@ import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-st
 import { toast } from "sonner";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { getApprovedRestaurant } from "@/lib/partner-public.functions";
+import { listOutletsForRestaurant } from "@/lib/outlets.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/food/r/$slug")({
   head: ({ params }) => ({
@@ -251,6 +254,9 @@ function RestaurantPage() {
         ))}
       </section>
 
+      {/* Outlets */}
+      <OutletsSection restaurantId={r.id} />
+
       {/* Reviews */}
       <section className="mx-auto max-w-5xl px-4 py-6">
         <ReviewsSection targetType="restaurant" targetId={r.id} seedRating={r.rating} />
@@ -304,5 +310,37 @@ function FavHeart({ restaurant }: { restaurant: Restaurant }) {
     >
       <Heart className={`h-4 w-4 ${isFav ? "fill-discount text-discount" : "text-muted-foreground"}`} />
     </button>
+  );
+}
+
+function OutletsSection({ restaurantId }: { restaurantId: string }) {
+  const listFn = useServerFn(listOutletsForRestaurant);
+  const q = useQuery({
+    queryKey: ["public-outlets", restaurantId],
+    queryFn: () => listFn({ data: { restaurant_id: restaurantId } }),
+  });
+  const outlets = q.data ?? [];
+  if (!outlets.length) return null;
+  return (
+    <section className="mx-auto max-w-5xl px-4 py-6">
+      <h2 className="font-display text-lg font-bold">Outlets near you</h2>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {outlets.map((o: any) => (
+          <div key={o.id} className="flex items-start gap-3 rounded-2xl border bg-card p-4 shadow-card">
+            <MapPin className="mt-0.5 h-4 w-4 text-primary" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-bold">{o.name}</div>
+                {!o.is_open && <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warning">Closed</span>}
+              </div>
+              <div className="truncate text-xs text-muted-foreground">{o.area || ""}{o.pincode ? ` · ${o.pincode}` : ""}</div>
+              <div className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-foreground/80">
+                <Clock className="h-3 w-3 text-primary" /> {o.eta_mins} min
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
