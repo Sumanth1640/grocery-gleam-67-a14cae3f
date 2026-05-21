@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { myRestaurant, createMyRestaurant, updateMyRestaurant } from "@/lib/partner.functions";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/partner/profile")({
   component: ProfilePage,
@@ -67,8 +68,8 @@ function ProfilePage() {
         <Field label="Cuisines (comma-separated)" className="sm:col-span-2"><input value={form.cuisines} onChange={(e) => set("cuisines", e.target.value)} className={input} placeholder="Indian, Mughlai, Biryani" required /></Field>
         <Field label="Area"><input value={form.area} onChange={(e) => set("area", e.target.value)} className={input} required /></Field>
         <Field label="Distance (km)"><input type="number" step="0.1" value={form.distance_km} onChange={(e) => set("distance_km", Number(e.target.value))} className={input} /></Field>
-        <Field label="Logo image URL"><input value={form.image} onChange={(e) => set("image", e.target.value)} className={input} placeholder="https://..." /></Field>
-        <Field label="Cover image URL"><input value={form.cover} onChange={(e) => set("cover", e.target.value)} className={input} placeholder="https://..." /></Field>
+        <Field label="Logo image" className="sm:col-span-2"><ImageUpload value={form.image} onChange={(url) => set("image", url)} folder="restaurants" /></Field>
+        <Field label="Cover image" className="sm:col-span-2"><ImageUpload value={form.cover} onChange={(url) => set("cover", url)} folder="restaurants" /></Field>
         <Field label="ETA (mins)"><input type="number" value={form.eta_mins} onChange={(e) => set("eta_mins", Number(e.target.value))} className={input} /></Field>
         <Field label="Cost for two (₹)"><input type="number" value={form.cost_for_two} onChange={(e) => set("cost_for_two", Number(e.target.value))} className={input} /></Field>
         <Field label="Price tier (1–3)"><input type="number" min={1} max={3} value={form.price_tier} onChange={(e) => set("price_tier", Number(e.target.value))} className={input} /></Field>

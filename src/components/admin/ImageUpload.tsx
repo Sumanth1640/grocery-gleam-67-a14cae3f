@@ -6,7 +6,7 @@ import { toast } from "sonner";
 type Props = {
   value: string;
   onChange: (url: string) => void;
-  folder: "products" | "categories";
+  folder: "products" | "categories" | "restaurants" | "dishes";
 };
 
 export function ImageUpload({ value, onChange, folder }: Props) {

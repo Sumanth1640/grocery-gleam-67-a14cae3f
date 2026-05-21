@@ -31,7 +31,7 @@ export function Footer() {
             <li>About</li>
             <li>Careers</li>
             <li>Press</li>
-            <li>Partner with us</li>
+            <li><Link to="/partner" className="hover:text-foreground">Partner with us</Link></li>
           </ul>
         </div>
         <div>

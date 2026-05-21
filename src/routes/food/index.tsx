@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
 import { RESTAURANTS, CUISINES, type Restaurant } from "@/lib/food-data";
+import { listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 import { Search, Star, Clock, MapPin, Filter, X, ChevronDown, Utensils, Heart } from "lucide-react";
 
@@ -28,8 +31,33 @@ function FoodHome() {
   const [sort, setSort] = useState<Sort>("relevance");
   const [showFilters, setShowFilters] = useState(false);
 
+  const partnerFn = useServerFn(listApprovedRestaurants);
+  const partnerQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => partnerFn() });
+
+  const allRestaurants = useMemo<Restaurant[]>(() => {
+    const partners: Restaurant[] = (partnerQ.data ?? []).map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      name: r.name,
+      image: r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+      cover: r.cover || r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
+      cuisines: r.cuisines ?? [],
+      rating: Number(r.rating ?? 4.5),
+      reviewsCount: r.reviews_count ?? 0,
+      etaMins: r.eta_mins,
+      distanceKm: Number(r.distance_km),
+      costForTwo: r.cost_for_two,
+      priceTier: r.price_tier as 1 | 2 | 3,
+      veg: r.veg,
+      area: r.area,
+      offer: r.offer ?? undefined,
+      menu: [],
+    }));
+    return [...partners, ...RESTAURANTS];
+  }, [partnerQ.data]);
+
   const visible = useMemo(() => {
-    let list = RESTAURANTS.slice();
+    let list = allRestaurants.slice();
     if (q.trim()) {
       const needle = q.toLowerCase();
       list = list.filter(
@@ -50,7 +78,7 @@ function FoodHome() {
       case "cost-desc": list.sort((a, b) => b.costForTwo - a.costForTwo); break;
     }
     return list;
-  }, [q, vegOnly, cuisine, minRating, maxEta, sort]);
+  }, [allRestaurants, q, vegOnly, cuisine, minRating, maxEta, sort]);
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
