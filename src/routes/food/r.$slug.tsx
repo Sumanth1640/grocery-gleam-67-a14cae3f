@@ -10,14 +10,41 @@ import { ArrowLeft, Star, Clock, MapPin, Plus, Flame, Award, ShoppingBag, Heart 
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 import { toast } from "sonner";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
+import { getApprovedRestaurant } from "@/lib/partner-public.functions";
 
 export const Route = createFileRoute("/food/r/$slug")({
   head: ({ params }) => ({
     meta: [{ title: `${params.slug} — Order online · freshcart` }],
   }),
-  loader: ({ params }) => {
-    const r = findRestaurant(params.slug);
-    if (!r) throw notFound();
+  loader: async ({ params }) => {
+    const local = findRestaurant(params.slug);
+    if (local) return local;
+    const db = await getApprovedRestaurant({ data: { slug: params.slug } });
+    if (!db) throw notFound();
+    const dishes = (db.partner_dishes ?? []) as Array<{
+      id: string; name: string; description: string; image: string; price: number; mrp: number | null;
+      veg: boolean; spicy: boolean; bestseller: boolean; section: string; in_stock: boolean; rating: number;
+      partner_dish_variants?: Array<{ id: string; name: string; price: number }>;
+      partner_dish_addons?: Array<{ id: string; name: string; price: number }>;
+    }>;
+    const menu: Dish[] = dishes.map((d) => ({
+      id: d.id, name: d.name, description: d.description ?? "", image: d.image || "",
+      price: d.price, mrp: d.mrp ?? undefined,
+      veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, inStock: d.in_stock,
+      rating: Number(d.rating ?? 4.5),
+      variants: (d.partner_dish_variants ?? []).map((v) => ({ id: v.id, name: v.name, price: v.price })),
+      addons: (d.partner_dish_addons ?? []).map((a) => ({ id: a.id, name: a.name, price: a.price })),
+    } as Dish));
+    const r: Restaurant = {
+      id: db.id, slug: db.slug, name: db.name,
+      image: db.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+      cover: db.cover || db.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
+      cuisines: db.cuisines ?? [], rating: Number(db.rating ?? 4.5), reviewsCount: db.reviews_count ?? 0,
+      etaMins: db.eta_mins, distanceKm: Number(db.distance_km), costForTwo: db.cost_for_two,
+      priceTier: db.price_tier as 1 | 2 | 3, veg: db.veg, isOpen: db.is_open, area: db.area,
+      offer: db.offer ?? undefined, opensAt: db.opens_at ?? undefined, closesAt: db.closes_at ?? undefined,
+      menu,
+    };
     return r;
   },
   notFoundComponent: () => (
