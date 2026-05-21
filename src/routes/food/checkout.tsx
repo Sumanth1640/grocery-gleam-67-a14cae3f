@@ -203,8 +203,14 @@ function FoodCheckoutPage() {
 
           <aside className="h-fit rounded-2xl border bg-card p-5 shadow-card md:sticky md:top-20">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">
-              <Clock className="h-3.5 w-3.5" /> Delivery in 30–35 min
+              <Clock className="h-3.5 w-3.5" /> Delivery in {outletQ.data?.outlet?.eta_mins ?? 30}–{(outletQ.data?.outlet?.eta_mins ?? 30) + 5} min
             </div>
+            {outletQ.data?.outlet && (
+              <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+                <div className="font-bold text-primary">From outlet: {outletQ.data.outlet.name}</div>
+                <div className="text-muted-foreground">{outletQ.data.outlet.area ?? ""}{outletQ.data.outlet.pincode ? ` · ${outletQ.data.outlet.pincode}` : ""}</div>
+              </div>
+            )}
             <h3 className="mt-4 font-display text-lg font-bold">Order summary</h3>
             <div className="mt-1 text-xs text-muted-foreground">{totals.items[0].restaurantName}</div>
             <ul className="mt-3 max-h-56 space-y-2 overflow-auto pr-1 text-xs">
