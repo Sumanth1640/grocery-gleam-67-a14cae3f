@@ -1,9 +1,12 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart, Utensils } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart, Utensils, Bell } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
+import { unreadCount } from "@/lib/notifications.functions";
 
 export function Header() {
   const cart = useCart();
