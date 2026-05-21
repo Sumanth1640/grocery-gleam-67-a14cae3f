@@ -1,4 +1,5 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -9,5 +10,31 @@ export const Route = createFileRoute("/_authenticated")({
       throw redirect({ to: "/login", search: { redirect: location.href } });
     }
   },
-  component: () => <Outlet />,
+  component: AuthenticatedLayout,
 });
+
+function AuthenticatedLayout() {
+  const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!active) return;
+      if (error || !data.user) {
+        navigate({ to: "/login", search: { redirect: window.location.pathname }, replace: true });
+        return;
+      }
+      setReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
+  if (!ready) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
+  return <Outlet />;
+}
