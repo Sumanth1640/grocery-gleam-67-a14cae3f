@@ -3,12 +3,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Save, MapPin, Package } from "lucide-react";
+import { Loader2, Plus, Trash2, Save, MapPin, Package, Users, X } from "lucide-react";
 import {
   listWarehouses, saveWarehouse, deleteWarehouse,
   listWarehousePincodes, setWarehousePincodes,
   listWarehouseStock, setProductStock,
 } from "@/lib/warehouses.functions";
+import { listWarehouseManagers, addWarehouseManager, removeWarehouseManager } from "@/lib/warehouse-managers.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/warehouses")({
   component: WarehousesAdmin,
