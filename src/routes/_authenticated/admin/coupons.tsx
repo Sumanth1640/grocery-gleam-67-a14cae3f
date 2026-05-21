@@ -133,7 +133,7 @@ function CouponsPage() {
           <div className="p-10 text-center text-sm text-muted-foreground">No coupons yet.</div>
         ) : (
           <div className="divide-y">
-            {data.map((c: Coupon) => (
+            {data.map((c: any) => (
               <div key={c.id} className="flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
