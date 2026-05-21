@@ -33,6 +33,9 @@ const orderSchema = z.object({
   subtotal: z.number().int().nonnegative(),
   delivery: z.number().int().nonnegative(),
   total: z.number().int().nonnegative(),
+  restaurant_id: z.string().uuid().optional().nullable(),
+  customer_lat: z.number().min(-90).max(90).optional().nullable(),
+  customer_lng: z.number().min(-180).max(180).optional().nullable(),
 });
 
 // ---------- Profile ----------
