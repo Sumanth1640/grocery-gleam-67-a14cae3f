@@ -68,7 +68,7 @@ function MenuPage() {
                 <div className="text-xs text-muted-foreground">₹{d.price}{d.mrp ? ` · MRP ₹${d.mrp}` : ""}</div>
               </div>
               <label className="inline-flex items-center gap-1 text-xs font-semibold"><input type="checkbox" checked={d.in_stock} onChange={(e) => toggle.mutate({ id: d.id, in_stock: e.target.checked })} /> In stock</label>
-              <button onClick={() => setEditing({ id: d.id, form: { name: d.name, description: d.description ?? "", image: d.image ?? "", price: d.price, mrp: d.mrp, veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, in_stock: d.in_stock, sort_order: d.sort_order } })} className="rounded-lg border p-2 hover:bg-secondary" aria-label="Edit"><Pencil className="h-3.5 w-3.5" /></button>
+              <button onClick={() => setEditing({ id: d.id, form: { name: d.name, description: d.description ?? "", image: d.image ?? "", price: d.price, mrp: d.mrp, veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, in_stock: d.in_stock, sort_order: d.sort_order, outlet_id: (d as any).outlet_id ?? null } })} className="rounded-lg border p-2 hover:bg-secondary" aria-label="Edit"><Pencil className="h-3.5 w-3.5" /></button>
               <button onClick={() => { if (confirm("Delete this dish?")) del.mutate(d.id); }} className="rounded-lg border p-2 text-destructive hover:bg-destructive/10" aria-label="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
             </li>
           ))}
