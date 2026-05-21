@@ -26,12 +26,16 @@ import { Route as FoodDishesRouteImport } from './routes/food/dishes'
 import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
+import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedPartnerIndexRouteImport } from './routes/_authenticated/partner/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
+import { Route as AuthenticatedPartnerProfileRouteImport } from './routes/_authenticated/partner/profile'
+import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenticated/partner/menu'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedFoodOrdersRouteImport } from './routes/_authenticated/food.orders'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
@@ -122,6 +126,11 @@ const CSlugRoute = CSlugRouteImport.update({
   path: '/c/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -143,6 +152,12 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPartnerIndexRoute =
+  AuthenticatedPartnerIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPartnerRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -153,6 +168,18 @@ const FoodRSlugRoute = FoodRSlugRouteImport.update({
   path: '/food/r/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPartnerProfileRoute =
+  AuthenticatedPartnerProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedPartnerRoute,
+  } as any)
+const AuthenticatedPartnerMenuRoute =
+  AuthenticatedPartnerMenuRouteImport.update({
+    id: '/menu',
+    path: '/menu',
+    getParentRoute: () => AuthenticatedPartnerRoute,
+  } as any)
 const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -195,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
+  '/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
@@ -208,8 +236,11 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/partner/menu': typeof AuthenticatedPartnerMenuRoute
+  '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/partner/': typeof AuthenticatedPartnerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,8 +267,11 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/partner/menu': typeof AuthenticatedPartnerMenuRoute
+  '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/partner': typeof AuthenticatedPartnerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -254,6 +288,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
+  '/_authenticated/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
@@ -267,8 +302,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/_authenticated/partner/menu': typeof AuthenticatedPartnerMenuRoute
+  '/_authenticated/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/partner/': typeof AuthenticatedPartnerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -285,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/notifications'
     | '/orders'
+    | '/partner'
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
@@ -298,8 +337,11 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/food/orders'
     | '/orders/$id'
+    | '/partner/menu'
+    | '/partner/profile'
     | '/food/r/$slug'
     | '/admin/'
+    | '/partner/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -326,8 +368,11 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/food/orders'
     | '/orders/$id'
+    | '/partner/menu'
+    | '/partner/profile'
     | '/food/r/$slug'
     | '/admin'
+    | '/partner'
   id:
     | '__root__'
     | '/'
@@ -343,6 +388,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/notifications'
     | '/_authenticated/orders'
+    | '/_authenticated/partner'
     | '/c/$slug'
     | '/food/cart'
     | '/food/checkout'
@@ -356,8 +402,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/products'
     | '/_authenticated/food/orders'
     | '/_authenticated/orders/$id'
+    | '/_authenticated/partner/menu'
+    | '/_authenticated/partner/profile'
     | '/food/r/$slug'
     | '/_authenticated/admin/'
+    | '/_authenticated/partner/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -502,6 +551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/partner': {
+      id: '/_authenticated/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof AuthenticatedPartnerRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/orders': {
       id: '/_authenticated/orders'
       path: '/orders'
@@ -530,6 +586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/partner/': {
+      id: '/_authenticated/partner/'
+      path: '/'
+      fullPath: '/partner/'
+      preLoaderRoute: typeof AuthenticatedPartnerIndexRouteImport
+      parentRoute: typeof AuthenticatedPartnerRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
@@ -543,6 +606,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/food/r/$slug'
       preLoaderRoute: typeof FoodRSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/partner/profile': {
+      id: '/_authenticated/partner/profile'
+      path: '/profile'
+      fullPath: '/partner/profile'
+      preLoaderRoute: typeof AuthenticatedPartnerProfileRouteImport
+      parentRoute: typeof AuthenticatedPartnerRoute
+    }
+    '/_authenticated/partner/menu': {
+      id: '/_authenticated/partner/menu'
+      path: '/menu'
+      fullPath: '/partner/menu'
+      preLoaderRoute: typeof AuthenticatedPartnerMenuRouteImport
+      parentRoute: typeof AuthenticatedPartnerRoute
     }
     '/_authenticated/orders/$id': {
       id: '/_authenticated/orders/$id'
@@ -610,11 +687,27 @@ const AuthenticatedOrdersRouteChildren: AuthenticatedOrdersRouteChildren = {
 const AuthenticatedOrdersRouteWithChildren =
   AuthenticatedOrdersRoute._addFileChildren(AuthenticatedOrdersRouteChildren)
 
+interface AuthenticatedPartnerRouteChildren {
+  AuthenticatedPartnerMenuRoute: typeof AuthenticatedPartnerMenuRoute
+  AuthenticatedPartnerProfileRoute: typeof AuthenticatedPartnerProfileRoute
+  AuthenticatedPartnerIndexRoute: typeof AuthenticatedPartnerIndexRoute
+}
+
+const AuthenticatedPartnerRouteChildren: AuthenticatedPartnerRouteChildren = {
+  AuthenticatedPartnerMenuRoute: AuthenticatedPartnerMenuRoute,
+  AuthenticatedPartnerProfileRoute: AuthenticatedPartnerProfileRoute,
+  AuthenticatedPartnerIndexRoute: AuthenticatedPartnerIndexRoute,
+}
+
+const AuthenticatedPartnerRouteWithChildren =
+  AuthenticatedPartnerRoute._addFileChildren(AuthenticatedPartnerRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRouteWithChildren
+  AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRouteWithChildren
   AuthenticatedFoodOrdersRoute: typeof AuthenticatedFoodOrdersRoute
 }
 
@@ -623,6 +716,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRouteWithChildren,
+  AuthenticatedPartnerRoute: AuthenticatedPartnerRouteWithChildren,
   AuthenticatedFoodOrdersRoute: AuthenticatedFoodOrdersRoute,
 }
 
