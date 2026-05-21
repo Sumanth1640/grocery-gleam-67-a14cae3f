@@ -106,6 +106,7 @@ function WarehousesAdmin() {
                 <div className="grid gap-4 border-t bg-secondary/20 p-4 md:grid-cols-2">
                   <PincodesPanel warehouseId={w.id} />
                   <StockPanel warehouseId={w.id} />
+                  <ManagersPanel warehouseId={w.id} />
                 </div>
               )}
             </div>
