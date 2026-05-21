@@ -54,7 +54,7 @@ function PartnerOrdersPage() {
     return <div className="grid place-items-center py-20"><Loader2 className="h-5 w-5 animate-spin" /></div>;
   }
 
-  const orders = (q.data ?? []) as Array<{
+  const orders = (q.data ?? []) as unknown as Array<{
     id: string; status: string; total: number; subtotal: number; delivery: number;
     items: Array<{ name: string; qty: number; price: number }>; address: { full_name?: string; phone?: string; line1?: string; city?: string };
     created_at: string; payment: string;
