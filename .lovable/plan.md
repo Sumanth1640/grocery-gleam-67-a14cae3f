@@ -1,67 +1,70 @@
-# Swiggy-style Partner Onboarding
+# Multi-warehouse & multi-outlet support
 
-Rebuild the partner profile page as a 5-step wizard that mirrors Swiggy's flow, with document uploads, an agreement step, and admin verification before going live.
+Scope: full system across both grocery (products) and food (restaurants), covering CRUD, per-location stock, nearest-location routing on checkout, and multiple outlets per partner.
 
-## 1. Database changes
+## 1. Data model (new tables + columns)
 
-Add to `partner_restaurants`:
-- `owner_name text`, `owner_email text`, `owner_phone text`
-- `fssai_number text`, `fssai_doc_url text`, `fssai_expiry date`
-- `pan_number text`, `pan_doc_url text`
-- `gst_number text` (nullable), `gst_doc_url text` (nullable)
-- `bank_account_name text`, `bank_account_number text`, `bank_ifsc text`, `bank_proof_url text`
-- `shop_license_doc_url text`
-- `agreement_accepted_at timestamptz`, `agreement_version text`
-- `commission_rate numeric` (admin sets; default 22)
-- `onboarding_step smallint` default 1 (1=basics, 2=docs, 3=menu, 4=agreement, 5=submitted)
-- `rejection_reason text` (admin)
+**Grocery side**
+- `warehouses` — name, code, address, city, pincode, lat, lng, is_active, sort_order
+- `warehouse_pincodes` — warehouse_id, pincode (which pincodes each warehouse serves)
+- `product_stock` — warehouse_id, product_id, qty, low_stock_threshold (unique on pair)
+- `orders` → add `warehouse_id` (nullable, set on checkout)
 
-Status flow stays: `pending → approved | rejected`. Restaurant only appears publicly when `status='approved'` AND `is_open=true` AND `agreement_accepted_at IS NOT NULL`.
+**Food side**
+- `partner_outlets` — restaurant_id, name, address, area, pincode, lat, lng, eta_mins, is_open, is_active
+- `partner_dishes` → add `outlet_id` nullable (null = available at all outlets of that restaurant)
+- `orders` → add `outlet_id` nullable
 
-## 2. Storage
+All tables: RLS on. Admin full access. Owners can manage outlets of restaurants they own (reuse `owns_restaurant`). Public read for active rows.
 
-New **private** bucket `partner-docs` (FSSAI, PAN, GST, bank, shop license are sensitive — NOT public).
-- RLS: owner can upload/read their own folder (`{user_id}/...`); admins can read all; no public access.
-- Signed URLs generated server-side for admin viewing.
+## 2. Server functions
 
-## 3. Server functions (`src/lib/partner.functions.ts`)
+`src/lib/warehouses.functions.ts` (admin)
+- listWarehouses / saveWarehouse / deleteWarehouse
+- setWarehousePincodes
+- listProductStock(warehouseId) / setProductStock
 
-- Split `updateMyRestaurant` into step-specific helpers: `saveBasics`, `saveDocuments`, `acceptAgreement`, `submitForReview`.
-- `submitForReview` validates all required fields/docs present, then sets `status='pending'` + `onboarding_step=5`.
-- Admin: `adminSetRestaurantStatus` already exists — extend with `commission_rate` and `rejection_reason`. Add `adminGetDocSignedUrl(path)`.
+`src/lib/outlets.functions.ts` (partner + admin)
+- listMyOutlets / saveOutlet / deleteOutlet (owner-scoped)
+- adminListOutlets
 
-## 4. Partner UI — wizard at `/partner/profile`
+`src/lib/fulfillment.functions.ts` (public, used at checkout)
+- resolveWarehouseForPincode(pincode) → returns best warehouse + serviceable boolean
+- resolveOutletForRestaurant(restaurantId, pincode) → nearest active outlet
 
-Replace the flat form with a stepper:
-1. **Basics** — name, slug (live uniqueness check), owner name/email/phone, area, cuisines, logo, cover, ETA, cost for two, timings.
-2. **Documents** — FSSAI (number + file + expiry), PAN (number + file), GST (optional), bank details (account/IFSC + cancelled cheque), shop license file.
-3. **Menu** — link to existing `/partner/menu`; require at least 1 dish to proceed.
-4. **Agreement** — show commission range (18–30%), terms, "I agree" checkbox + signature name. Stores `agreement_accepted_at`.
-5. **Submit for review** — summary screen + submit button. Locks the record into `pending`.
+## 3. Checkout integration
+- Grocery checkout: before placing order, call `resolveWarehouseForPincode`. If none serviceable → block with "We don't deliver here yet". Otherwise stamp `warehouse_id` on order and decrement `product_stock` in a transaction (DB function `place_grocery_order`).
+- Food checkout: call `resolveOutletForRestaurant`, stamp `outlet_id`.
 
-Each step saves independently so partners can resume. Progress bar at top. Dashboard shows current step + next action.
+## 4. Admin UI
+- New route `/admin/warehouses` — table + create/edit dialog, pincode chips, stock sub-table per warehouse.
+- `/admin/restaurants` row expansion → add "Outlets" tab listing outlets for that restaurant.
+- Sidebar entry "Warehouses".
 
-## 5. Admin UI — `/admin/restaurants`
+## 5. Partner UI
+- New route `/partner/outlets` — owner manages outlets (name, address, pincode, lat/lng, ETA, open/closed).
+- Partner nav gets "Outlets" link.
+- Dish form gains optional outlet picker (defaults to "All outlets").
 
-Extend approval queue:
-- Show all submitted documents (signed URL links open in new tab).
-- Input for `commission_rate` and optional `rejection_reason`.
-- Approve / Reject buttons; rejection sends a notification with reason and sets `status='rejected'` so partner can edit + resubmit.
+## 6. Public surfaces
+- Product page / cart shows "Delivered from <warehouse>, ETA …" once pincode known.
+- Restaurant page picks nearest outlet for ETA + distance.
 
-## 6. Public visibility
-
-Update `partner-public.functions.ts` to filter `agreement_accepted_at IS NOT NULL` in addition to `status='approved'`.
+## 7. Order routing notifications
+- `notify_restaurant_on_order` trigger updated to also notify the outlet owner channel (same owner, but include outlet name in body).
 
 ## Technical notes
-- Document files: PDF/JPG/PNG, max 5MB each, stored under `partner-docs/{owner_id}/{type}-{timestamp}.{ext}`.
-- Build a small `<DocumentUpload>` component (variant of `ImageUpload`) targeting the private bucket.
-- Slug uniqueness check (from previous turn) folds into Step 1.
-- Zod schemas per step on the server; client-side same schema for inline errors.
+- Distance: simple Haversine in SQL (or app-side) when lat/lng present; fallback to pincode-list match.
+- Stock decrement uses a `security definer` Postgres function to keep it atomic and bypass RLS safely; rejects if any line goes negative.
+- `partner_restaurants.area / eta_mins / distance_km` become derived from the chosen outlet at query time; the columns remain for the restaurant-level default/fallback.
+- No data migration needed: existing restaurants work with zero outlets (system falls back to restaurant-level fields). Existing products work with no stock rows (treated as in stock, no warehouse) until admin sets up warehouses.
 
-## Out of scope (flag for later)
-- E-signature integration (DocuSign etc.) — using checkbox + typed name for now.
-- Automated FSSAI verification API — admin manually verifies.
-- Commission negotiation chat — admin sets one rate.
+## Rollout order
+1. Migration (warehouses, outlets, stock, order columns, RLS, helper SQL fns)
+2. Server functions
+3. Admin warehouse UI + outlet tab
+4. Partner outlets UI
+5. Checkout integration (grocery + food)
+6. Public display tweaks
 
-## Heads-up
-Per your project memory: final app is targeted for PHP on Hostinger. This adds substantial React/TS surface area that will need porting. Confirm you still want it built here.
+Note on hosting: project is TanStack Start (React/TS). Reminder per saved memory — Hostinger/PHP target would require a separate port; this build stays on the current stack.

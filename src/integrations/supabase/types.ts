@@ -129,12 +129,14 @@ export type Database = {
           delivery: number
           id: string
           items: Json
+          outlet_id: string | null
           payment: string
           restaurant_id: string | null
           status: string
           subtotal: number
           total: number
           user_id: string
+          warehouse_id: string | null
         }
         Insert: {
           address: Json
@@ -142,12 +144,14 @@ export type Database = {
           delivery?: number
           id?: string
           items: Json
+          outlet_id?: string | null
           payment: string
           restaurant_id?: string | null
           status?: string
           subtotal: number
           total: number
           user_id: string
+          warehouse_id?: string | null
         }
         Update: {
           address?: Json
@@ -155,14 +159,31 @@ export type Database = {
           delivery?: number
           id?: string
           items?: Json
+          outlet_id?: string | null
           payment?: string
           restaurant_id?: string | null
           status?: string
           subtotal?: number
           total?: number
           user_id?: string
+          warehouse_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_outlets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_dish_addons: {
         Row: {
@@ -244,6 +265,7 @@ export type Database = {
           in_stock: boolean
           mrp: number | null
           name: string
+          outlet_id: string | null
           price: number
           rating: number
           restaurant_id: string
@@ -262,6 +284,7 @@ export type Database = {
           in_stock?: boolean
           mrp?: number | null
           name: string
+          outlet_id?: string | null
           price: number
           rating?: number
           restaurant_id: string
@@ -280,6 +303,7 @@ export type Database = {
           in_stock?: boolean
           mrp?: number | null
           name?: string
+          outlet_id?: string | null
           price?: number
           rating?: number
           restaurant_id?: string
@@ -291,7 +315,73 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "partner_dishes_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_outlets"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "partner_dishes_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "partner_restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_outlets: {
+        Row: {
+          address: string
+          area: string
+          created_at: string
+          eta_mins: number
+          id: string
+          is_active: boolean
+          is_open: boolean
+          lat: number | null
+          lng: number | null
+          name: string
+          pincode: string
+          restaurant_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          area?: string
+          created_at?: string
+          eta_mins?: number
+          id?: string
+          is_active?: boolean
+          is_open?: boolean
+          lat?: number | null
+          lng?: number | null
+          name: string
+          pincode?: string
+          restaurant_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          area?: string
+          created_at?: string
+          eta_mins?: number
+          id?: string
+          is_active?: boolean
+          is_open?: boolean
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          pincode?: string
+          restaurant_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_outlets_restaurant_id_fkey"
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "partner_restaurants"
@@ -437,6 +527,48 @@ export type Database = {
         }
         Relationships: []
       }
+      product_stock: {
+        Row: {
+          id: string
+          low_stock_threshold: number
+          product_id: string
+          qty: number
+          updated_at: string
+          warehouse_id: string
+        }
+        Insert: {
+          id?: string
+          low_stock_threshold?: number
+          product_id: string
+          qty?: number
+          updated_at?: string
+          warehouse_id: string
+        }
+        Update: {
+          id?: string
+          low_stock_threshold?: number
+          product_id?: string
+          qty?: number
+          updated_at?: string
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_stock_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_stock_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category_slug: string
@@ -577,11 +709,92 @@ export type Database = {
         }
         Relationships: []
       }
+      warehouse_pincodes: {
+        Row: {
+          created_at: string
+          id: string
+          pincode: string
+          priority: number
+          warehouse_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pincode: string
+          priority?: number
+          warehouse_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pincode?: string
+          priority?: number
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warehouse_pincodes_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      warehouses: {
+        Row: {
+          address: string
+          city: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          lat: number | null
+          lng: number | null
+          name: string
+          pincode: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          city?: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name: string
+          pincode?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          pincode?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      decrement_warehouse_stock: {
+        Args: { _items: Json; _warehouse_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -592,6 +805,14 @@ export type Database = {
       owns_restaurant: {
         Args: { _restaurant_id: string; _user_id: string }
         Returns: boolean
+      }
+      resolve_outlet_for_restaurant: {
+        Args: { _lat?: number; _lng?: number; _restaurant_id: string }
+        Returns: string
+      }
+      resolve_warehouse_for_pincode: {
+        Args: { _pincode: string }
+        Returns: string
       }
     }
     Enums: {

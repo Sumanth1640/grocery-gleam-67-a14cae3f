@@ -35,10 +35,12 @@ import { Route as AuthenticatedPartnerIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
 import { Route as AuthenticatedPartnerProfileRouteImport } from './routes/_authenticated/partner/profile'
+import { Route as AuthenticatedPartnerOutletsRouteImport } from './routes/_authenticated/partner/outlets'
 import { Route as AuthenticatedPartnerOrdersRouteImport } from './routes/_authenticated/partner/orders'
 import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenticated/partner/menu'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedFoodOrdersRouteImport } from './routes/_authenticated/food.orders'
+import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_authenticated/admin/warehouses'
 import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin/restaurants'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
@@ -176,6 +178,12 @@ const AuthenticatedPartnerProfileRoute =
     path: '/profile',
     getParentRoute: () => AuthenticatedPartnerRoute,
   } as any)
+const AuthenticatedPartnerOutletsRoute =
+  AuthenticatedPartnerOutletsRouteImport.update({
+    id: '/outlets',
+    path: '/outlets',
+    getParentRoute: () => AuthenticatedPartnerRoute,
+  } as any)
 const AuthenticatedPartnerOrdersRoute =
   AuthenticatedPartnerOrdersRouteImport.update({
     id: '/orders',
@@ -198,6 +206,12 @@ const AuthenticatedFoodOrdersRoute = AuthenticatedFoodOrdersRouteImport.update({
   path: '/food/orders',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminWarehousesRoute =
+  AuthenticatedAdminWarehousesRouteImport.update({
+    id: '/warehouses',
+    path: '/warehouses',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRestaurantsRoute =
   AuthenticatedAdminRestaurantsRouteImport.update({
     id: '/restaurants',
@@ -249,10 +263,12 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
+  '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -282,10 +298,12 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
+  '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -319,10 +337,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/_authenticated/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/_authenticated/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/_authenticated/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/_authenticated/partner/orders': typeof AuthenticatedPartnerOrdersRoute
+  '/_authenticated/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
   '/_authenticated/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -356,10 +376,12 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/restaurants'
+    | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
     | '/partner/menu'
     | '/partner/orders'
+    | '/partner/outlets'
     | '/partner/profile'
     | '/food/r/$slug'
     | '/admin/'
@@ -389,10 +411,12 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/restaurants'
+    | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
     | '/partner/menu'
     | '/partner/orders'
+    | '/partner/outlets'
     | '/partner/profile'
     | '/food/r/$slug'
     | '/admin'
@@ -425,10 +449,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/restaurants'
+    | '/_authenticated/admin/warehouses'
     | '/_authenticated/food/orders'
     | '/_authenticated/orders/$id'
     | '/_authenticated/partner/menu'
     | '/_authenticated/partner/orders'
+    | '/_authenticated/partner/outlets'
     | '/_authenticated/partner/profile'
     | '/food/r/$slug'
     | '/_authenticated/admin/'
@@ -640,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPartnerProfileRouteImport
       parentRoute: typeof AuthenticatedPartnerRoute
     }
+    '/_authenticated/partner/outlets': {
+      id: '/_authenticated/partner/outlets'
+      path: '/outlets'
+      fullPath: '/partner/outlets'
+      preLoaderRoute: typeof AuthenticatedPartnerOutletsRouteImport
+      parentRoute: typeof AuthenticatedPartnerRoute
+    }
     '/_authenticated/partner/orders': {
       id: '/_authenticated/partner/orders'
       path: '/orders'
@@ -667,6 +700,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/food/orders'
       preLoaderRoute: typeof AuthenticatedFoodOrdersRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/warehouses': {
+      id: '/_authenticated/admin/warehouses'
+      path: '/warehouses'
+      fullPath: '/admin/warehouses'
+      preLoaderRoute: typeof AuthenticatedAdminWarehousesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/restaurants': {
       id: '/_authenticated/admin/restaurants'
@@ -704,6 +744,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminRestaurantsRoute: typeof AuthenticatedAdminRestaurantsRoute
+  AuthenticatedAdminWarehousesRoute: typeof AuthenticatedAdminWarehousesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -712,6 +753,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminRestaurantsRoute: AuthenticatedAdminRestaurantsRoute,
+  AuthenticatedAdminWarehousesRoute: AuthenticatedAdminWarehousesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
@@ -732,6 +774,7 @@ const AuthenticatedOrdersRouteWithChildren =
 interface AuthenticatedPartnerRouteChildren {
   AuthenticatedPartnerMenuRoute: typeof AuthenticatedPartnerMenuRoute
   AuthenticatedPartnerOrdersRoute: typeof AuthenticatedPartnerOrdersRoute
+  AuthenticatedPartnerOutletsRoute: typeof AuthenticatedPartnerOutletsRoute
   AuthenticatedPartnerProfileRoute: typeof AuthenticatedPartnerProfileRoute
   AuthenticatedPartnerIndexRoute: typeof AuthenticatedPartnerIndexRoute
 }
@@ -739,6 +782,7 @@ interface AuthenticatedPartnerRouteChildren {
 const AuthenticatedPartnerRouteChildren: AuthenticatedPartnerRouteChildren = {
   AuthenticatedPartnerMenuRoute: AuthenticatedPartnerMenuRoute,
   AuthenticatedPartnerOrdersRoute: AuthenticatedPartnerOrdersRoute,
+  AuthenticatedPartnerOutletsRoute: AuthenticatedPartnerOutletsRoute,
   AuthenticatedPartnerProfileRoute: AuthenticatedPartnerProfileRoute,
   AuthenticatedPartnerIndexRoute: AuthenticatedPartnerIndexRoute,
 }
@@ -791,13 +835,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
