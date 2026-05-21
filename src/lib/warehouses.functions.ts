@@ -85,11 +85,23 @@ export const setWarehousePincodes = createServerFn({ method: "POST" })
   });
 
 // ---- stock ----
+async function ensureAdminOrManagesWarehouse(
+  supabase: any,
+  userId: string,
+  warehouseId: string,
+) {
+  const [{ data: adminRow }, { data: mgrRow }] = await Promise.all([
+    supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
+    supabaseAdmin.from("warehouse_managers").select("id").eq("user_id", userId).eq("warehouse_id", warehouseId).maybeSingle(),
+  ]);
+  if (!adminRow && !mgrRow) throw new Error("Not allowed for this warehouse");
+}
+
 export const listWarehouseStock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ warehouse_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await ensureAdmin(context.supabase, context.userId);
+    await ensureAdminOrManagesWarehouse(context.supabase, context.userId, data.warehouse_id);
     const [{ data: stock, error: e1 }, { data: products, error: e2 }] = await Promise.all([
       supabaseAdmin.from("product_stock").select("*").eq("warehouse_id", data.warehouse_id),
       supabaseAdmin.from("products").select("id, name, slug, image").order("name"),
@@ -114,7 +126,7 @@ export const setProductStock = createServerFn({ method: "POST" })
     low_stock_threshold: z.number().int().min(0).max(100_000).default(5),
   }).parse(d))
   .handler(async ({ data, context }) => {
-    await ensureAdmin(context.supabase, context.userId);
+    await ensureAdminOrManagesWarehouse(context.supabase, context.userId, data.warehouse_id);
     const { error } = await supabaseAdmin
       .from("product_stock")
       .upsert(data as any, { onConflict: "warehouse_id,product_id" });
