@@ -177,12 +177,21 @@ export const adminListRestaurants = createServerFn({ method: "GET" })
 
 export const adminSetRestaurantStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid(), status: z.enum(["approved", "rejected", "pending"]) }).parse(d))
+  .inputValidator((d) => z.object({
+    id: z.string().uuid(),
+    status: z.enum(["approved", "rejected", "pending"]),
+    commission_rate: z.number().min(0).max(100).optional(),
+    rejection_reason: z.string().trim().max(500).optional().nullable(),
+  }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
+    const patch: Record<string, unknown> = { status: data.status };
+    if (typeof data.commission_rate === "number") patch.commission_rate = data.commission_rate;
+    if (data.status === "rejected") patch.rejection_reason = data.rejection_reason ?? null;
+    if (data.status === "approved") patch.rejection_reason = null;
     const { data: r, error } = await supabaseAdmin
       .from("partner_restaurants")
-      .update({ status: data.status })
+      .update(patch)
       .eq("id", data.id)
       .select("owner_id, name")
       .single();
@@ -195,10 +204,21 @@ export const adminSetRestaurantStatus = createServerFn({ method: "POST" })
         body: data.status === "approved"
           ? `${r.name} is now live and visible to customers.`
           : data.status === "rejected"
-            ? `${r.name} was not approved. Please update your details.`
+            ? `${r.name} was not approved. Reason: ${data.rejection_reason || "Please update your details."}`
             : `${r.name} is back in review.`,
         link: "/partner",
       });
     }
     return { ok: true };
+  });
+
+// Signed URL for any partner document (admin only)
+export const adminGetDocSignedUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ path: z.string().min(1).max(500) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data: signed, error } = await supabaseAdmin.storage.from("partner-docs").createSignedUrl(data.path, 60 * 10);
+    if (error) throw new Error(error.message);
+    return { url: signed.signedUrl };
   });
