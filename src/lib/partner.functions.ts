@@ -367,3 +367,127 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
     void userId;
     return { ok: true };
   });
+
+// ----- Dashboard aggregate -----
+export const toggleRestaurantOpen = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ is_open: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("partner_restaurants")
+      .update({ is_open: data.is_open })
+      .eq("owner_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const partnerDashboard = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: r } = await supabase
+      .from("partner_restaurants")
+      .select("id, name, status, is_open, rating, reviews_count, eta_mins, cost_for_two, area, cuisines, image")
+      .eq("owner_id", userId)
+      .maybeSingle();
+    if (!r) return null;
+
+    const since = new Date();
+    since.setDate(since.getDate() - 6);
+    since.setHours(0, 0, 0, 0);
+
+    const [ordersRes, outletsRes, dishesRes] = await Promise.all([
+      supabase
+        .from("orders")
+        .select("id, status, total, items, created_at, address, payment")
+        .eq("restaurant_id", r.id)
+        .gte("created_at", since.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(500),
+      supabase
+        .from("partner_outlets")
+        .select("id, name, area, pincode, eta_mins, is_open, is_active")
+        .eq("restaurant_id", r.id)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("partner_dishes")
+        .select("id, name, image, price, in_stock, rating")
+        .eq("restaurant_id", r.id)
+        .limit(500),
+    ]);
+
+    const orders = ordersRes.data ?? [];
+    const outlets = outletsRes.data ?? [];
+    const dishes = dishesRes.data ?? [];
+
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const isToday = (iso: string) => iso.slice(0, 10) === todayKey;
+
+    const today = orders.filter((o) => isToday(o.created_at));
+    const todayRevenue = today.reduce((s, o) => s + (o.total ?? 0), 0);
+    const pending = orders.filter((o) => ["placed", "preparing", "ready"].includes(o.status));
+    const cancelled7 = orders.filter((o) => o.status === "cancelled");
+    const delivered7 = orders.filter((o) => o.status === "delivered");
+    const revenue7 = orders.filter((o) => o.status !== "cancelled").reduce((s, o) => s + (o.total ?? 0), 0);
+    const aov = orders.length ? Math.round(revenue7 / orders.length) : 0;
+
+    // 7-day revenue series
+    const series: { day: string; label: string; revenue: number; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const key = d.toISOString().slice(0, 10);
+      const dayOrders = orders.filter((o) => o.created_at.slice(0, 10) === key && o.status !== "cancelled");
+      series.push({
+        day: key,
+        label: d.toLocaleDateString(undefined, { weekday: "short" }),
+        revenue: dayOrders.reduce((s, o) => s + (o.total ?? 0), 0),
+        count: dayOrders.length,
+      });
+    }
+
+    // Top dishes (by qty in last 7d orders)
+    const tally = new Map<string, { name: string; image: string; qty: number; revenue: number }>();
+    for (const o of orders) {
+      const items = Array.isArray(o.items) ? (o.items as Array<{ product?: { id?: string; name?: string; image?: string; price?: number }; qty?: number }>) : [];
+      for (const it of items) {
+        const id = it.product?.id ?? it.product?.name ?? "unknown";
+        const name = it.product?.name ?? "Item";
+        const image = it.product?.image ?? "";
+        const qty = it.qty ?? 0;
+        const price = it.product?.price ?? 0;
+        const cur = tally.get(id) ?? { name, image, qty: 0, revenue: 0 };
+        cur.qty += qty;
+        cur.revenue += qty * price;
+        tally.set(id, cur);
+      }
+    }
+    const topDishes = Array.from(tally.values()).sort((a, b) => b.qty - a.qty).slice(0, 5);
+
+    const outOfStock = dishes.filter((d) => !d.in_stock).slice(0, 6);
+
+    return {
+      restaurant: r,
+      kpis: {
+        todayOrders: today.length,
+        todayRevenue,
+        pendingOrders: pending.length,
+        revenue7,
+        orders7: orders.length,
+        delivered7: delivered7.length,
+        cancelled7: cancelled7.length,
+        aov,
+        outletCount: outlets.length,
+        dishCount: dishes.length,
+        outOfStockCount: outOfStock.length,
+      },
+      series,
+      topDishes,
+      outlets,
+      outOfStock,
+      recentOrders: orders.slice(0, 8),
+    };
+  });
+
