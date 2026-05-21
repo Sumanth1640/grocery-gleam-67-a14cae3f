@@ -136,6 +136,10 @@ function ProductPage() {
         </div>
 
         <section className="mt-16">
+          <ReviewsSection targetType="product" targetId={product.id} seedRating={product.rating} />
+        </section>
+
+        <section className="mt-16">
           <h2 className="font-display text-2xl font-bold">You might also like</h2>
           <div className="mt-5">
             {relatedQ.isLoading ? <ProductGridSkeleton count={5} /> : related.length > 0 && <ProductGrid products={related} />}
