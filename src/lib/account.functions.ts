@@ -166,6 +166,24 @@ export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((input) => orderSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // Resolve fulfillment location
+    let warehouse_id: string | null = null;
+    let outlet_id: string | null = null;
+
+    if (data.restaurant_id) {
+      const { data: out } = await supabaseAdmin.rpc("resolve_outlet_for_restaurant", {
+        _restaurant_id: data.restaurant_id,
+        _lat: data.customer_lat ?? undefined,
+        _lng: data.customer_lng ?? undefined,
+      });
+      outlet_id = (out as unknown as string | null) ?? null;
+    } else {
+      // Grocery: route to a warehouse by pincode (optional — null means no warehouse coverage yet)
+      const { data: wh } = await supabaseAdmin.rpc("resolve_warehouse_for_pincode", { _pincode: data.address.pincode });
+      warehouse_id = (wh as unknown as string | null) ?? null;
+    }
+
     const { data: row, error } = await supabase
       .from("orders")
       .insert({
@@ -176,10 +194,26 @@ export const placeOrder = createServerFn({ method: "POST" })
         subtotal: data.subtotal,
         delivery: data.delivery,
         total: data.total,
+        restaurant_id: data.restaurant_id ?? null,
+        warehouse_id,
+        outlet_id,
       })
       .select("id, created_at")
       .single();
     if (error) throw new Error(error.message);
+
+    // Decrement stock for grocery orders when warehouse known.
+    if (warehouse_id && !data.restaurant_id) {
+      const stockItems = data.items
+        .map((it) => ({ product_id: it.product.id, qty: it.qty }))
+        .filter((it) => /^[0-9a-f-]{36}$/i.test(it.product_id));
+      if (stockItems.length) {
+        await supabaseAdmin.rpc("decrement_warehouse_stock", {
+          _warehouse_id: warehouse_id,
+          _items: stockItems as unknown as never,
+        });
+      }
+    }
     return row;
   });
 
