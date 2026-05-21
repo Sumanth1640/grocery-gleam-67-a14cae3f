@@ -161,3 +161,44 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------- Restaurant approval (partner portal) ----------
+export const adminListRestaurants = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ status: z.enum(["pending", "approved", "rejected", "all"]).default("pending") }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    let q = supabaseAdmin.from("partner_restaurants").select("*").order("created_at", { ascending: false });
+    if (data.status !== "all") q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const adminSetRestaurantStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid(), status: z.enum(["approved", "rejected", "pending"]) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data: r, error } = await supabaseAdmin
+      .from("partner_restaurants")
+      .update({ status: data.status })
+      .eq("id", data.id)
+      .select("owner_id, name")
+      .single();
+    if (error) throw new Error(error.message);
+    if (r) {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: r.owner_id,
+        kind: "system",
+        title: data.status === "approved" ? "Your restaurant is live!" : data.status === "rejected" ? "Restaurant rejected" : "Restaurant set to pending",
+        body: data.status === "approved"
+          ? `${r.name} is now live and visible to customers.`
+          : data.status === "rejected"
+            ? `${r.name} was not approved. Please update your details.`
+            : `${r.name} is back in review.`,
+        link: "/partner",
+      });
+    }
+    return { ok: true };
+  });
