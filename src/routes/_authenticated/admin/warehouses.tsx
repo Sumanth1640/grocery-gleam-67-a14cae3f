@@ -181,6 +181,79 @@ function StockPanel({ warehouseId }: { warehouseId: string }) {
   );
 }
 
+function ManagersPanel({ warehouseId }: { warehouseId: string }) {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listWarehouseManagers);
+  const addFn = useServerFn(addWarehouseManager);
+  const rmFn = useServerFn(removeWarehouseManager);
+  const q = useQuery({
+    queryKey: ["admin", "wh-managers", warehouseId],
+    queryFn: () => listFn({ data: { warehouse_id: warehouseId } }),
+  });
+  const [email, setEmail] = useState("");
+  const addMut = useMutation({
+    mutationFn: () => addFn({ data: { warehouse_id: warehouseId, email } }),
+    onSuccess: () => {
+      toast.success("Manager added");
+      setEmail("");
+      qc.invalidateQueries({ queryKey: ["admin", "wh-managers", warehouseId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const rmMut = useMutation({
+    mutationFn: (id: string) => rmFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Removed");
+      qc.invalidateQueries({ queryKey: ["admin", "wh-managers", warehouseId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const rows = (q.data ?? []) as Array<{ id: string; user_id: string; email: string | null; full_name: string | null }>;
+
+  return (
+    <div className="rounded-xl border bg-background p-3 md:col-span-2">
+      <div className="flex items-center gap-2 text-sm font-bold"><Users className="h-4 w-4" /> Warehouse managers</div>
+      <p className="mt-1 text-[11px] text-muted-foreground">Managers receive live order alerts and can update orders for this warehouse.</p>
+      <div className="mt-2 flex gap-2">
+        <input
+          type="email"
+          placeholder="manager@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="flex-1 rounded-lg border bg-background px-3 py-2 text-xs"
+        />
+        <button
+          onClick={() => email && addMut.mutate()}
+          disabled={!email || addMut.isPending}
+          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-50"
+        >
+          {addMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Add"}
+        </button>
+      </div>
+      <div className="mt-3 space-y-1">
+        {rows.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-3 text-center text-[11px] text-muted-foreground">No managers yet.</div>
+        ) : rows.map((r) => (
+          <div key={r.id} className="flex items-center gap-2 rounded-lg border p-2">
+            <div className="flex-1 truncate">
+              <div className="text-xs font-semibold">{r.full_name || r.email || r.user_id.slice(0, 8)}</div>
+              {r.email && <div className="text-[10px] text-muted-foreground">{r.email}</div>}
+            </div>
+            <button
+              onClick={() => confirm("Remove this manager?") && rmMut.mutate(r.id)}
+              className="rounded-md border p-1.5 text-muted-foreground hover:text-destructive"
+              aria-label="Remove"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
   return <label className={`block ${className}`}><div className="mb-1 text-xs font-semibold text-muted-foreground">{label}</div>{children}</label>;
 }
