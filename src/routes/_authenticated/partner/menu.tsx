@@ -91,6 +91,19 @@ function MenuPage() {
                 <input type="number" placeholder="MRP" value={editing.form.mrp ?? ""} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, mrp: e.target.value ? Number(e.target.value) : null } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
                 <input placeholder="Section" value={editing.form.section} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, section: e.target.value } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
               </div>
+              {outlets.length > 0 && (
+                <label className="block">
+                  <div className="mb-1 text-xs font-semibold text-muted-foreground">Available at outlet</div>
+                  <select
+                    className="w-full rounded-xl border bg-background px-3 py-2 text-sm"
+                    value={editing.form.outlet_id ?? ""}
+                    onChange={(e) => setEditing({ ...editing, form: { ...editing.form, outlet_id: e.target.value || null } })}
+                  >
+                    <option value="">All outlets</option>
+                    {outlets.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                  </select>
+                </label>
+              )}
               <div className="flex flex-wrap gap-3 text-xs font-semibold">
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.veg} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, veg: e.target.checked } })} /> Veg</label>
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.spicy} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, spicy: e.target.checked } })} /> Spicy</label>
