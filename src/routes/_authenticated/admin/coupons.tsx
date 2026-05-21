@@ -34,6 +34,7 @@ type Coupon = {
   min_order: number;
   max_discount: number | null;
   usage_limit: number | null;
+  per_user_limit: number | null;
   used_count: number;
   valid_from: string;
   valid_until: string | null;
@@ -48,6 +49,7 @@ const empty: Partial<Coupon> = {
   min_order: 0,
   max_discount: null,
   usage_limit: null,
+  per_user_limit: 1,
   valid_until: null,
   is_active: true,
 };
@@ -106,6 +108,9 @@ function CouponsPage() {
       usage_limit: form.usage_limit === null || form.usage_limit === undefined || form.usage_limit === ("" as any)
         ? null
         : Number(form.usage_limit),
+      per_user_limit: form.per_user_limit === null || form.per_user_limit === undefined || form.per_user_limit === ("" as any)
+        ? null
+        : Number(form.per_user_limit),
       valid_until: form.valid_until ? new Date(form.valid_until).toISOString() : null,
       is_active: !!form.is_active,
     };
@@ -149,6 +154,7 @@ function CouponsPage() {
                     {c.min_order ? ` · min ₹${c.min_order}` : ""}
                     {c.max_discount ? ` · cap ₹${c.max_discount}` : ""}
                     {c.usage_limit ? ` · used ${c.used_count}/${c.usage_limit}` : ` · used ${c.used_count}`}
+                    {c.per_user_limit ? ` · ${c.per_user_limit}/customer` : " · unlimited/customer"}
                     {c.valid_until ? ` · until ${new Date(c.valid_until).toLocaleDateString()}` : ""}
                   </div>
                   {c.description && <div className="mt-1 text-sm">{c.description}</div>}
@@ -239,21 +245,31 @@ function CouponsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5">
-                <Label>Usage limit (optional)</Label>
+                <Label>Total usage limit (optional)</Label>
                 <Input
                   type="number"
                   value={form.usage_limit ?? ""}
                   onChange={(e) => setForm((f) => ({ ...f, usage_limit: e.target.value === "" ? null : Number(e.target.value) }))}
+                  placeholder="Unlimited"
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label>Valid until (optional)</Label>
+                <Label>Per customer limit</Label>
                 <Input
-                  type="date"
-                  value={form.valid_until ? String(form.valid_until).slice(0, 10) : ""}
-                  onChange={(e) => setForm((f) => ({ ...f, valid_until: e.target.value || null }))}
+                  type="number"
+                  value={form.per_user_limit ?? ""}
+                  onChange={(e) => setForm((f) => ({ ...f, per_user_limit: e.target.value === "" ? null : Number(e.target.value) }))}
+                  placeholder="Unlimited (blank) — 1 = one-time"
                 />
               </div>
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Valid until (optional)</Label>
+              <Input
+                type="date"
+                value={form.valid_until ? String(form.valid_until).slice(0, 10) : ""}
+                onChange={(e) => setForm((f) => ({ ...f, valid_until: e.target.value || null }))}
+              />
             </div>
             <div className="flex items-center gap-3">
               <Switch
