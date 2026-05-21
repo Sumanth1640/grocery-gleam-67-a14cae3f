@@ -36,6 +36,8 @@ const orderSchema = z.object({
   restaurant_id: z.string().uuid().optional().nullable(),
   customer_lat: z.number().min(-90).max(90).optional().nullable(),
   customer_lng: z.number().min(-180).max(180).optional().nullable(),
+  coupon_id: z.string().uuid().optional().nullable(),
+  coupon_discount: z.number().int().nonnegative().optional().nullable(),
 });
 
 // ---------- Profile ----------
@@ -201,6 +203,29 @@ export const placeOrder = createServerFn({ method: "POST" })
       .select("id, created_at")
       .single();
     if (error) throw new Error(error.message);
+
+    // Record coupon redemption + bump global usage counter
+    if (data.coupon_id) {
+      try {
+        await supabase.from("coupon_redemptions").insert({
+          coupon_id: data.coupon_id,
+          user_id: userId,
+          order_id: row.id,
+          discount: data.coupon_discount ?? 0,
+        });
+        const { data: c } = await supabaseAdmin
+          .from("coupons")
+          .select("used_count")
+          .eq("id", data.coupon_id)
+          .maybeSingle();
+        if (c) {
+          await supabaseAdmin
+            .from("coupons")
+            .update({ used_count: (c.used_count ?? 0) + 1 })
+            .eq("id", data.coupon_id);
+        }
+      } catch { /* non-fatal */ }
+    }
 
     // Decrement stock for grocery orders when warehouse known.
     if (warehouse_id && !data.restaurant_id) {
