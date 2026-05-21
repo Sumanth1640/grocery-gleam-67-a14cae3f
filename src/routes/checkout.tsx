@@ -211,7 +211,7 @@ function CheckoutPage() {
               ) : (
                 <button
                   onClick={placeOrder}
-                  disabled={submitting}
+                  disabled={submitting || (whQ.data && !whQ.data.serviceable) || false}
                   className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-pop transition disabled:opacity-60 hover:opacity-95"
                 >
                   {submitting ? "Placing order…" : `Pay ₹${totals.total}`}
