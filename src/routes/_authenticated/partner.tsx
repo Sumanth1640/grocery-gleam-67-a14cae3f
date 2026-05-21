@@ -38,7 +38,9 @@ function PartnerLayout() {
               <div className="mt-0.5 text-[10px] font-medium text-muted-foreground">Manage your restaurant</div>
             </div>
           </div>
+          <OrderAlertsControl />
         </div>
+        <OrderAlerts />
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2">
           {NAV.map((n) => {
             const active = isActive(n.to, n.exact);
