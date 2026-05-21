@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock } from "@/lib/partner.functions";
+import { listMyOutlets } from "@/lib/outlets.functions";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Pencil, X } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -14,8 +15,9 @@ export const Route = createFileRoute("/_authenticated/partner/menu")({
 type DishForm = {
   name: string; description: string; image: string; price: number; mrp: number | null;
   veg: boolean; spicy: boolean; bestseller: boolean; section: string; in_stock: boolean; sort_order: number;
+  outlet_id: string | null;
 };
-const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0 };
+const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0, outlet_id: null };
 
 function MenuPage() {
   const qc = useQueryClient();
