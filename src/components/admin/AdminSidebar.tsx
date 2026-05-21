@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +21,7 @@ const items = [
   { to: "/admin/categories", label: "Categories", icon: FolderTree, exact: false },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false },
   { to: "/admin/restaurants", label: "Restaurants", icon: UtensilsCrossed, exact: false },
+  { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse, exact: false },
 ] as const;
 
 export function AdminSidebar() {

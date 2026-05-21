@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft } from "lucide-react";
+import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/partner")({
   head: () => ({ meta: [{ title: "Partner portal — freshcart" }] }),
@@ -16,6 +16,7 @@ const NAV = [
   { to: "/partner", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/partner/profile", label: "Profile", icon: Settings, exact: false },
   { to: "/partner/menu", label: "Menu", icon: UtensilsCrossed, exact: false },
+  { to: "/partner/outlets", label: "Outlets", icon: MapPin, exact: false },
   { to: "/partner/orders", label: "Orders", icon: ShoppingBag, exact: false },
 ] as const;
 
