@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock } from "@/lib/partner.functions";
+import { listMyOutlets } from "@/lib/outlets.functions";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Pencil, X } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -14,17 +15,21 @@ export const Route = createFileRoute("/_authenticated/partner/menu")({
 type DishForm = {
   name: string; description: string; image: string; price: number; mrp: number | null;
   veg: boolean; spicy: boolean; bestseller: boolean; section: string; in_stock: boolean; sort_order: number;
+  outlet_id: string | null;
 };
-const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0 };
+const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0, outlet_id: null };
 
 function MenuPage() {
   const qc = useQueryClient();
   const listFn = useServerFn(listMyDishes);
+  const outletsFn = useServerFn(listMyOutlets);
   const createFn = useServerFn(createDish);
   const updateFn = useServerFn(updateDish);
   const delFn = useServerFn(deleteDish);
   const stockFn = useServerFn(toggleDishStock);
   const q = useQuery({ queryKey: ["my-dishes"], queryFn: () => listFn() });
+  const outletsQ = useQuery({ queryKey: ["partner", "outlets"], queryFn: () => outletsFn() });
+  const outlets = (outletsQ.data?.outlets ?? []) as Array<{ id: string; name: string; restaurant_id: string }>;
   const [editing, setEditing] = useState<{ id?: string; form: DishForm } | null>(null);
 
   const save = useMutation({
@@ -63,7 +68,7 @@ function MenuPage() {
                 <div className="text-xs text-muted-foreground">₹{d.price}{d.mrp ? ` · MRP ₹${d.mrp}` : ""}</div>
               </div>
               <label className="inline-flex items-center gap-1 text-xs font-semibold"><input type="checkbox" checked={d.in_stock} onChange={(e) => toggle.mutate({ id: d.id, in_stock: e.target.checked })} /> In stock</label>
-              <button onClick={() => setEditing({ id: d.id, form: { name: d.name, description: d.description ?? "", image: d.image ?? "", price: d.price, mrp: d.mrp, veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, in_stock: d.in_stock, sort_order: d.sort_order } })} className="rounded-lg border p-2 hover:bg-secondary" aria-label="Edit"><Pencil className="h-3.5 w-3.5" /></button>
+              <button onClick={() => setEditing({ id: d.id, form: { name: d.name, description: d.description ?? "", image: d.image ?? "", price: d.price, mrp: d.mrp, veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, in_stock: d.in_stock, sort_order: d.sort_order, outlet_id: (d as any).outlet_id ?? null } })} className="rounded-lg border p-2 hover:bg-secondary" aria-label="Edit"><Pencil className="h-3.5 w-3.5" /></button>
               <button onClick={() => { if (confirm("Delete this dish?")) del.mutate(d.id); }} className="rounded-lg border p-2 text-destructive hover:bg-destructive/10" aria-label="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
             </li>
           ))}
@@ -86,6 +91,19 @@ function MenuPage() {
                 <input type="number" placeholder="MRP" value={editing.form.mrp ?? ""} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, mrp: e.target.value ? Number(e.target.value) : null } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
                 <input placeholder="Section" value={editing.form.section} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, section: e.target.value } })} className="rounded-xl border bg-background px-3 py-2 text-sm" />
               </div>
+              {outlets.length > 0 && (
+                <label className="block">
+                  <div className="mb-1 text-xs font-semibold text-muted-foreground">Available at outlet</div>
+                  <select
+                    className="w-full rounded-xl border bg-background px-3 py-2 text-sm"
+                    value={editing.form.outlet_id ?? ""}
+                    onChange={(e) => setEditing({ ...editing, form: { ...editing.form, outlet_id: e.target.value || null } })}
+                  >
+                    <option value="">All outlets</option>
+                    {outlets.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                  </select>
+                </label>
+              )}
               <div className="flex flex-wrap gap-3 text-xs font-semibold">
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.veg} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, veg: e.target.checked } })} /> Veg</label>
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.spicy} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, spicy: e.target.checked } })} /> Spicy</label>

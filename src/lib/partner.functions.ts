@@ -240,6 +240,7 @@ const dishInput = z.object({
   section: z.string().trim().min(1).max(40).default("Mains"),
   in_stock: z.boolean().default(true),
   sort_order: z.number().int().min(0).max(10000).default(0),
+  outlet_id: z.string().uuid().nullable().optional(),
 });
 
 const variantInput = z.object({ name: z.string().trim().min(1).max(40), price: z.number().int().min(0).max(100000), sort_order: z.number().int().default(0) });
