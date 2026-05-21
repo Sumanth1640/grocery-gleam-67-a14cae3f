@@ -151,31 +151,55 @@ function StockPanel({ warehouseId }: { warehouseId: string }) {
   const listFn = useServerFn(listWarehouseStock);
   const setFn = useServerFn(setProductStock);
   const q = useQuery({ queryKey: ["admin", "wh-stock", warehouseId], queryFn: () => listFn({ data: { warehouse_id: warehouseId } }) });
+  const [search, setSearch] = useState("");
 
   const mut = useMutation({
-    mutationFn: (v: { product_id: string; qty: number }) => setFn({ data: { warehouse_id: warehouseId, ...v, low_stock_threshold: 5 } }),
+    mutationFn: (v: { product_id: string; qty: number; low_stock_threshold: number }) =>
+      setFn({ data: { warehouse_id: warehouseId, ...v } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "wh-stock", warehouseId] }),
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const rows = (q.data ?? []) as Array<{ product: { id: string; name: string; image: string }; qty: number }>;
+  const rows = ((q.data ?? []) as Array<{ product: { id: string; name: string; image: string }; qty: number; low_stock_threshold: number }>)
+    .filter((r) => !search || r.product.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="rounded-xl border bg-background p-3">
-      <div className="flex items-center gap-2 text-sm font-bold"><Package className="h-4 w-4" /> Stock</div>
-      <div className="mt-2 max-h-72 space-y-1 overflow-auto">
-        {rows.map((r) => (
-          <div key={r.product.id} className="flex items-center gap-2 rounded-lg border p-2">
-            {r.product.image && <img src={r.product.image} alt="" className="h-8 w-8 rounded object-cover" />}
-            <div className="flex-1 truncate text-xs font-semibold">{r.product.name}</div>
-            <input
-              type="number" min={0}
-              defaultValue={r.qty}
-              onBlur={(e) => { const v = Number(e.target.value); if (v !== r.qty) mut.mutate({ product_id: r.product.id, qty: v }); }}
-              className="w-20 rounded-md border bg-background px-2 py-1 text-xs"
-            />
-          </div>
-        ))}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-bold"><Package className="h-4 w-4" /> Stock</div>
+        <input
+          value={search} onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search"
+          className="w-32 rounded-md border bg-background px-2 py-1 text-xs"
+        />
+      </div>
+      <div className="mt-2 grid grid-cols-[1fr_64px_64px] gap-1 px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div>Product</div><div className="text-right">Qty</div><div className="text-right">Low at</div>
+      </div>
+      <div className="mt-1 max-h-72 space-y-1 overflow-auto">
+        {rows.map((r) => {
+          const low = r.qty <= r.low_stock_threshold;
+          return (
+            <div key={r.product.id} className={`grid grid-cols-[1fr_64px_64px] items-center gap-1 rounded-lg border p-2 ${low ? "border-warning/50 bg-warning/5" : ""}`}>
+              <div className="flex items-center gap-2 min-w-0">
+                {r.product.image && <img src={r.product.image} alt="" className="h-7 w-7 shrink-0 rounded object-cover" />}
+                <div className="truncate text-xs font-semibold">{r.product.name}</div>
+              </div>
+              <input
+                type="number" min={0}
+                defaultValue={r.qty}
+                onBlur={(e) => { const v = Number(e.target.value); if (v !== r.qty) mut.mutate({ product_id: r.product.id, qty: v, low_stock_threshold: r.low_stock_threshold }); }}
+                className="w-full rounded-md border bg-background px-1.5 py-1 text-right text-xs"
+              />
+              <input
+                type="number" min={0}
+                defaultValue={r.low_stock_threshold}
+                onBlur={(e) => { const v = Number(e.target.value); if (v !== r.low_stock_threshold) mut.mutate({ product_id: r.product.id, qty: r.qty, low_stock_threshold: v }); }}
+                className="w-full rounded-md border bg-background px-1.5 py-1 text-right text-xs"
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
