@@ -22,11 +22,14 @@ const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mr
 function MenuPage() {
   const qc = useQueryClient();
   const listFn = useServerFn(listMyDishes);
+  const outletsFn = useServerFn(listMyOutlets);
   const createFn = useServerFn(createDish);
   const updateFn = useServerFn(updateDish);
   const delFn = useServerFn(deleteDish);
   const stockFn = useServerFn(toggleDishStock);
   const q = useQuery({ queryKey: ["my-dishes"], queryFn: () => listFn() });
+  const outletsQ = useQuery({ queryKey: ["partner", "outlets"], queryFn: () => outletsFn() });
+  const outlets = (outletsQ.data?.outlets ?? []) as Array<{ id: string; name: string; restaurant_id: string }>;
   const [editing, setEditing] = useState<{ id?: string; form: DishForm } | null>(null);
 
   const save = useMutation({
