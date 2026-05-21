@@ -21,7 +21,7 @@ import {
   MapPin,
   Smartphone,
   Wallet,
-  Tag,
+
 } from "lucide-react";
 
 const searchSchema = z.object({ coupon: z.string().optional() });
