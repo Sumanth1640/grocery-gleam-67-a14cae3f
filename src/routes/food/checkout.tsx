@@ -11,8 +11,6 @@ import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store"
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import {
   ArrowLeft, ArrowRight, Check, Clock, CreditCard, Home as HomeIcon,
