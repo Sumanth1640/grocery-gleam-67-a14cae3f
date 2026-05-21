@@ -6,7 +6,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
-import { applyCoupon, type Coupon } from "@/lib/food-data";
+import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
 import { resolveOutletForRestaurant } from "@/lib/fulfillment.functions";
@@ -47,13 +47,17 @@ function FoodCheckoutPage() {
   const [payment, setPayment] = useState<PaymentMethod>("upi");
   const [submitting, setSubmitting] = useState(false);
   const [saveAddr, setSaveAddr] = useState(true);
+  const { data: availableCoupons = [] } = useQuery({
+    queryKey: ["active-coupons"],
+    queryFn: listActiveCoupons,
+  });
 
   const couponData: Coupon | null = useMemo(() => {
     if (!search.coupon) return null;
-    const r = applyCoupon(search.coupon, foodCartTotals(cart).subtotal);
+    const r = applyCoupon(availableCoupons, search.coupon, foodCartTotals(cart).subtotal);
     return r.ok ? r.coupon! : null;
-  }, [search.coupon, cart]);
-  const discount = couponData ? applyCoupon(couponData.code, foodCartTotals(cart).subtotal).discount : 0;
+  }, [availableCoupons, search.coupon, cart]);
+  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, foodCartTotals(cart).subtotal).discount : 0;
   const totals = foodCartTotals(cart, discount);
 
   if (totals.itemsCount === 0) {

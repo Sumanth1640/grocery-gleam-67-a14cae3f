@@ -39,21 +39,6 @@ export type Restaurant = {
   menu: Dish[];
 };
 
-export type Coupon = {
-  code: string;
-  desc: string;
-  type: "percent" | "flat";
-  value: number;
-  minOrder: number;
-  maxDiscount?: number;
-};
-
-export const COUPONS: Coupon[] = [
-  { code: "WELCOME50", desc: "50% off up to ₹100 on first order", type: "percent", value: 50, minOrder: 199, maxDiscount: 100 },
-  { code: "FLAT75", desc: "Flat ₹75 off on orders above ₹399", type: "flat", value: 75, minOrder: 399 },
-  { code: "TREAT20", desc: "20% off up to ₹150", type: "percent", value: 20, minOrder: 299, maxDiscount: 150 },
-];
-
 export const CUISINES = [
   "North Indian", "South Indian", "Chinese", "Italian", "Pizza",
   "Burgers", "Biryani", "Desserts", "Healthy", "Mughlai",
@@ -226,13 +211,4 @@ export const RESTAURANTS: Restaurant[] = [
 
 export function findRestaurant(slug: string): Restaurant | undefined {
   return RESTAURANTS.find((r) => r.slug === slug);
-}
-
-export function applyCoupon(code: string, subtotal: number): { ok: boolean; discount: number; coupon?: Coupon; reason?: string } {
-  const c = COUPONS.find((x) => x.code.toLowerCase() === code.toLowerCase());
-  if (!c) return { ok: false, discount: 0, reason: "Invalid code" };
-  if (subtotal < c.minOrder) return { ok: false, discount: 0, coupon: c, reason: `Minimum order ₹${c.minOrder}` };
-  let discount = c.type === "flat" ? c.value : Math.round((c.value / 100) * subtotal);
-  if (c.maxDiscount) discount = Math.min(discount, c.maxDiscount);
-  return { ok: true, discount, coupon: c };
 }

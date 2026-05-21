@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
-import { COUPONS, RESTAURANTS } from "@/lib/food-data";
+import { RESTAURANTS } from "@/lib/food-data";
+import { couponDescription, couponLabel, listActiveCoupons } from "@/lib/public-coupons";
+import { useQuery } from "@tanstack/react-query";
 import { Tag, Copy, Check, ArrowRight, Percent, Gift, Flame } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +21,10 @@ export const Route = createFileRoute("/food/offers")({
 
 function OffersPage() {
   const [copied, setCopied] = useState<string | null>(null);
+  const { data: coupons = [] } = useQuery({
+    queryKey: ["active-coupons"],
+    queryFn: listActiveCoupons,
+  });
   const restaurantOffers = RESTAURANTS.filter((r) => r.offer);
 
   const copy = (code: string) => {
@@ -54,15 +60,19 @@ function OffersPage() {
           <h2 className="font-display text-xl font-bold">Promo codes</h2>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {COUPONS.map((c) => (
+          {coupons.length === 0 ? (
+            <div className="rounded-2xl border border-dashed bg-card p-5 text-sm text-muted-foreground md:col-span-2 lg:col-span-3">
+              No promo codes are available right now.
+            </div>
+          ) : coupons.map((c) => (
             <div key={c.code} className="group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-card transition hover:shadow-pop">
               <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-discount/10 blur-2xl" />
               <div className="relative">
                 <div className="inline-flex items-center gap-1 rounded-md bg-discount/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-discount">
-                  <Tag className="h-3 w-3" /> {c.type === "percent" ? `${c.value}% OFF` : `₹${c.value} OFF`}
+                  <Tag className="h-3 w-3" /> {couponLabel(c)}
                 </div>
-                <div className="mt-3 font-display text-lg font-bold">{c.desc}</div>
-                <div className="mt-1 text-xs text-muted-foreground">Min. order ₹{c.minOrder}{c.maxDiscount ? ` · Max ₹${c.maxDiscount}` : ""}</div>
+                <div className="mt-3 font-display text-lg font-bold">{couponDescription(c)}</div>
+                <div className="mt-1 text-xs text-muted-foreground">Min. order ₹{c.min_order}{c.max_discount ? ` · Max ₹${c.max_discount}` : ""}</div>
 
                 <div className="mt-4 flex items-stretch gap-2">
                   <div className="flex-1 rounded-xl border-2 border-dashed border-discount/40 bg-discount/5 px-3 py-2.5 font-mono text-sm font-bold tracking-widest text-discount">

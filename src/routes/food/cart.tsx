@@ -4,8 +4,9 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
-import { applyCoupon, COUPONS, type Coupon } from "@/lib/food-data";
+import { applyCoupon, couponDescription, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
 import { QtyStepper } from "@/components/site/DishCustomizeDialog";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Tag, Check, X, Trash2, Clock, Utensils } from "lucide-react";
 
 export const Route = createFileRoute("/food/cart")({
@@ -18,9 +19,13 @@ function FoodCartPage() {
   const [code, setCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { data: availableCoupons = [] } = useQuery({
+    queryKey: ["active-coupons"],
+    queryFn: listActiveCoupons,
+  });
 
   const initialTotals = foodCartTotals(cart);
-  const couponResult = appliedCoupon ? applyCoupon(appliedCoupon.code, initialTotals.subtotal) : null;
+  const couponResult = appliedCoupon ? applyCoupon(availableCoupons, appliedCoupon.code, initialTotals.subtotal) : null;
   const discount = couponResult?.ok ? couponResult.discount : 0;
   const totals = foodCartTotals(cart, discount);
 
@@ -28,7 +33,7 @@ function FoodCartPage() {
     setError(null);
     const c = (raw ?? code).trim();
     if (!c) return;
-    const res = applyCoupon(c, initialTotals.subtotal);
+    const res = applyCoupon(availableCoupons, c, initialTotals.subtotal);
     if (!res.ok) {
       setError(res.reason ?? "Invalid coupon");
       setAppliedCoupon(null);
@@ -138,7 +143,11 @@ function FoodCartPage() {
               )}
               <div className="mt-4 space-y-2">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Available offers</div>
-                {COUPONS.map((c) => (
+                {availableCoupons.length === 0 ? (
+                  <div className="rounded-xl border border-dashed p-3 text-xs text-muted-foreground">
+                    No coupons available right now.
+                  </div>
+                ) : availableCoupons.map((c) => (
                   <button
                     key={c.code}
                     onClick={() => handleApply(c.code)}
@@ -146,7 +155,7 @@ function FoodCartPage() {
                   >
                     <div>
                       <div className="text-sm font-bold">{c.code}</div>
-                      <div className="text-xs text-muted-foreground">{c.desc}</div>
+                      <div className="text-xs text-muted-foreground">{couponDescription(c)}</div>
                     </div>
                     <span className="rounded-md bg-discount/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-discount">Apply</span>
                   </button>
