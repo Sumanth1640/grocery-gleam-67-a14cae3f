@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { myRestaurant, createMyRestaurant, updateMyRestaurant } from "@/lib/partner.functions";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/partner/profile")({
   component: ProfilePage,
