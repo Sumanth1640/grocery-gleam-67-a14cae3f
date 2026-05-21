@@ -43,6 +43,16 @@ function SearchPage() {
   );
   const results = resultsQ.data ?? [];
 
+  const foodMatches = useMemo(() => {
+    if (!query) return [];
+    return RESTAURANTS.filter((r) =>
+      r.name.toLowerCase().includes(lower) ||
+      r.cuisines.some((c) => c.toLowerCase().includes(lower)) ||
+      r.menu.some((d) => d.name.toLowerCase().includes(lower))
+    ).slice(0, 6);
+  }, [query, lower]);
+
+
   const [sort, setSort] = useState<Sort>("relevance");
   const [onlyDeals, setOnlyDeals] = useState(false);
   const [inStockOnly, setInStockOnly] = useState(false);
