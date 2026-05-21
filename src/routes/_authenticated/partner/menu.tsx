@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock } from "@/lib/partner.functions";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Pencil, X } from "lucide-react";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/partner/menu")({
   component: MenuPage,
