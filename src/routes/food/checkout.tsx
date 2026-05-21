@@ -7,6 +7,7 @@ import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
 import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
+import { listMyCouponUsage } from "@/lib/coupons.functions";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
 import { resolveOutletForRestaurant } from "@/lib/fulfillment.functions";
@@ -51,13 +52,18 @@ function FoodCheckoutPage() {
     queryKey: ["active-coupons"],
     queryFn: listActiveCoupons,
   });
+  const myUsageRpc = useServerFn(listMyCouponUsage);
+  const { data: myUsage = {} } = useQuery({
+    queryKey: ["my-coupon-usage"],
+    queryFn: () => myUsageRpc(),
+  });
 
   const couponData: Coupon | null = useMemo(() => {
     if (!search.coupon) return null;
-    const r = applyCoupon(availableCoupons, search.coupon, foodCartTotals(cart).subtotal);
+    const r = applyCoupon(availableCoupons, search.coupon, foodCartTotals(cart).subtotal, myUsage);
     return r.ok ? r.coupon! : null;
-  }, [availableCoupons, search.coupon, cart]);
-  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, foodCartTotals(cart).subtotal).discount : 0;
+  }, [availableCoupons, search.coupon, cart, myUsage]);
+  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, foodCartTotals(cart).subtotal, myUsage).discount : 0;
   const totals = foodCartTotals(cart, discount);
 
   if (totals.itemsCount === 0) {
@@ -130,6 +136,8 @@ function FoodCheckoutPage() {
         delivery: totals.delivery + totals.packaging + totals.taxes - discount,
         total: totals.total,
         restaurant_id: totals.items[0]?.restaurantId,
+        coupon_id: couponData?.id ?? null,
+        coupon_discount: discount,
       };
       const row = await placeOrderRpc({ data: payload });
       if (saveAddr) { try { await saveAddressRpc({ data: payload.address }); } catch { /* ignore */ } }
