@@ -25,6 +25,8 @@ type OrderRow = {
   items: any;
   address: any;
   created_at: string;
+  warehouse_id?: string | null;
+  warehouse?: { name: string; code: string } | null;
 };
 
 const statusTint: Record<Status, string> = {
