@@ -491,3 +491,105 @@ export const partnerDashboard = createServerFn({ method: "GET" })
     };
   });
 
+
+// ----- Payouts / Settlement -----
+export const partnerPayouts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ days: z.number().int().min(1).max(365).default(30) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: r } = await supabase
+      .from("partner_restaurants")
+      .select("id, name, commission_rate, bank_account_name, bank_account_number, bank_ifsc")
+      .eq("owner_id", userId)
+      .maybeSingle();
+    if (!r) return null;
+    const since = new Date();
+    since.setDate(since.getDate() - data.days + 1);
+    const { data: orders, error } = await supabase
+      .from("orders")
+      .select("id, subtotal, total, status, created_at, items")
+      .eq("restaurant_id", r.id)
+      .gte("created_at", since.toISOString())
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const rate = Number(r.commission_rate ?? 0);
+    const rows = (orders ?? []).map((o: any) => {
+      const gross = o.subtotal ?? 0;
+      const commission = Math.round((gross * rate) / 100);
+      return {
+        id: o.id,
+        date: o.created_at,
+        status: o.status,
+        gross,
+        commission,
+        payout: gross - commission,
+      };
+    });
+    const active = rows.filter((r) => r.status !== "cancelled");
+    const totals = {
+      orders: active.length,
+      gross: active.reduce((s, x) => s + x.gross, 0),
+      commission: active.reduce((s, x) => s + x.commission, 0),
+      payout: active.reduce((s, x) => s + x.payout, 0),
+    };
+    // Weekly buckets
+    const weekMap = new Map<string, { week: string; gross: number; commission: number; payout: number; orders: number }>();
+    for (const x of active) {
+      const d = new Date(x.date);
+      const day = d.getUTCDay();
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() - ((day + 6) % 7));
+      const k = monday.toISOString().slice(0, 10);
+      const cur = weekMap.get(k) ?? { week: k, gross: 0, commission: 0, payout: 0, orders: 0 };
+      cur.gross += x.gross; cur.commission += x.commission; cur.payout += x.payout; cur.orders += 1;
+      weekMap.set(k, cur);
+    }
+    const weekly = Array.from(weekMap.values()).sort((a, b) => a.week.localeCompare(b.week));
+    return {
+      restaurant: { name: r.name, commission_rate: rate, bank_account_name: r.bank_account_name, bank_account_number: r.bank_account_number, bank_ifsc: r.bank_ifsc },
+      rows,
+      totals,
+      weekly,
+    };
+  });
+
+// ----- Bulk import dishes (CSV) -----
+const bulkDishInput = z.object({
+  name: z.string().trim().min(1).max(80),
+  description: z.string().trim().max(300).optional().default(""),
+  image: z.string().trim().max(500).optional().default(""),
+  price: z.number().int().min(0).max(100000),
+  mrp: z.number().int().min(0).max(100000).optional().nullable(),
+  veg: z.boolean().optional().default(true),
+  spicy: z.boolean().optional().default(false),
+  bestseller: z.boolean().optional().default(false),
+  section: z.string().trim().min(1).max(40).optional().default("Mains"),
+  in_stock: z.boolean().optional().default(true),
+});
+
+export const bulkImportDishes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ dishes: z.array(bulkDishInput).min(1).max(500) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: r } = await supabase.from("partner_restaurants").select("id").eq("owner_id", userId).maybeSingle();
+    if (!r) throw new Error("Create your restaurant first");
+    const rows = data.dishes.map((d, i) => ({
+      restaurant_id: r.id,
+      name: d.name,
+      description: d.description ?? "",
+      image: d.image ?? "",
+      price: d.price,
+      mrp: d.mrp ?? null,
+      veg: d.veg ?? true,
+      spicy: d.spicy ?? false,
+      bestseller: d.bestseller ?? false,
+      section: d.section ?? "Mains",
+      in_stock: d.in_stock ?? true,
+      sort_order: i,
+    }));
+    const { error } = await supabase.from("partner_dishes").insert(rows);
+    if (error) throw new Error(error.message);
+    return { inserted: rows.length };
+  });
