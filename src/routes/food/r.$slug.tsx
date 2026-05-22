@@ -27,10 +27,21 @@ export const Route = createFileRoute("/food/r/$slug")({
     const dishes = (db.partner_dishes ?? []) as Array<{
       id: string; name: string; description: string; image: string; price: number; mrp: number | null;
       veg: boolean; spicy: boolean; bestseller: boolean; section: string; in_stock: boolean; rating: number;
+      available_days?: number[] | null; available_from?: string | null; available_to?: string | null;
       partner_dish_variants?: Array<{ id: string; name: string; price: number }>;
       partner_dish_addons?: Array<{ id: string; name: string; price: number }>;
     }>;
-    const menu: Dish[] = dishes.map((d) => ({
+    const now = new Date();
+    const dayIdx = now.getDay();
+    const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const isAvailableNow = (d: typeof dishes[number]) => {
+      const days = d.available_days ?? [0,1,2,3,4,5,6];
+      if (!days.includes(dayIdx)) return false;
+      const from = d.available_from ?? "00:00";
+      const to = d.available_to ?? "23:59";
+      return hhmm >= from && hhmm <= to;
+    };
+    const menu: Dish[] = dishes.filter(isAvailableNow).map((d) => ({
       id: d.id, name: d.name, desc: d.description ?? "", image: d.image || "",
       price: d.price, mrp: d.mrp ?? undefined,
       veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section,

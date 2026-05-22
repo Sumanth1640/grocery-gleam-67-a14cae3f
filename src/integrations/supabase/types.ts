@@ -433,6 +433,9 @@ export type Database = {
       }
       partner_dishes: {
         Row: {
+          available_days: number[]
+          available_from: string
+          available_to: string
           bestseller: boolean
           created_at: string
           description: string
@@ -452,6 +455,9 @@ export type Database = {
           veg: boolean
         }
         Insert: {
+          available_days?: number[]
+          available_from?: string
+          available_to?: string
           bestseller?: boolean
           created_at?: string
           description?: string
@@ -471,6 +477,9 @@ export type Database = {
           veg?: boolean
         }
         Update: {
+          available_days?: number[]
+          available_from?: string
+          available_to?: string
           bestseller?: boolean
           created_at?: string
           description?: string

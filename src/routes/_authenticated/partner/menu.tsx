@@ -46,8 +46,10 @@ type DishForm = {
   name: string; description: string; image: string; price: number; mrp: number | null;
   veg: boolean; spicy: boolean; bestseller: boolean; section: string; in_stock: boolean; sort_order: number;
   outlet_id: string | null;
+  available_days: number[]; available_from: string; available_to: string;
 };
-const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0, outlet_id: null };
+const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0, outlet_id: null, available_days: [0,1,2,3,4,5,6], available_from: "00:00", available_to: "23:59" };
+const DAY_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] as const;
 
 function MenuPage() {
   const qc = useQueryClient();
@@ -138,7 +140,7 @@ function MenuPage() {
                 <div className="text-xs text-muted-foreground">₹{d.price}{d.mrp ? ` · MRP ₹${d.mrp}` : ""}</div>
               </div>
               <label className="inline-flex items-center gap-1 text-xs font-semibold"><input type="checkbox" checked={d.in_stock} onChange={(e) => toggle.mutate({ id: d.id, in_stock: e.target.checked })} /> In stock</label>
-              <button onClick={() => setEditing({ id: d.id, form: { name: d.name, description: d.description ?? "", image: d.image ?? "", price: d.price, mrp: d.mrp, veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, in_stock: d.in_stock, sort_order: d.sort_order, outlet_id: (d as any).outlet_id ?? null } })} className="rounded-lg border p-2 hover:bg-secondary" aria-label="Edit"><Pencil className="h-3.5 w-3.5" /></button>
+              <button onClick={() => setEditing({ id: d.id, form: { name: d.name, description: d.description ?? "", image: d.image ?? "", price: d.price, mrp: d.mrp, veg: d.veg, spicy: d.spicy, bestseller: d.bestseller, section: d.section, in_stock: d.in_stock, sort_order: d.sort_order, outlet_id: (d as any).outlet_id ?? null, available_days: ((d as any).available_days ?? [0,1,2,3,4,5,6]) as number[], available_from: (d as any).available_from ?? "00:00", available_to: (d as any).available_to ?? "23:59" } })} className="rounded-lg border p-2 hover:bg-secondary" aria-label="Edit"><Pencil className="h-3.5 w-3.5" /></button>
               <button onClick={() => { if (confirm("Delete this dish?")) del.mutate(d.id); }} className="rounded-lg border p-2 text-destructive hover:bg-destructive/10" aria-label="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
             </li>
           ))}
@@ -174,6 +176,41 @@ function MenuPage() {
                   </select>
                 </label>
               )}
+              <div className="rounded-xl border bg-secondary/30 p-3">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Availability schedule</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {DAY_LABELS.map((label, idx) => {
+                    const active = editing.form.available_days.includes(idx);
+                    return (
+                      <button
+                        type="button"
+                        key={idx}
+                        onClick={() => {
+                          const next = active
+                            ? editing.form.available_days.filter((d) => d !== idx)
+                            : [...editing.form.available_days, idx].sort((a, b) => a - b);
+                          if (next.length === 0) return;
+                          setEditing({ ...editing, form: { ...editing.form, available_days: next } });
+                        }}
+                        className={`rounded-lg px-2 py-1 text-[11px] font-bold ${active ? "bg-primary text-primary-foreground" : "border bg-background text-muted-foreground"}`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <label className="text-xs font-semibold">
+                    <span className="mb-1 block text-muted-foreground">From</span>
+                    <input type="time" value={editing.form.available_from} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, available_from: e.target.value } })} className="w-full rounded-lg border bg-background px-2 py-1.5 text-sm" />
+                  </label>
+                  <label className="text-xs font-semibold">
+                    <span className="mb-1 block text-muted-foreground">To</span>
+                    <input type="time" value={editing.form.available_to} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, available_to: e.target.value } })} className="w-full rounded-lg border bg-background px-2 py-1.5 text-sm" />
+                  </label>
+                </div>
+                <div className="mt-1 text-[10px] text-muted-foreground">Dish is hidden from customers outside this window.</div>
+              </div>
               <div className="flex flex-wrap gap-3 text-xs font-semibold">
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.veg} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, veg: e.target.checked } })} /> Veg</label>
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.spicy} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, spicy: e.target.checked } })} /> Spicy</label>
