@@ -69,6 +69,19 @@ function FoodCheckoutPage() {
   }, [availableCoupons, search.coupon, cart, myUsage]);
   const discount = couponData ? applyCoupon(availableCoupons, couponData.code, foodCartTotals(cart).subtotal, myUsage).discount : 0;
   const totals = foodCartTotals(cart, discount);
+  const placeOrderRpc = useServerFn(placeOrderFn);
+  const saveAddressRpc = useServerFn(createAddress);
+  const createRpOrderRpc = useServerFn(createRazorpayOrder);
+  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
+  const resolveOutletRpc = useServerFn(resolveOutletForRestaurant);
+
+  const restaurantId = totals.items[0]?.restaurantId;
+  const outletQ = useQuery({
+    queryKey: ["resolve-outlet", restaurantId],
+    queryFn: () => resolveOutletRpc({ data: { restaurant_id: restaurantId! } }),
+    enabled: !!restaurantId,
+    staleTime: 60_000,
+  });
 
   if (totals.itemsCount === 0) {
     return (
@@ -92,20 +105,6 @@ function FoodCheckoutPage() {
     address.line1.trim().length > 2 &&
     address.city.trim().length > 1 &&
     /^\d{6}$/.test(address.pincode);
-
-  const placeOrderRpc = useServerFn(placeOrderFn);
-  const saveAddressRpc = useServerFn(createAddress);
-  const createRpOrderRpc = useServerFn(createRazorpayOrder);
-  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
-  const resolveOutletRpc = useServerFn(resolveOutletForRestaurant);
-
-  const restaurantId = totals.items[0]?.restaurantId;
-  const outletQ = useQuery({
-    queryKey: ["resolve-outlet", restaurantId],
-    queryFn: () => resolveOutletRpc({ data: { restaurant_id: restaurantId! } }),
-    enabled: !!restaurantId,
-    staleTime: 60_000,
-  });
 
   const placeOrder = async () => {
     setSubmitting(true);

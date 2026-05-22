@@ -84,6 +84,19 @@ function CheckoutPage() {
   }, [availableCoupons, search.coupon, baseTotals.subtotal, myUsage]);
   const discount = couponData ? applyCoupon(availableCoupons, couponData.code, baseTotals.subtotal, myUsage).discount : 0;
   const totals = { ...baseTotals, total: baseTotals.subtotal + baseTotals.delivery - discount };
+  const placeOrderRpc = useServerFn(placeOrderFn);
+  const saveAddressRpc = useServerFn(createAddress);
+  const resolveWhRpc = useServerFn(resolveWarehouseForPincode);
+  const createRpOrderRpc = useServerFn(createRazorpayOrder);
+  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
+  const [saveAddr, setSaveAddr] = useState(true);
+
+  const whQ = useQuery({
+    queryKey: ["resolve-warehouse", address.pincode],
+    queryFn: () => resolveWhRpc({ data: { pincode: address.pincode } }),
+    enabled: /^\d{6}$/.test(address.pincode),
+    staleTime: 60_000,
+  });
 
 
   if (totals.itemsCount === 0) {
@@ -110,20 +123,6 @@ function CheckoutPage() {
     address.line1.trim().length > 2 &&
     address.city.trim().length > 1 &&
     /^\d{6}$/.test(address.pincode);
-
-  const placeOrderRpc = useServerFn(placeOrderFn);
-  const saveAddressRpc = useServerFn(createAddress);
-  const resolveWhRpc = useServerFn(resolveWarehouseForPincode);
-  const createRpOrderRpc = useServerFn(createRazorpayOrder);
-  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
-  const [saveAddr, setSaveAddr] = useState(true);
-
-  const whQ = useQuery({
-    queryKey: ["resolve-warehouse", address.pincode],
-    queryFn: () => resolveWhRpc({ data: { pincode: address.pincode } }),
-    enabled: /^\d{6}$/.test(address.pincode),
-    staleTime: 60_000,
-  });
 
   const placeOrder = async () => {
     setSubmitting(true);
