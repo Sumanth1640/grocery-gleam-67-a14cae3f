@@ -195,7 +195,7 @@ function FoodCheckoutPage() {
         description: `Food order · ${payload.items.length} item(s)`,
         prefill: { name: payload.address.full_name, contact: payload.address.phone },
         theme: { color: "#16a34a" },
-        method: payment === "upi" ? { upi: true, card: false, netbanking: false, wallet: false } : { card: true, upi: false, netbanking: false, wallet: false },
+        // Don't restrict methods — let Razorpay show all enabled flows (QR + Collect + Intent for UPI)
         modal: { ondismiss: () => { setSubmitting(false); toast.message("Payment cancelled"); } },
         handler: async (resp) => {
           try {
