@@ -42,11 +42,17 @@ import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenti
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedFoodOrdersRouteImport } from './routes/_authenticated/food.orders'
 import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_authenticated/admin/warehouses'
+import { Route as AuthenticatedAdminRidersRouteImport } from './routes/_authenticated/admin/riders'
 import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin/restaurants'
+import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
+import { Route as AuthenticatedAdminRefundsRouteImport } from './routes/_authenticated/admin/refunds'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
+import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin/inventory'
+import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin/coupons'
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin/categories'
+import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authenticated/admin/banners'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -221,10 +227,28 @@ const AuthenticatedAdminWarehousesRoute =
     path: '/warehouses',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRidersRoute =
+  AuthenticatedAdminRidersRouteImport.update({
+    id: '/riders',
+    path: '/riders',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRestaurantsRoute =
   AuthenticatedAdminRestaurantsRouteImport.update({
     id: '/restaurants',
     path: '/restaurants',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminReportsRoute =
+  AuthenticatedAdminReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRefundsRoute =
+  AuthenticatedAdminRefundsRouteImport.update({
+    id: '/refunds',
+    path: '/refunds',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminProductsRoute =
@@ -239,6 +263,18 @@ const AuthenticatedAdminOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminInventoryRoute =
+  AuthenticatedAdminInventoryRouteImport.update({
+    id: '/inventory',
+    path: '/inventory',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCustomersRoute =
+  AuthenticatedAdminCustomersRouteImport.update({
+    id: '/customers',
+    path: '/customers',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCouponsRoute =
   AuthenticatedAdminCouponsRouteImport.update({
     id: '/coupons',
@@ -249,6 +285,12 @@ const AuthenticatedAdminCategoriesRoute =
   AuthenticatedAdminCategoriesRouteImport.update({
     id: '/categories',
     path: '/categories',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBannersRoute =
+  AuthenticatedAdminBannersRouteImport.update({
+    id: '/banners',
+    path: '/banners',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAnalyticsRoute =
@@ -281,11 +323,17 @@ export interface FileRoutesByFullPath {
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
+  '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/refunds': typeof AuthenticatedAdminRefundsRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/admin/riders': typeof AuthenticatedAdminRidersRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
@@ -319,11 +367,17 @@ export interface FileRoutesByTo {
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
+  '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/refunds': typeof AuthenticatedAdminRefundsRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/admin/riders': typeof AuthenticatedAdminRidersRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
@@ -361,11 +415,17 @@ export interface FileRoutesById {
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
+  '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/_authenticated/admin/refunds': typeof AuthenticatedAdminRefundsRoute
+  '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/_authenticated/admin/riders': typeof AuthenticatedAdminRidersRoute
   '/_authenticated/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/_authenticated/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
@@ -403,11 +463,17 @@ export interface FileRouteTypes {
     | '/p/$id'
     | '/food/'
     | '/admin/analytics'
+    | '/admin/banners'
     | '/admin/categories'
     | '/admin/coupons'
+    | '/admin/customers'
+    | '/admin/inventory'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/refunds'
+    | '/admin/reports'
     | '/admin/restaurants'
+    | '/admin/riders'
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
@@ -441,11 +507,17 @@ export interface FileRouteTypes {
     | '/p/$id'
     | '/food'
     | '/admin/analytics'
+    | '/admin/banners'
     | '/admin/categories'
     | '/admin/coupons'
+    | '/admin/customers'
+    | '/admin/inventory'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/refunds'
+    | '/admin/reports'
     | '/admin/restaurants'
+    | '/admin/riders'
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
@@ -482,11 +554,17 @@ export interface FileRouteTypes {
     | '/p/$id'
     | '/food/'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/banners'
     | '/_authenticated/admin/categories'
     | '/_authenticated/admin/coupons'
+    | '/_authenticated/admin/customers'
+    | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
+    | '/_authenticated/admin/refunds'
+    | '/_authenticated/admin/reports'
     | '/_authenticated/admin/restaurants'
+    | '/_authenticated/admin/riders'
     | '/_authenticated/admin/warehouses'
     | '/_authenticated/food/orders'
     | '/_authenticated/orders/$id'
@@ -754,11 +832,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminWarehousesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/riders': {
+      id: '/_authenticated/admin/riders'
+      path: '/riders'
+      fullPath: '/admin/riders'
+      preLoaderRoute: typeof AuthenticatedAdminRidersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/restaurants': {
       id: '/_authenticated/admin/restaurants'
       path: '/restaurants'
       fullPath: '/admin/restaurants'
       preLoaderRoute: typeof AuthenticatedAdminRestaurantsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/reports': {
+      id: '/_authenticated/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/refunds': {
+      id: '/_authenticated/admin/refunds'
+      path: '/refunds'
+      fullPath: '/admin/refunds'
+      preLoaderRoute: typeof AuthenticatedAdminRefundsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/products': {
@@ -775,6 +874,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/inventory': {
+      id: '/_authenticated/admin/inventory'
+      path: '/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AuthenticatedAdminInventoryRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/customers': {
+      id: '/_authenticated/admin/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/coupons': {
       id: '/_authenticated/admin/coupons'
       path: '/coupons'
@@ -789,6 +902,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCategoriesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/banners': {
+      id: '/_authenticated/admin/banners'
+      path: '/banners'
+      fullPath: '/admin/banners'
+      preLoaderRoute: typeof AuthenticatedAdminBannersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/analytics': {
       id: '/_authenticated/admin/analytics'
       path: '/analytics'
@@ -801,22 +921,34 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminBannersRoute: typeof AuthenticatedAdminBannersRoute
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
+  AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
+  AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
+  AuthenticatedAdminRefundsRoute: typeof AuthenticatedAdminRefundsRoute
+  AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminRestaurantsRoute: typeof AuthenticatedAdminRestaurantsRoute
+  AuthenticatedAdminRidersRoute: typeof AuthenticatedAdminRidersRoute
   AuthenticatedAdminWarehousesRoute: typeof AuthenticatedAdminWarehousesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminBannersRoute: AuthenticatedAdminBannersRoute,
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
+  AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
+  AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
+  AuthenticatedAdminRefundsRoute: AuthenticatedAdminRefundsRoute,
+  AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminRestaurantsRoute: AuthenticatedAdminRestaurantsRoute,
+  AuthenticatedAdminRidersRoute: AuthenticatedAdminRidersRoute,
   AuthenticatedAdminWarehousesRoute: AuthenticatedAdminWarehousesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }

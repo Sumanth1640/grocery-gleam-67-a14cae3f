@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3, Image as ImageIcon, Users, ReceiptText, AlertTriangle, Bike, LineChart } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,12 +18,18 @@ import { signOut } from "@/lib/use-auth";
 const items = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, adminOnly: false },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3, exact: false, adminOnly: true },
+  { to: "/admin/reports", label: "Reports", icon: LineChart, exact: false, adminOnly: true },
   { to: "/admin/products", label: "Products", icon: Package, exact: false, adminOnly: true },
   { to: "/admin/categories", label: "Categories", icon: FolderTree, exact: false, adminOnly: true },
+  { to: "/admin/inventory", label: "Inventory", icon: AlertTriangle, exact: false, adminOnly: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false, adminOnly: false },
+  { to: "/admin/riders", label: "Riders", icon: Bike, exact: false, adminOnly: true },
+  { to: "/admin/refunds", label: "Refunds", icon: ReceiptText, exact: false, adminOnly: true },
+  { to: "/admin/customers", label: "Customers", icon: Users, exact: false, adminOnly: true },
   { to: "/admin/restaurants", label: "Restaurants", icon: UtensilsCrossed, exact: false, adminOnly: true },
   { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse, exact: false, adminOnly: true },
   { to: "/admin/coupons", label: "Coupons", icon: TicketPercent, exact: false, adminOnly: true },
+  { to: "/admin/banners", label: "Banners", icon: ImageIcon, exact: false, adminOnly: true },
 ] as const;
 
 export function AdminSidebar({ isAdminUser = true }: { isAdminUser?: boolean }) {
