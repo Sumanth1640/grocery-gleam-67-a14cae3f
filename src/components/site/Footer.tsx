@@ -35,7 +35,7 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold">Help</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/help" className="hover:text-foreground">Customer support</Link></li>
+            <li><Link to="/support" className="hover:text-foreground">Customer support</Link></li>
             <li><Link to="/help" className="hover:text-foreground">Delivery areas</Link></li>
             <li><Link to="/help" className="hover:text-foreground">Refund policy</Link></li>
             <li><Link to="/help" className="hover:text-foreground">Terms & privacy</Link></li>
