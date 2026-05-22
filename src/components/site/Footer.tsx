@@ -43,7 +43,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} hallifresh. Crafted with care.
+        © {new Date().getFullYear()} HalliFresh Veggies. Fresh from farm to home.
       </div>
     </footer>
   );

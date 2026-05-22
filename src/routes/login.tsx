@@ -14,7 +14,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/login")({
   validateSearch: (s) => searchSchema.parse(s),
-  head: () => ({ meta: [{ title: "Sign in — hallifresh" }] }),
+  head: () => ({ meta: [{ title: "Sign in — HalliFresh" }] }),
   component: LoginPage,
 });
 
@@ -179,7 +179,7 @@ function LoginPage() {
           <div className="mt-5 text-center text-xs text-muted-foreground">
             {mode === "signin" ? (
               <>
-                New to hallifresh?{" "}
+                New to HalliFresh?{" "}
                 <button onClick={() => setMode("signup")} className="font-bold text-primary hover:underline">
                   Create an account
                 </button>
