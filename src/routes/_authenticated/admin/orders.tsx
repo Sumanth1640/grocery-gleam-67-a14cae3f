@@ -25,6 +25,8 @@ type OrderRow = {
   items: any;
   address: any;
   created_at: string;
+  warehouse_id?: string | null;
+  warehouse?: { name: string; code: string } | null;
 };
 
 const statusTint: Record<Status, string> = {
@@ -117,6 +119,13 @@ function OrdersAdmin() {
                       </span>
                       <span className="text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
                       <span className="text-xs text-muted-foreground">· {new Date(o.created_at).toLocaleString()}</span>
+                      {o.warehouse ? (
+                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground" title={o.warehouse.name}>
+                          🏬 {o.warehouse.code}
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">No warehouse</span>
+                      )}
                     </div>
                     <div className="mt-0.5 line-clamp-1 text-sm font-semibold">
                       {addr.full_name ?? "—"} · {items.length} item{items.length !== 1 ? "s" : ""}
@@ -139,7 +148,11 @@ function OrdersAdmin() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Update status</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Fulfilled by</div>
+                        <div className="mt-1 text-sm font-semibold">
+                          {o.warehouse ? `${o.warehouse.name} (${o.warehouse.code})` : <span className="text-destructive">No warehouse assigned</span>}
+                        </div>
+                        <div className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Update status</div>
                         <select
                           value={o.status}
                           onChange={(e) => mut.mutate({ id: o.id, status: e.target.value as Status })}
