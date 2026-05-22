@@ -228,6 +228,7 @@ export const getMyDocSignedUrl = createServerFn({ method: "POST" })
   });
 
 // ----- Dishes -----
+const timeRe = /^([01]\d|2[0-3]):[0-5]\d$/;
 const dishInput = z.object({
   name: z.string().trim().min(2).max(80),
   description: z.string().trim().max(300).default(""),
@@ -241,6 +242,9 @@ const dishInput = z.object({
   in_stock: z.boolean().default(true),
   sort_order: z.number().int().min(0).max(10000).default(0),
   outlet_id: z.string().uuid().nullable().optional(),
+  available_days: z.array(z.number().int().min(0).max(6)).min(1).max(7).default([0,1,2,3,4,5,6]),
+  available_from: z.string().regex(timeRe).default("00:00"),
+  available_to: z.string().regex(timeRe).default("23:59"),
 });
 
 const variantInput = z.object({ name: z.string().trim().min(1).max(40), price: z.number().int().min(0).max(100000), sort_order: z.number().int().default(0) });
