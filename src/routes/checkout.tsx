@@ -13,6 +13,7 @@ import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupon
 import { listMyCouponUsage } from "@/lib/coupons.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
+import { DeliverySlotPicker } from "@/components/site/DeliverySlotPicker";
 import { toast } from "sonner";
 import {
   ArrowLeft,
