@@ -144,7 +144,18 @@ export const adminListOrders = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
-    return data ?? [];
+    const rows = data ?? [];
+    const whIds = Array.from(new Set(rows.map((r: any) => r.warehouse_id).filter(Boolean))) as string[];
+    const whMap = new Map<string, { name: string; code: string }>();
+    if (whIds.length) {
+      const { data: whs } = await supabaseAdmin
+        .from("warehouses").select("id, name, code").in("id", whIds);
+      (whs ?? []).forEach((w: any) => whMap.set(w.id, { name: w.name, code: w.code }));
+    }
+    return rows.map((r: any) => ({
+      ...r,
+      warehouse: r.warehouse_id ? whMap.get(r.warehouse_id) ?? null : null,
+    }));
   });
 
 export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
