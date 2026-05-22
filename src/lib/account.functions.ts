@@ -256,3 +256,24 @@ export const listOrders = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+export const cancelOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error: selErr } = await supabase
+      .from("orders")
+      .select("id, status, user_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (selErr) throw new Error(selErr.message);
+    if (!row || row.user_id !== userId) throw new Error("Order not found");
+    if (row.status !== "placed") throw new Error("Order can no longer be cancelled");
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "cancelled" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
