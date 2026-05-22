@@ -4,7 +4,7 @@ import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLe
 import { OrderAlerts, OrderAlertsControl } from "@/components/partner/OrderAlerts";
 
 export const Route = createFileRoute("/_authenticated/partner")({
-  head: () => ({ meta: [{ title: "Partner portal — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Partner portal — hallifresh" }] }),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();

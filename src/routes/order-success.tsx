@@ -5,7 +5,7 @@ import { useLastOrder } from "@/lib/order-store";
 import { CheckCircle2, Clock, MapPin, Package, Receipt } from "lucide-react";
 
 export const Route = createFileRoute("/order-success")({
-  head: () => ({ meta: [{ title: "Order placed — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Order placed — hallifresh" }] }),
   component: SuccessPage,
 });
 

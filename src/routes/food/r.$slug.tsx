@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/food/r/$slug")({
   head: ({ params }) => ({
-    meta: [{ title: `${params.slug} — Order online · freshcart` }],
+    meta: [{ title: `${params.slug} — Order online · hallifresh` }],
   }),
   loader: async ({ params }) => {
     const local = findRestaurant(params.slug);

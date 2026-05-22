@@ -20,7 +20,7 @@ import { LogOut, MapPin, Package, Pencil, Plus, Star, Trash2, User as UserIcon, 
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
-  head: () => ({ meta: [{ title: "Your account — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Your account — hallifresh" }] }),
   component: AccountPage,
 });
 

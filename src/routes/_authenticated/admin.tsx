@@ -9,7 +9,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminOrderAlerts, AdminOrderAlertsControl } from "@/components/admin/OrderAlerts";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Admin — hallifresh" }] }),
   component: AdminLayout,
 });
 

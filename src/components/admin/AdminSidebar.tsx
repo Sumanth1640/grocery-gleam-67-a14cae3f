@@ -50,7 +50,7 @@ export function AdminSidebar({ isAdminUser = true }: { isAdminUser?: boolean }) 
           {!collapsed && (
             <div className="leading-tight">
               <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Admin</div>
-              <div className="font-display text-sm font-bold">freshcart</div>
+              <div className="font-display text-sm font-bold">hallifresh</div>
             </div>
           )}
         </div>

@@ -10,7 +10,7 @@ export function Footer() {
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground">
               <Zap className="h-5 w-5" strokeWidth={2.5} />
             </div>
-            <div className="font-display text-lg font-bold">freshcart</div>
+            <div className="font-display text-lg font-bold">hallifresh</div>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
             Groceries delivered in minutes. Fresh, fast, and hand-picked.
@@ -45,7 +45,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} freshcart. Crafted with care.
+        © {new Date().getFullYear()} hallifresh. Crafted with care.
       </div>
     </footer>
   );

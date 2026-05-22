@@ -78,10 +78,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "freshcart — Groceries delivered in 11 minutes" },
+      { title: "hallifresh — Groceries delivered in 11 minutes" },
       { name: "description", content: "Order fresh fruits, vegetables, dairy, snacks and household essentials online. Lightning-fast delivery to your door." },
-      { name: "author", content: "freshcart" },
-      { property: "og:title", content: "freshcart — Groceries delivered in 11 minutes" },
+      { name: "author", content: "hallifresh" },
+      { property: "og:title", content: "hallifresh — Groceries delivered in 11 minutes" },
       { property: "og:description", content: "Fresh, fast, and hand-picked. Your everyday grocery store, online." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

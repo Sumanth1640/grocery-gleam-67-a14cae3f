@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Tag, Check, X, Trash2, Clock, Utensils } from "lucide-react";
 
 export const Route = createFileRoute("/food/cart")({
-  head: () => ({ meta: [{ title: "Your food cart — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Your food cart — hallifresh" }] }),
   component: FoodCartPage,
 });
 

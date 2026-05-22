@@ -4,7 +4,7 @@ import type { Product } from "./products";
 type CartItem = { product: Product; qty: number };
 type CartState = Record<string, CartItem>;
 
-const STORAGE_KEY = "freshcart:cart";
+const STORAGE_KEY = "hallifresh:cart";
 
 let state: CartState = (() => {
   if (typeof window === "undefined") return {};

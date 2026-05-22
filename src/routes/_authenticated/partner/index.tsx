@@ -73,7 +73,7 @@ function HeroCard({ data }: { data: NonNullable<Awaited<ReturnType<typeof partne
   });
 
   const statusMeta = r.status === "approved"
-    ? { Icon: CheckCircle2, color: "text-success", bg: "bg-success/10", label: "Approved — live on freshcart" }
+    ? { Icon: CheckCircle2, color: "text-success", bg: "bg-success/10", label: "Approved — live on hallifresh" }
     : r.status === "rejected"
     ? { Icon: XCircle, color: "text-destructive", bg: "bg-destructive/10", label: "Rejected — update your details" }
     : { Icon: Clock, color: "text-primary", bg: "bg-primary/10", label: "Pending review" };

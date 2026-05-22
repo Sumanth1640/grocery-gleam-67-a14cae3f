@@ -13,7 +13,7 @@ import { Search, Star, Clock, MapPin, Filter, X, ChevronDown, Utensils, Heart } 
 export const Route = createFileRoute("/food/")({
   head: () => ({
     meta: [
-      { title: "Food delivery in 30 mins — freshcart" },
+      { title: "Food delivery in 30 mins — hallifresh" },
       { name: "description", content: "Order from your favourite restaurants. Pizzas, biryanis, burgers, salads — delivered fast." },
     ],
   }),

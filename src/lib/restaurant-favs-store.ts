@@ -4,7 +4,7 @@ import type { Restaurant } from "./food-data";
 type FavRestaurant = Pick<Restaurant, "id" | "slug" | "name" | "image" | "cuisines" | "rating" | "etaMins" | "costForTwo" | "area">;
 type State = Record<string, FavRestaurant>;
 
-const KEY = "freshcart:restaurantFavs";
+const KEY = "hallifresh:restaurantFavs";
 
 let state: State = (() => {
   if (typeof window === "undefined") return {};

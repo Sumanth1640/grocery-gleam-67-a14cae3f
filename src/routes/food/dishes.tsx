@@ -16,7 +16,7 @@ type Sort = "relevance" | "rating" | "price-asc" | "price-desc";
 export const Route = createFileRoute("/food/dishes")({
   head: () => ({
     meta: [
-      { title: "Browse all dishes — freshcart" },
+      { title: "Browse all dishes — hallifresh" },
       { name: "description", content: "Search dishes across every restaurant. Filter by veg, price, rating and category." },
     ],
   }),
