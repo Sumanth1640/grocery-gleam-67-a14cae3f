@@ -26,7 +26,7 @@ function CustomersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
   const roleM = useMutation({
-    mutationFn: (v: { user_id: string; role: "admin" | "moderator" | "user"; grant: boolean }) => roleFn({ data: v }),
+    mutationFn: (v: { user_id: string; role: "admin" | "customer" | "restaurant"; grant: boolean }) => roleFn({ data: v }),
     onSuccess: () => { toast.success("Role updated"); qc.invalidateQueries({ queryKey: ["admin-customers"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -80,10 +80,10 @@ function CustomersPage() {
                         <ShieldCheck className="h-3.5 w-3.5" /> {c.roles.includes("admin") ? "Unadmin" : "Admin"}
                       </button>
                       <button
-                        onClick={() => roleM.mutate({ user_id: c.id, role: "moderator", grant: !c.roles.includes("moderator") })}
+                        onClick={() => roleM.mutate({ user_id: c.id, role: "restaurant", grant: !c.roles.includes("restaurant") })}
                         className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-xs hover:bg-secondary"
                       >
-                        <UserCog className="h-3.5 w-3.5" /> {c.roles.includes("moderator") ? "Unmod" : "Mod"}
+                        <UserCog className="h-3.5 w-3.5" /> {c.roles.includes("restaurant") ? "Unrestaurant" : "Restaurant"}
                       </button>
                       <button
                         onClick={() => blockM.mutate({ id: c.id, is_blocked: !c.is_blocked })}
