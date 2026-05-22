@@ -42,8 +42,8 @@ export function Header() {
         <button className="hidden items-center gap-1 rounded-xl border bg-secondary/50 px-3 py-2 text-left text-xs hover:bg-secondary md:flex">
           <MapPin className="h-4 w-4 text-primary" />
           <div>
-            <div className="font-semibold">Home</div>
-            <div className="text-muted-foreground">221B Baker Street</div>
+            <div className="font-semibold">Deliver to</div>
+            <div className="text-muted-foreground">Set your location</div>
           </div>
           <ChevronDown className="ml-1 h-4 w-4" />
         </button>
