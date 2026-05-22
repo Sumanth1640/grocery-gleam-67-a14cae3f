@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as OrderSuccessRouteImport } from './routes/order-success'
 import { Route as LoginRouteImport } from './routes/login'
@@ -58,6 +59,11 @@ import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authe
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/search': typeof SearchRoute
+  '/support': typeof SupportRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -354,6 +361,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/search': typeof SearchRoute
+  '/support': typeof SupportRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -400,6 +408,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/search': typeof SearchRoute
+  '/support': typeof SupportRoute
   '/wishlist': typeof WishlistRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -448,6 +457,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/order-success'
     | '/search'
+    | '/support'
     | '/wishlist'
     | '/account'
     | '/admin'
@@ -494,6 +504,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/order-success'
     | '/search'
+    | '/support'
     | '/wishlist'
     | '/account'
     | '/notifications'
@@ -539,6 +550,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/order-success'
     | '/search'
+    | '/support'
     | '/wishlist'
     | '/_authenticated/account'
     | '/_authenticated/admin'
@@ -587,6 +599,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OrderSuccessRoute: typeof OrderSuccessRoute
   SearchRoute: typeof SearchRoute
+  SupportRoute: typeof SupportRoute
   WishlistRoute: typeof WishlistRoute
   CSlugRoute: typeof CSlugRoute
   FoodCartRoute: typeof FoodCartRoute
@@ -606,6 +619,13 @@ declare module '@tanstack/react-router' {
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -1019,6 +1039,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OrderSuccessRoute: OrderSuccessRoute,
   SearchRoute: SearchRoute,
+  SupportRoute: SupportRoute,
   WishlistRoute: WishlistRoute,
   CSlugRoute: CSlugRoute,
   FoodCartRoute: FoodCartRoute,
