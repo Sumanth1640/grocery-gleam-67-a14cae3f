@@ -38,6 +38,7 @@ const orderSchema = z.object({
   customer_lng: z.number().min(-180).max(180).optional().nullable(),
   coupon_id: z.string().uuid().optional().nullable(),
   coupon_discount: z.number().int().nonnegative().optional().nullable(),
+  scheduled_for: z.string().datetime().optional().nullable(),
 });
 
 // ---------- Profile ----------
