@@ -46,8 +46,10 @@ type DishForm = {
   name: string; description: string; image: string; price: number; mrp: number | null;
   veg: boolean; spicy: boolean; bestseller: boolean; section: string; in_stock: boolean; sort_order: number;
   outlet_id: string | null;
+  available_days: number[]; available_from: string; available_to: string;
 };
-const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0, outlet_id: null };
+const emptyDish: DishForm = { name: "", description: "", image: "", price: 0, mrp: null, veg: true, spicy: false, bestseller: false, section: "Mains", in_stock: true, sort_order: 0, outlet_id: null, available_days: [0,1,2,3,4,5,6], available_from: "00:00", available_to: "23:59" };
+const DAY_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] as const;
 
 function MenuPage() {
   const qc = useQueryClient();
