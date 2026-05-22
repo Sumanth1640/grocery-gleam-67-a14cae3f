@@ -119,6 +119,13 @@ function OrdersAdmin() {
                       </span>
                       <span className="text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
                       <span className="text-xs text-muted-foreground">· {new Date(o.created_at).toLocaleString()}</span>
+                      {o.warehouse ? (
+                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground" title={o.warehouse.name}>
+                          🏬 {o.warehouse.code}
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">No warehouse</span>
+                      )}
                     </div>
                     <div className="mt-0.5 line-clamp-1 text-sm font-semibold">
                       {addr.full_name ?? "—"} · {items.length} item{items.length !== 1 ? "s" : ""}
