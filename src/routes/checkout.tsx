@@ -13,6 +13,7 @@ import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupon
 import { listMyCouponUsage } from "@/lib/coupons.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
+import { DeliverySlotPicker } from "@/components/site/DeliverySlotPicker";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -62,6 +63,7 @@ function CheckoutPage() {
   const [step, setStep] = useState<Step>(1);
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [payment, setPayment] = useState<PaymentMethod>("upi");
+  const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { data: availableCoupons = [] } = useQuery({
     queryKey: ["active-coupons"],
@@ -150,6 +152,7 @@ function CheckoutPage() {
         total: totals.total,
         coupon_id: couponData?.id ?? null,
         coupon_discount: discount,
+        scheduled_for: scheduledFor,
       };
       const row = await placeOrderRpc({ data: payload });
       if (saveAddr) {
@@ -198,7 +201,12 @@ function CheckoutPage() {
             )}
 
             {step === 2 && (
-              <PaymentStep payment={payment} setPayment={setPayment} />
+              <>
+                <PaymentStep payment={payment} setPayment={setPayment} />
+                <div className="mt-5">
+                  <DeliverySlotPicker value={scheduledFor} onChange={setScheduledFor} baseEtaMins={11} />
+                </div>
+              </>
             )}
             {step === 3 && (
               <ReviewStep address={address} payment={payment} totals={totals} />

@@ -221,6 +221,7 @@ export type Database = {
           outlet_id: string | null
           payment: string
           restaurant_id: string | null
+          scheduled_for: string | null
           status: string
           subtotal: number
           total: number
@@ -236,6 +237,7 @@ export type Database = {
           outlet_id?: string | null
           payment: string
           restaurant_id?: string | null
+          scheduled_for?: string | null
           status?: string
           subtotal: number
           total: number
@@ -251,6 +253,7 @@ export type Database = {
           outlet_id?: string | null
           payment?: string
           restaurant_id?: string | null
+          scheduled_for?: string | null
           status?: string
           subtotal?: number
           total?: number

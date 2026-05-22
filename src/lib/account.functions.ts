@@ -38,6 +38,7 @@ const orderSchema = z.object({
   customer_lng: z.number().min(-180).max(180).optional().nullable(),
   coupon_id: z.string().uuid().optional().nullable(),
   coupon_discount: z.number().int().nonnegative().optional().nullable(),
+  scheduled_for: z.string().datetime().optional().nullable(),
 });
 
 // ---------- Profile ----------
@@ -199,6 +200,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         restaurant_id: data.restaurant_id ?? null,
         warehouse_id,
         outlet_id,
+        scheduled_for: data.scheduled_for ?? null,
       })
       .select("id, created_at")
       .single();
@@ -253,4 +255,25 @@ export const listOrders = createServerFn({ method: "GET" })
       .limit(50);
     if (error) throw new Error(error.message);
     return data ?? [];
+  });
+
+export const cancelOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error: selErr } = await supabase
+      .from("orders")
+      .select("id, status, user_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (selErr) throw new Error(selErr.message);
+    if (!row || row.user_id !== userId) throw new Error("Order not found");
+    if (row.status !== "placed") throw new Error("Order can no longer be cancelled");
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "cancelled" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });

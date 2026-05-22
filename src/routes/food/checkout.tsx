@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
+import { DeliverySlotPicker } from "@/components/site/DeliverySlotPicker";
 import {
   ArrowLeft, ArrowRight, Check, Clock, CreditCard, Home as HomeIcon,
   MapPin, Smartphone, Wallet, Tag,
@@ -46,6 +47,7 @@ function FoodCheckoutPage() {
   const [step, setStep] = useState<Step>(1);
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [payment, setPayment] = useState<PaymentMethod>("upi");
+  const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [saveAddr, setSaveAddr] = useState(true);
   const { data: availableCoupons = [] } = useQuery({
@@ -138,6 +140,7 @@ function FoodCheckoutPage() {
         restaurant_id: totals.items[0]?.restaurantId,
         coupon_id: couponData?.id ?? null,
         coupon_discount: discount,
+        scheduled_for: scheduledFor,
       };
       const row = await placeOrderRpc({ data: payload });
       if (saveAddr) { try { await saveAddressRpc({ data: payload.address }); } catch { /* ignore */ } }
@@ -188,7 +191,7 @@ function FoodCheckoutPage() {
         <div className="mt-6 grid gap-6 md:grid-cols-[1fr_360px]">
           <div className="rounded-2xl border bg-card p-5 shadow-card md:p-6">
             {step === 1 && <AddressStep address={address} setAddress={setAddress} saveAddr={saveAddr} setSaveAddr={setSaveAddr} />}
-            {step === 2 && <PaymentStep payment={payment} setPayment={setPayment} />}
+            {step === 2 && (<><PaymentStep payment={payment} setPayment={setPayment} /><div className="mt-5"><DeliverySlotPicker value={scheduledFor} onChange={setScheduledFor} baseEtaMins={outletQ.data?.outlet?.eta_mins ?? 30} /></div></>)}
             {step === 3 && <ReviewStep address={address} payment={payment} restaurantName={totals.items[0].restaurantName} itemsCount={totals.itemsCount} total={totals.total} />}
 
             <div className="mt-6 flex items-center justify-between gap-3 border-t pt-5">
