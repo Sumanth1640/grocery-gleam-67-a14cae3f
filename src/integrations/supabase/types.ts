@@ -304,6 +304,9 @@ export type Database = {
           items: Json
           outlet_id: string | null
           payment: string
+          payment_status: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
           restaurant_id: string | null
           scheduled_for: string | null
           status: string
@@ -320,6 +323,9 @@ export type Database = {
           items: Json
           outlet_id?: string | null
           payment: string
+          payment_status?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           restaurant_id?: string | null
           scheduled_for?: string | null
           status?: string
@@ -336,6 +342,9 @@ export type Database = {
           items?: Json
           outlet_id?: string | null
           payment?: string
+          payment_status?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           restaurant_id?: string | null
           scheduled_for?: string | null
           status?: string

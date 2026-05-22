@@ -7,6 +7,8 @@ import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
+import { createRazorpayOrder, verifyAndPlaceOrder } from "@/lib/razorpay.functions";
+import { openRazorpayCheckout } from "@/lib/razorpay-client";
 import { resolveWarehouseForPincode } from "@/lib/fulfillment.functions";
 import { useQuery } from "@tanstack/react-query";
 import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
@@ -112,6 +114,8 @@ function CheckoutPage() {
   const placeOrderRpc = useServerFn(placeOrderFn);
   const saveAddressRpc = useServerFn(createAddress);
   const resolveWhRpc = useServerFn(resolveWarehouseForPincode);
+  const createRpOrderRpc = useServerFn(createRazorpayOrder);
+  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
   const [saveAddr, setSaveAddr] = useState(true);
 
   const whQ = useQuery({
@@ -154,23 +158,59 @@ function CheckoutPage() {
         coupon_discount: discount,
         scheduled_for: scheduledFor,
       };
-      const row = await placeOrderRpc({ data: payload });
-      if (saveAddr) {
-        try { await saveAddressRpc({ data: payload.address }); } catch { /* ignore */ }
+
+      const finalize = (row: { id: string; created_at: string }) => {
+        if (saveAddr) { saveAddressRpc({ data: payload.address }).catch(() => { /* ignore */ }); }
+        orderStore.place({
+          id: row.id,
+          items: totals.items,
+          address,
+          payment,
+          subtotal: totals.subtotal,
+          delivery: totals.delivery,
+          total: totals.total,
+          placedAt: new Date(row.created_at).getTime(),
+          eta: "11 minutes",
+        });
+        cartStore.clear();
+        navigate({ to: "/order-success" });
+      };
+
+      if (payment === "cod") {
+        const row = await placeOrderRpc({ data: payload });
+        finalize(row);
+        return;
       }
-      orderStore.place({
-        id: row.id,
-        items: totals.items,
-        address,
-        payment,
-        subtotal: totals.subtotal,
-        delivery: totals.delivery,
-        total: totals.total,
-        placedAt: new Date(row.created_at).getTime(),
-        eta: "11 minutes",
+
+      const rp = await createRpOrderRpc({ data: { amount: payload.total } });
+      await openRazorpayCheckout({
+        key: rp.key_id,
+        amount: rp.amount,
+        currency: rp.currency,
+        order_id: rp.order_id,
+        name: "hallifresh",
+        description: `Grocery order · ${payload.items.length} item(s)`,
+        prefill: { name: payload.address.full_name, contact: payload.address.phone },
+        theme: { color: "#16a34a" },
+        method: payment === "upi" ? { upi: true, card: false, netbanking: false, wallet: false } : { card: true, upi: false, netbanking: false, wallet: false },
+        modal: { ondismiss: () => { setSubmitting(false); toast.message("Payment cancelled"); } },
+        handler: async (resp) => {
+          try {
+            const row = await verifyAndPlaceRpc({
+              data: {
+                razorpay_order_id: resp.razorpay_order_id,
+                razorpay_payment_id: resp.razorpay_payment_id,
+                razorpay_signature: resp.razorpay_signature,
+                order: { ...payload, payment: payment as "upi" | "card" },
+              },
+            });
+            finalize(row);
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Payment verification failed");
+            setSubmitting(false);
+          }
+        },
       });
-      cartStore.clear();
-      navigate({ to: "/order-success" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not place order");
       setSubmitting(false);
