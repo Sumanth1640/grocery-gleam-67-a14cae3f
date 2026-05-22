@@ -17,6 +17,13 @@ export interface RazorpayOptions {
   prefill?: { name?: string; email?: string; contact?: string };
   theme?: { color?: string };
   method?: { upi?: boolean; card?: boolean; netbanking?: boolean; wallet?: boolean };
+  config?: {
+    display?: {
+      blocks?: Record<string, { name: string; instruments: Array<{ method: string; flows?: string[] }> }>;
+      sequence?: string[];
+      preferences?: { show_default_blocks?: boolean };
+    };
+  };
   handler: (resp: {
     razorpay_order_id: string;
     razorpay_payment_id: string;
