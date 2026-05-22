@@ -132,6 +132,28 @@ function OrderDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // ----- Refund request -----
+  const refundFetchRpc = useServerFn(myRefundForOrder);
+  const refundCreateRpc = useServerFn(createRefundRequest);
+  const refundQ = useQuery({
+    queryKey: ["refund", id],
+    queryFn: () => refundFetchRpc({ data: { order_id: id } }),
+    enabled: !!order && order.status !== "placed",
+  });
+  const [showRefund, setShowRefund] = useState(false);
+  const [refundReason, setRefundReason] = useState("Item missing");
+  const [refundDetails, setRefundDetails] = useState("");
+  const refundM = useMutation({
+    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0 } }),
+    onSuccess: () => {
+      toast.success("Refund request submitted");
+      setShowRefund(false); setRefundDetails("");
+      qc.invalidateQueries({ queryKey: ["refund", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const canRequestRefund = !!order && (order.status === "delivered" || order.status === "cancelled" || order.status === "out_for_delivery") && !refundQ.data;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
