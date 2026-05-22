@@ -81,11 +81,51 @@ function MenuPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["my-dishes"] }),
   });
 
+  const bulkFn = useServerFn(bulkImportDishes);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const bulk = useMutation({
+    mutationFn: (dishes: any[]) => bulkFn({ data: { dishes } }),
+    onSuccess: (r) => { toast.success(`Imported ${r.inserted} dishes`); qc.invalidateQueries({ queryKey: ["my-dishes"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const onCsvFile = async (file: File) => {
+    const text = await file.text();
+    const rows = parseCsv(text);
+    if (rows.length === 0) return toast.error("CSV is empty or missing rows");
+    const dishes = rows.map((r) => ({
+      name: r.name,
+      description: r.description ?? "",
+      image: r.image ?? "",
+      price: Number(r.price || 0),
+      mrp: r.mrp ? Number(r.mrp) : null,
+      veg: toBool(r.veg, true),
+      spicy: toBool(r.spicy, false),
+      bestseller: toBool(r.bestseller, false),
+      section: r.section || "Mains",
+      in_stock: toBool(r.in_stock, true),
+    })).filter((d) => d.name && d.price >= 0);
+    if (dishes.length === 0) return toast.error("No valid rows found (need name + price)");
+    bulk.mutate(dishes);
+  };
+
+  const downloadTemplate = () => {
+    const blob = new Blob([CSV_TEMPLATE], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "menu-template.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-display text-2xl font-bold">Menu</h1>
-        <button onClick={() => setEditing({ form: emptyDish })} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-pop"><Plus className="h-4 w-4" /> Add dish</button>
+        <div className="flex flex-wrap gap-2">
+          <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onCsvFile(f); e.target.value = ""; }} />
+          <button onClick={downloadTemplate} className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-3 py-2 text-xs font-bold hover:bg-secondary"><Download className="h-3.5 w-3.5" /> Template</button>
+          <button disabled={bulk.isPending} onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-3 py-2 text-xs font-bold hover:bg-secondary disabled:opacity-60"><Upload className="h-3.5 w-3.5" /> {bulk.isPending ? "Importing…" : "Import CSV"}</button>
+          <button onClick={() => setEditing({ form: emptyDish })} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-pop"><Plus className="h-4 w-4" /> Add dish</button>
+        </div>
       </div>
       {q.isLoading ? <div className="grid place-items-center py-20"><Loader2 className="h-5 w-5 animate-spin" /></div> : (
         <ul className="mt-6 grid gap-3">
