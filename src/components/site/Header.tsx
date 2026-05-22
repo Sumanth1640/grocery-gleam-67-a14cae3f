@@ -2,8 +2,9 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, ShoppingCart, MapPin, ChevronDown, User as UserIcon, LogIn, Heart, Utensils, Bell } from "lucide-react";
+import { Search, ShoppingCart, User as UserIcon, LogIn, Heart, Utensils, Bell } from "lucide-react";
 import logo from "@/assets/hallifresh-logo.jpeg";
+import { DeliveryAddressChip } from "@/components/site/DeliveryAddressChip";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
@@ -39,14 +40,7 @@ export function Header() {
           </div>
         </Link>
 
-        <button className="hidden items-center gap-1 rounded-xl border bg-secondary/50 px-3 py-2 text-left text-xs hover:bg-secondary md:flex">
-          <MapPin className="h-4 w-4 text-primary" />
-          <div>
-            <div className="font-semibold">Deliver to</div>
-            <div className="text-muted-foreground">Set your location</div>
-          </div>
-          <ChevronDown className="ml-1 h-4 w-4" />
-        </button>
+        <DeliveryAddressChip className="hidden md:flex" />
 
         <Link
           to="/food"
