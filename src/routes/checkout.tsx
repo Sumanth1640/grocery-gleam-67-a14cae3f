@@ -27,7 +27,6 @@ import {
   MapPin,
   Smartphone,
   Wallet,
-
 } from "lucide-react";
 
 const searchSchema = z.object({ coupon: z.string().optional() });
@@ -82,7 +81,9 @@ function CheckoutPage() {
     const r = applyCoupon(availableCoupons, search.coupon, baseTotals.subtotal, myUsage);
     return r.ok ? r.coupon! : null;
   }, [availableCoupons, search.coupon, baseTotals.subtotal, myUsage]);
-  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, baseTotals.subtotal, myUsage).discount : 0;
+  const discount = couponData
+    ? applyCoupon(availableCoupons, couponData.code, baseTotals.subtotal, myUsage).discount
+    : 0;
   const totals = { ...baseTotals, total: baseTotals.subtotal + baseTotals.delivery - discount };
   const placeOrderRpc = useServerFn(placeOrderFn);
   const saveAddressRpc = useServerFn(createAddress);
@@ -97,7 +98,6 @@ function CheckoutPage() {
     enabled: /^\d{6}$/.test(address.pincode),
     staleTime: 60_000,
   });
-
 
   if (totals.itemsCount === 0) {
     return (
@@ -159,7 +159,11 @@ function CheckoutPage() {
       };
 
       const finalize = (row: { id: string; created_at: string }) => {
-        if (saveAddr) { saveAddressRpc({ data: payload.address }).catch(() => { /* ignore */ }); }
+        if (saveAddr) {
+          saveAddressRpc({ data: payload.address }).catch(() => {
+            /* ignore */
+          });
+        }
         orderStore.place({
           id: row.id,
           items: totals.items,
@@ -192,19 +196,27 @@ function CheckoutPage() {
         prefill: { name: payload.address.full_name, contact: payload.address.phone },
         theme: { color: "#16a34a" },
         method: payment === "upi" ? { upi: true } : { card: true },
-        config: payment === "upi" ? {
-          display: {
-            blocks: {
-              upiCollect: {
-                name: "Pay via UPI ID",
-                instruments: [{ method: "upi", flows: ["collect"] }],
-              },
-            },
-            sequence: ["block.upiCollect"],
-            preferences: { show_default_blocks: false },
+        config:
+          payment === "upi"
+            ? {
+                display: {
+                  blocks: {
+                    upiCollect: {
+                      name: "Pay via UPI ID",
+                      instruments: [{ method: "upi", flows: ["collect"] }],
+                    },
+                  },
+                  sequence: ["block.upiCollect"],
+                  preferences: { show_default_blocks: false },
+                },
+              }
+            : undefined,
+        modal: {
+          ondismiss: () => {
+            setSubmitting(false);
+            toast.message("Payment cancelled");
           },
-        } : undefined,
-        modal: { ondismiss: () => { setSubmitting(false); toast.message("Payment cancelled"); } },
+        },
         handler: async (resp) => {
           try {
             const row = await verifyAndPlaceRpc({
@@ -232,7 +244,10 @@ function CheckoutPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
-        <Link to="/cart" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
+        <Link
+          to="/cart"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to cart
         </Link>
         <h1 className="mt-2 font-display text-2xl font-bold md:text-3xl">Checkout</h1>
@@ -244,8 +259,21 @@ function CheckoutPage() {
             {step === 1 && (
               <>
                 <SavedAddressPicker
-                  onPick={(a) => setAddress({ ...address, fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, pincode: a.pincode, type: a.type })}
-                  activeSignature={address.line1 ? `${address.line1}|${address.pincode}` : undefined}
+                  onPick={(a) =>
+                    setAddress({
+                      ...address,
+                      fullName: a.fullName,
+                      phone: a.phone,
+                      line1: a.line1,
+                      line2: a.line2 ?? "",
+                      city: a.city,
+                      pincode: a.pincode,
+                      type: a.type,
+                    })
+                  }
+                  activeSignature={
+                    address.line1 ? `${address.line1}|${address.pincode}` : undefined
+                  }
                 />
                 <AddressStep address={address} setAddress={setAddress} />
               </>
@@ -255,13 +283,15 @@ function CheckoutPage() {
               <>
                 <PaymentStep payment={payment} setPayment={setPayment} />
                 <div className="mt-5">
-                  <DeliverySlotPicker value={scheduledFor} onChange={setScheduledFor} baseEtaMins={11} />
+                  <DeliverySlotPicker
+                    value={scheduledFor}
+                    onChange={setScheduledFor}
+                    baseEtaMins={11}
+                  />
                 </div>
               </>
             )}
-            {step === 3 && (
-              <ReviewStep address={address} payment={payment} totals={totals} />
-            )}
+            {step === 3 && <ReviewStep address={address} payment={payment} totals={totals} />}
 
             <div className="mt-6 flex items-center justify-between gap-3 border-t pt-5">
               <button
@@ -297,8 +327,12 @@ function CheckoutPage() {
             </div>
             {whQ.data?.serviceable && whQ.data.warehouse && (
               <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
-                <div className="font-bold text-primary">Delivered from {whQ.data.warehouse.name}</div>
-                <div className="text-muted-foreground">{whQ.data.warehouse.city} · {whQ.data.warehouse.pincode}</div>
+                <div className="font-bold text-primary">
+                  Delivered from {whQ.data.warehouse.name}
+                </div>
+                <div className="text-muted-foreground">
+                  {whQ.data.warehouse.city} · {whQ.data.warehouse.pincode}
+                </div>
               </div>
             )}
             {whQ.data && !whQ.data.serviceable && (
@@ -363,7 +397,11 @@ function Stepper({ step }: { step: Step }) {
             >
               {done ? <Check className="h-3.5 w-3.5" /> : n}
             </div>
-            <div className={`text-xs font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>{l}</div>
+            <div
+              className={`text-xs font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}
+            >
+              {l}
+            </div>
             {i < labels.length - 1 && <div className="ml-1 h-px flex-1 bg-border" />}
           </div>
         );
@@ -379,8 +417,7 @@ function AddressStep({
   address: Address;
   setAddress: (a: Address) => void;
 }) {
-  const set = <K extends keyof Address>(k: K, v: Address[K]) =>
-    setAddress({ ...address, [k]: v });
+  const set = <K extends keyof Address>(k: K, v: Address[K]) => setAddress({ ...address, [k]: v });
 
   return (
     <div>
@@ -392,7 +429,12 @@ function AddressStep({
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <Field label="Full name">
-          <input value={address.fullName} onChange={(e) => set("fullName", e.target.value)} className={inputCls} placeholder="Jane Doe" />
+          <input
+            value={address.fullName}
+            onChange={(e) => set("fullName", e.target.value)}
+            className={inputCls}
+            placeholder="Jane Doe"
+          />
         </Field>
         <Field label="Phone (10 digits)">
           <input
@@ -404,13 +446,28 @@ function AddressStep({
           />
         </Field>
         <Field label="Address line 1" className="sm:col-span-2">
-          <input value={address.line1} onChange={(e) => set("line1", e.target.value)} className={inputCls} placeholder="Flat / House no, Building" />
+          <input
+            value={address.line1}
+            onChange={(e) => set("line1", e.target.value)}
+            className={inputCls}
+            placeholder="Flat / House no, Building"
+          />
         </Field>
         <Field label="Address line 2 (optional)" className="sm:col-span-2">
-          <input value={address.line2 ?? ""} onChange={(e) => set("line2", e.target.value)} className={inputCls} placeholder="Street, Area, Landmark" />
+          <input
+            value={address.line2 ?? ""}
+            onChange={(e) => set("line2", e.target.value)}
+            className={inputCls}
+            placeholder="Street, Area, Landmark"
+          />
         </Field>
         <Field label="City">
-          <input value={address.city} onChange={(e) => set("city", e.target.value)} className={inputCls} placeholder="Mumbai" />
+          <input
+            value={address.city}
+            onChange={(e) => set("city", e.target.value)}
+            className={inputCls}
+            placeholder="Mumbai"
+          />
         </Field>
         <Field label="Pincode (6 digits)">
           <input
@@ -455,8 +512,18 @@ function PaymentStep({
 }) {
   const opts = [
     { id: "upi" as const, label: "UPI", desc: "GPay, PhonePe, Paytm and more", icon: Smartphone },
-    { id: "card" as const, label: "Credit / Debit card", desc: "Visa, Mastercard, RuPay", icon: CreditCard },
-    { id: "cod" as const, label: "Cash on delivery", desc: "Pay in cash when your order arrives", icon: Wallet },
+    {
+      id: "card" as const,
+      label: "Credit / Debit card",
+      desc: "Visa, Mastercard, RuPay",
+      icon: CreditCard,
+    },
+    {
+      id: "cod" as const,
+      label: "Cash on delivery",
+      desc: "Pay in cash when your order arrives",
+      icon: Wallet,
+    },
   ];
   return (
     <div>
@@ -474,14 +541,18 @@ function PaymentStep({
                 active ? "border-primary bg-primary/5 ring-focus" : "hover:bg-secondary"
               }`}
             >
-              <div className={`grid h-10 w-10 place-items-center rounded-lg ${active ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
+              <div
+                className={`grid h-10 w-10 place-items-center rounded-lg ${active ? "bg-primary text-primary-foreground" : "bg-secondary"}`}
+              >
                 <Icon className="h-5 w-5" />
               </div>
               <div className="flex-1">
                 <div className="text-sm font-bold">{o.label}</div>
                 <div className="text-xs text-muted-foreground">{o.desc}</div>
               </div>
-              <div className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? "border-primary" : "border-border"}`}>
+              <div
+                className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? "border-primary" : "border-border"}`}
+              >
                 {active && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
               </div>
             </button>
@@ -501,7 +572,8 @@ function ReviewStep({
   payment: PaymentMethod;
   totals: ReturnType<typeof cartTotals>;
 }) {
-  const payLabel = payment === "upi" ? "UPI" : payment === "card" ? "Credit / Debit card" : "Cash on delivery";
+  const payLabel =
+    payment === "upi" ? "UPI" : payment === "card" ? "Credit / Debit card" : "Cash on delivery";
   return (
     <div>
       <h2 className="font-display text-lg font-bold">Review your order</h2>
@@ -526,7 +598,9 @@ function ReviewStep({
         </Block>
 
         <Block title={`${totals.itemsCount} item${totals.itemsCount > 1 ? "s" : ""}`}>
-          <div className="text-xs text-muted-foreground">Total to pay: <span className="font-bold text-foreground">₹{totals.total}</span></div>
+          <div className="text-xs text-muted-foreground">
+            Total to pay: <span className="font-bold text-foreground">₹{totals.total}</span>
+          </div>
         </Block>
       </div>
     </div>
@@ -536,13 +610,23 @@ function ReviewStep({
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl border bg-secondary/30 p-4">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{title}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </div>
       <div className="mt-1.5">{children}</div>
     </div>
   );
 }
 
-function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <label className={`block ${className}`}>
       <div className="mb-1 text-xs font-semibold text-muted-foreground">{label}</div>

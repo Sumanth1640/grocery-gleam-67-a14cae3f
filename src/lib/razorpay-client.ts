@@ -3,7 +3,10 @@ let loadingPromise: Promise<void> | null = null;
 
 declare global {
   interface Window {
-    Razorpay?: new (options: RazorpayOptions) => { open: () => void; on: (e: string, cb: (r: unknown) => void) => void };
+    Razorpay?: new (options: RazorpayOptions) => {
+      open: () => void;
+      on: (e: string, cb: (r: unknown) => void) => void;
+    };
   }
 }
 
@@ -19,7 +22,10 @@ export interface RazorpayOptions {
   method?: { upi?: boolean; card?: boolean; netbanking?: boolean; wallet?: boolean };
   config?: {
     display?: {
-      blocks?: Record<string, { name: string; instruments: Array<{ method: string; flows?: string[] }> }>;
+      blocks?: Record<
+        string,
+        { name: string; instruments: Array<{ method: string; flows?: string[] }> }
+      >;
       sequence?: string[];
       preferences?: { show_default_blocks?: boolean };
     };
@@ -41,7 +47,10 @@ export function loadRazorpay(): Promise<void> {
     s.src = "https://checkout.razorpay.com/v1/checkout.js";
     s.async = true;
     s.onload = () => resolve();
-    s.onerror = () => { loadingPromise = null; reject(new Error("Failed to load Razorpay")); };
+    s.onerror = () => {
+      loadingPromise = null;
+      reject(new Error("Failed to load Razorpay"));
+    };
     document.head.appendChild(s);
   });
   return loadingPromise;
