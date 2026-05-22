@@ -14,6 +14,19 @@ async function ensureAdmin(supabase: any, userId: string) {
   if (!data) throw new Error("Admin role required");
 }
 
+/** Returns { isAdmin, warehouseIds } — throws if user is neither admin nor warehouse manager. */
+async function ensureAdminOrManager(userId: string): Promise<{ isAdmin: boolean; warehouseIds: string[] }> {
+  const [{ data: roleRow }, { data: whRows }] = await Promise.all([
+    supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
+    supabaseAdmin.from("warehouse_managers").select("warehouse_id").eq("user_id", userId),
+  ]);
+  const isAdmin = !!roleRow;
+  const warehouseIds = (whRows ?? []).map((r: any) => r.warehouse_id);
+  if (!isAdmin && warehouseIds.length === 0) throw new Error("Admin or warehouse-manager role required");
+  return { isAdmin, warehouseIds };
+}
+
+
 // ---------- Stats ----------
 export const adminStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -137,12 +150,14 @@ export const adminDeleteCategory = createServerFn({ method: "POST" })
 export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await ensureAdmin(context.supabase, context.userId);
-    const { data, error } = await supabaseAdmin
+    const { isAdmin, warehouseIds } = await ensureAdminOrManager(context.userId);
+    let q = supabaseAdmin
       .from("orders")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
+    if (!isAdmin) q = q.in("warehouse_id", warehouseIds);
+    const { data, error } = await q;
     if (error) throw new Error(error.message);
     const rows = data ?? [];
     const whIds = Array.from(new Set(rows.map((r: any) => r.warehouse_id).filter(Boolean))) as string[];
@@ -167,7 +182,13 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await ensureAdmin(context.supabase, context.userId);
+    const { isAdmin, warehouseIds } = await ensureAdminOrManager(context.userId);
+    if (!isAdmin) {
+      const { data: ord } = await supabaseAdmin.from("orders").select("warehouse_id").eq("id", data.id).maybeSingle();
+      if (!ord || !ord.warehouse_id || !warehouseIds.includes(ord.warehouse_id)) {
+        throw new Error("Not allowed for this order");
+      }
+    }
     const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
