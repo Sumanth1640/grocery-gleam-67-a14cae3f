@@ -102,6 +102,35 @@ function OrderDetailPage() {
     navigate({ to: "/cart" });
   };
 
+  const cancelRpc = useServerFn(cancelOrder);
+  const cancelM = useMutation({
+    mutationFn: () => cancelRpc({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Order cancelled");
+      qc.invalidateQueries({ queryKey: ["order", id] });
+      qc.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reviewRpc = useServerFn(upsertReview);
+  const [showReview, setShowReview] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [reviewBody, setReviewBody] = useState("");
+  const reviewM = useMutation({
+    mutationFn: async () => {
+      // Submit one review per distinct product in the order
+      const seen = new Set<string>();
+      for (const it of items) {
+        if (seen.has(it.product.id)) continue;
+        seen.add(it.product.id);
+        await reviewRpc({ data: { target_type: "product", target_id: it.product.id, rating, body: reviewBody || null, title: null } });
+      }
+    },
+    onSuccess: () => { toast.success("Thanks for your feedback!"); setShowReview(false); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -133,15 +162,76 @@ function OrderDetailPage() {
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   Placed {new Date(order.created_at).toLocaleString()}
+                  {(order as any).scheduled_for && (
+                    <> · Scheduled for {new Date((order as any).scheduled_for).toLocaleString()}</>
+                  )}
                 </div>
               </div>
-              <button
-                onClick={handleReorder}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-pop hover:opacity-95"
-              >
-                <Repeat className="h-3.5 w-3.5" /> Reorder
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => downloadInvoice(order as any)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold hover:bg-secondary"
+                >
+                  <Download className="h-3.5 w-3.5" /> Invoice
+                </button>
+                {order.status === "placed" && (
+                  <button
+                    onClick={() => { if (confirm("Cancel this order?")) cancelM.mutate(); }}
+                    disabled={cancelM.isPending}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-destructive/30 px-3 py-2 text-xs font-bold text-destructive hover:bg-destructive/5 disabled:opacity-50"
+                  >
+                    <X className="h-3.5 w-3.5" /> Cancel
+                  </button>
+                )}
+                <button
+                  onClick={handleReorder}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-pop hover:opacity-95"
+                >
+                  <Repeat className="h-3.5 w-3.5" /> Reorder
+                </button>
+              </div>
             </div>
+
+            {order.status === "delivered" && (
+              <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+                {!showReview ? (
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-sm font-semibold">How was your order? Help others by leaving a quick review.</div>
+                    <button onClick={() => setShowReview(true)} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-pop">
+                      <Star className="h-3.5 w-3.5" /> Rate items
+                    </button>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); reviewM.mutate(); }}
+                    className="space-y-3"
+                  >
+                    <div className="text-sm font-bold">Rate your order</div>
+                    <div className="inline-flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <button type="button" key={i} onClick={() => setRating(i + 1)} aria-label={`${i + 1} star`}>
+                          <Star className={`h-6 w-6 ${i < rating ? "fill-current text-success" : "text-muted-foreground opacity-40"}`} />
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      value={reviewBody}
+                      onChange={(e) => setReviewBody(e.target.value)}
+                      rows={3}
+                      maxLength={1000}
+                      placeholder="Share your experience (optional)"
+                      className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-focus"
+                    />
+                    <div className="flex gap-2">
+                      <button type="submit" disabled={reviewM.isPending} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-pop disabled:opacity-50">
+                        {reviewM.isPending ? "Submitting…" : "Submit review"}
+                      </button>
+                      <button type="button" onClick={() => setShowReview(false)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-secondary">Cancel</button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
 
             {/* Status timeline */}
             <div className="mt-6 rounded-2xl border bg-card p-6 shadow-card">
