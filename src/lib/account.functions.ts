@@ -200,6 +200,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         restaurant_id: data.restaurant_id ?? null,
         warehouse_id,
         outlet_id,
+        scheduled_for: data.scheduled_for ?? null,
       })
       .select("id, created_at")
       .single();
