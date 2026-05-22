@@ -140,6 +140,7 @@ function FoodCheckoutPage() {
         restaurant_id: totals.items[0]?.restaurantId,
         coupon_id: couponData?.id ?? null,
         coupon_discount: discount,
+        scheduled_for: scheduledFor,
       };
       const row = await placeOrderRpc({ data: payload });
       if (saveAddr) { try { await saveAddressRpc({ data: payload.address }); } catch { /* ignore */ } }
