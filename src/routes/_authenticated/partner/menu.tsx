@@ -176,6 +176,41 @@ function MenuPage() {
                   </select>
                 </label>
               )}
+              <div className="rounded-xl border bg-secondary/30 p-3">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Availability schedule</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {DAY_LABELS.map((label, idx) => {
+                    const active = editing.form.available_days.includes(idx);
+                    return (
+                      <button
+                        type="button"
+                        key={idx}
+                        onClick={() => {
+                          const next = active
+                            ? editing.form.available_days.filter((d) => d !== idx)
+                            : [...editing.form.available_days, idx].sort((a, b) => a - b);
+                          if (next.length === 0) return;
+                          setEditing({ ...editing, form: { ...editing.form, available_days: next } });
+                        }}
+                        className={`rounded-lg px-2 py-1 text-[11px] font-bold ${active ? "bg-primary text-primary-foreground" : "border bg-background text-muted-foreground"}`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <label className="text-xs font-semibold">
+                    <span className="mb-1 block text-muted-foreground">From</span>
+                    <input type="time" value={editing.form.available_from} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, available_from: e.target.value } })} className="w-full rounded-lg border bg-background px-2 py-1.5 text-sm" />
+                  </label>
+                  <label className="text-xs font-semibold">
+                    <span className="mb-1 block text-muted-foreground">To</span>
+                    <input type="time" value={editing.form.available_to} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, available_to: e.target.value } })} className="w-full rounded-lg border bg-background px-2 py-1.5 text-sm" />
+                  </label>
+                </div>
+                <div className="mt-1 text-[10px] text-muted-foreground">Dish is hidden from customers outside this window.</div>
+              </div>
               <div className="flex flex-wrap gap-3 text-xs font-semibold">
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.veg} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, veg: e.target.checked } })} /> Veg</label>
                 <label className="inline-flex items-center gap-1"><input type="checkbox" checked={editing.form.spicy} onChange={(e) => setEditing({ ...editing, form: { ...editing.form, spicy: e.target.checked } })} /> Spicy</label>
