@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Instagram, Facebook, Mail } from "lucide-react";
 import logo from "@/assets/hallifresh-logo.jpeg";
 
 export function Footer() {
@@ -13,6 +14,33 @@ export function Footer() {
           <p className="mt-3 text-sm text-muted-foreground">
             Fresh from farm to home. Hand-picked vegetables and groceries delivered to your door.
           </p>
+          <div className="mt-4 flex items-center gap-2">
+            <a
+              href="https://www.instagram.com/hallifreshveggies?igsh=bzNxemw0ZWZybXVh"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram"
+              className="grid h-9 w-9 place-items-center rounded-full border bg-card text-foreground/80 transition hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
+            >
+              <Instagram className="h-4 w-4" />
+            </a>
+            <a
+              href="https://www.facebook.com/share/1DoTqcfpGd/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook"
+              className="grid h-9 w-9 place-items-center rounded-full border bg-card text-foreground/80 transition hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
+            >
+              <Facebook className="h-4 w-4" />
+            </a>
+            <a
+              href="mailto:support@hallifresh.com"
+              aria-label="Email"
+              className="grid h-9 w-9 place-items-center rounded-full border bg-card text-foreground/80 transition hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
+            >
+              <Mail className="h-4 w-4" />
+            </a>
+          </div>
         </div>
         <div>
           <h4 className="text-sm font-semibold">Shop</h4>
