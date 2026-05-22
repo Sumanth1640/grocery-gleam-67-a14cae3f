@@ -14,6 +14,19 @@ async function ensureAdmin(supabase: any, userId: string) {
   if (!data) throw new Error("Admin role required");
 }
 
+/** Returns { isAdmin, warehouseIds } — throws if user is neither admin nor warehouse manager. */
+async function ensureAdminOrManager(userId: string): Promise<{ isAdmin: boolean; warehouseIds: string[] }> {
+  const [{ data: roleRow }, { data: whRows }] = await Promise.all([
+    supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
+    supabaseAdmin.from("warehouse_managers").select("warehouse_id").eq("user_id", userId),
+  ]);
+  const isAdmin = !!roleRow;
+  const warehouseIds = (whRows ?? []).map((r: any) => r.warehouse_id);
+  if (!isAdmin && warehouseIds.length === 0) throw new Error("Admin or warehouse-manager role required");
+  return { isAdmin, warehouseIds };
+}
+
+
 // ---------- Stats ----------
 export const adminStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
