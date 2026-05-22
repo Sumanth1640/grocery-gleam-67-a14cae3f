@@ -201,7 +201,12 @@ function CheckoutPage() {
             )}
 
             {step === 2 && (
-              <PaymentStep payment={payment} setPayment={setPayment} />
+              <>
+                <PaymentStep payment={payment} setPayment={setPayment} />
+                <div className="mt-5">
+                  <DeliverySlotPicker value={scheduledFor} onChange={setScheduledFor} baseEtaMins={11} />
+                </div>
+              </>
             )}
             {step === 3 && (
               <ReviewStep address={address} payment={payment} totals={totals} />
