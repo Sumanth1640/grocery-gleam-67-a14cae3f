@@ -146,35 +146,74 @@ function FoodCheckoutPage() {
         coupon_discount: discount,
         scheduled_for: scheduledFor,
       };
-      const row = await placeOrderRpc({ data: payload });
-      if (saveAddr) { try { await saveAddressRpc({ data: payload.address }); } catch { /* ignore */ } }
-      orderStore.place({
-        id: row.id,
-        items: totals.items.map((it) => ({
-          product: {
-            id: it.lineId,
-            slug: it.lineId,
-            name: it.name,
-            category_slug: "food",
-            image: it.image,
-            weight: it.restaurantName,
-            price: it.unitPrice,
-            mrp: it.unitPrice,
-            eta: "30 min",
-            rating: 4.5,
-            in_stock: true,
-          },
-          qty: it.qty,
-        })),
-        address, payment,
-        subtotal: totals.subtotal,
-        delivery: totals.delivery,
-        total: totals.total,
-        placedAt: new Date(row.created_at).getTime(),
-        eta: "30 minutes",
+
+      const finalize = (row: { id: string; created_at: string }) => {
+        if (saveAddr) { saveAddressRpc({ data: payload.address }).catch(() => { /* ignore */ }); }
+        orderStore.place({
+          id: row.id,
+          items: totals.items.map((it) => ({
+            product: {
+              id: it.lineId,
+              slug: it.lineId,
+              name: it.name,
+              category_slug: "food",
+              image: it.image,
+              weight: it.restaurantName,
+              price: it.unitPrice,
+              mrp: it.unitPrice,
+              eta: "30 min",
+              rating: 4.5,
+              in_stock: true,
+            },
+            qty: it.qty,
+          })),
+          address, payment,
+          subtotal: totals.subtotal,
+          delivery: totals.delivery,
+          total: totals.total,
+          placedAt: new Date(row.created_at).getTime(),
+          eta: "30 minutes",
+        });
+        foodCartStore.clear();
+        navigate({ to: "/order-success" });
+      };
+
+      if (payment === "cod") {
+        const row = await placeOrderRpc({ data: payload });
+        finalize(row);
+        return;
+      }
+
+      // Online payment via Razorpay
+      const rp = await createRpOrderRpc({ data: { amount: payload.total } });
+      await openRazorpayCheckout({
+        key: rp.key_id,
+        amount: rp.amount,
+        currency: rp.currency,
+        order_id: rp.order_id,
+        name: "hallifresh",
+        description: `Food order · ${payload.items.length} item(s)`,
+        prefill: { name: payload.address.full_name, contact: payload.address.phone },
+        theme: { color: "#16a34a" },
+        method: payment === "upi" ? { upi: true, card: false, netbanking: false, wallet: false } : { card: true, upi: false, netbanking: false, wallet: false },
+        modal: { ondismiss: () => { setSubmitting(false); toast.message("Payment cancelled"); } },
+        handler: async (resp) => {
+          try {
+            const row = await verifyAndPlaceRpc({
+              data: {
+                razorpay_order_id: resp.razorpay_order_id,
+                razorpay_payment_id: resp.razorpay_payment_id,
+                razorpay_signature: resp.razorpay_signature,
+                order: { ...payload, payment: payment as "upi" | "card" },
+              },
+            });
+            finalize(row);
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Payment verification failed");
+            setSubmitting(false);
+          }
+        },
       });
-      foodCartStore.clear();
-      navigate({ to: "/order-success" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not place order");
       setSubmitting(false);
