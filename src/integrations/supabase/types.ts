@@ -56,6 +56,51 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          bg: string
+          created_at: string
+          cta_label: string
+          fg: string
+          id: string
+          image: string
+          is_active: boolean
+          link_to: string
+          sort_order: number
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          bg?: string
+          created_at?: string
+          cta_label?: string
+          fg?: string
+          id?: string
+          image?: string
+          is_active?: boolean
+          link_to?: string
+          sort_order?: number
+          subtitle?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          bg?: string
+          created_at?: string
+          cta_label?: string
+          fg?: string
+          id?: string
+          image?: string
+          is_active?: boolean
+          link_to?: string
+          sort_order?: number
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -208,6 +253,45 @@ export type Database = {
           read?: boolean
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      order_assignments: {
+        Row: {
+          assigned_at: string
+          created_at: string
+          delivered_at: string | null
+          id: string
+          notes: string
+          order_id: string
+          picked_up_at: string | null
+          rider_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          notes?: string
+          order_id: string
+          picked_up_at?: string | null
+          rider_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          notes?: string
+          order_id?: string
+          picked_up_at?: string | null
+          rider_id?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -723,6 +807,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_blocked: boolean
           phone: string | null
           updated_at: string
         }
@@ -731,6 +816,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          is_blocked?: boolean
           phone?: string | null
           updated_at?: string
         }
@@ -739,8 +825,48 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_blocked?: boolean
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      refund_requests: {
+        Row: {
+          admin_note: string
+          amount: number
+          created_at: string
+          details: string
+          id: string
+          order_id: string
+          reason: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string
+          amount?: number
+          created_at?: string
+          details?: string
+          id?: string
+          order_id: string
+          reason: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string
+          amount?: number
+          created_at?: string
+          details?: string
+          id?: string
+          order_id?: string
+          reason?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -777,6 +903,42 @@ export type Database = {
           title?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      riders: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string
+          phone: string
+          updated_at: string
+          vehicle: string
+          vehicle_no: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string
+          phone: string
+          updated_at?: string
+          vehicle?: string
+          vehicle_no?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string
+          phone?: string
+          updated_at?: string
+          vehicle?: string
+          vehicle_no?: string
         }
         Relationships: []
       }
