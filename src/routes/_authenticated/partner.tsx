@@ -19,6 +19,7 @@ const NAV = [
   { to: "/partner/menu", label: "Menu", icon: UtensilsCrossed, exact: false },
   { to: "/partner/outlets", label: "Outlets", icon: MapPin, exact: false },
   { to: "/partner/orders", label: "Orders", icon: ShoppingBag, exact: false },
+  { to: "/partner/payouts", label: "Payouts", icon: Wallet, exact: false },
 ] as const;
 
 function PartnerLayout() {
