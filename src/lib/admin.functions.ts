@@ -150,12 +150,14 @@ export const adminDeleteCategory = createServerFn({ method: "POST" })
 export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await ensureAdmin(context.supabase, context.userId);
-    const { data, error } = await supabaseAdmin
+    const { isAdmin, warehouseIds } = await ensureAdminOrManager(context.userId);
+    let q = supabaseAdmin
       .from("orders")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
+    if (!isAdmin) q = q.in("warehouse_id", warehouseIds);
+    const { data, error } = await q;
     if (error) throw new Error(error.message);
     const rows = data ?? [];
     const whIds = Array.from(new Set(rows.map((r: any) => r.warehouse_id).filter(Boolean))) as string[];
@@ -180,7 +182,13 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await ensureAdmin(context.supabase, context.userId);
+    const { isAdmin, warehouseIds } = await ensureAdminOrManager(context.userId);
+    if (!isAdmin) {
+      const { data: ord } = await supabaseAdmin.from("orders").select("warehouse_id").eq("id", data.id).maybeSingle();
+      if (!ord || !ord.warehouse_id || !warehouseIds.includes(ord.warehouse_id)) {
+        throw new Error("Not allowed for this order");
+      }
+    }
     const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
