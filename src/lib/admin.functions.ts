@@ -223,3 +223,103 @@ export const adminGetDocSignedUrl = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { url: signed.signedUrl };
   });
+
+// ---------- Analytics ----------
+export const adminAnalytics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ days: z.number().int().min(1).max(365).default(30) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const since = new Date();
+    since.setDate(since.getDate() - data.days + 1);
+    since.setHours(0, 0, 0, 0);
+    const { data: orders, error } = await supabaseAdmin
+      .from("orders")
+      .select("id, total, subtotal, items, created_at, status, payment, restaurant_id, warehouse_id")
+      .gte("created_at", since.toISOString())
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const list = (orders ?? []).filter((o: any) => o.status !== "cancelled");
+
+    // Daily revenue series
+    const byDay = new Map<string, { revenue: number; orders: number }>();
+    for (let i = 0; i < data.days; i++) {
+      const d = new Date(since);
+      d.setDate(since.getDate() + i);
+      const k = d.toISOString().slice(0, 10);
+      byDay.set(k, { revenue: 0, orders: 0 });
+    }
+    for (const o of list) {
+      const k = new Date(o.created_at).toISOString().slice(0, 10);
+      const cur = byDay.get(k) ?? { revenue: 0, orders: 0 };
+      cur.revenue += o.total ?? 0;
+      cur.orders += 1;
+      byDay.set(k, cur);
+    }
+    const series = Array.from(byDay.entries()).map(([date, v]) => ({ date, ...v }));
+
+    // Top items
+    const itemMap = new Map<string, { name: string; qty: number; revenue: number }>();
+    for (const o of list) {
+      const items = Array.isArray(o.items) ? o.items : [];
+      for (const it of items as any[]) {
+        const key = it.id ?? it.slug ?? it.name ?? "unknown";
+        const name = it.name ?? "Item";
+        const qty = Number(it.qty ?? it.quantity ?? 1);
+        const price = Number(it.price ?? 0);
+        const cur = itemMap.get(key) ?? { name, qty: 0, revenue: 0 };
+        cur.qty += qty;
+        cur.revenue += qty * price;
+        itemMap.set(key, cur);
+      }
+    }
+    const topItems = Array.from(itemMap.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+
+    // Payment split
+    const payments = new Map<string, number>();
+    for (const o of list) payments.set(o.payment ?? "other", (payments.get(o.payment ?? "other") ?? 0) + 1);
+
+    const revenue = list.reduce((s, o) => s + (o.total ?? 0), 0);
+    const aov = list.length ? Math.round(revenue / list.length) : 0;
+
+    return {
+      revenue,
+      orders: list.length,
+      aov,
+      series,
+      topItems,
+      paymentSplit: Array.from(payments.entries()).map(([k, v]) => ({ name: k, value: v })),
+    };
+  });
+
+// ---------- Settlements (admin overview) ----------
+export const adminSettlements = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ days: z.number().int().min(1).max(365).default(30) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const since = new Date();
+    since.setDate(since.getDate() - data.days + 1);
+    const { data: orders } = await supabaseAdmin
+      .from("orders")
+      .select("id, subtotal, total, restaurant_id, status, created_at")
+      .gte("created_at", since.toISOString())
+      .not("restaurant_id", "is", null);
+    const { data: restos } = await supabaseAdmin
+      .from("partner_restaurants")
+      .select("id, name, commission_rate");
+    const byResto = new Map<string, { name: string; commission_rate: number; gross: number; commission: number; payout: number; orders: number }>();
+    for (const r of restos ?? []) byResto.set(r.id, { name: r.name, commission_rate: r.commission_rate ?? 0, gross: 0, commission: 0, payout: 0, orders: 0 });
+    for (const o of orders ?? []) {
+      if (o.status === "cancelled") continue;
+      const r = byResto.get(o.restaurant_id!);
+      if (!r) continue;
+      const gross = o.subtotal ?? 0;
+      const commission = Math.round((gross * r.commission_rate) / 100);
+      r.gross += gross;
+      r.commission += commission;
+      r.payout += gross - commission;
+      r.orders += 1;
+    }
+    return Array.from(byResto.values()).filter((r) => r.orders > 0).sort((a, b) => b.payout - a.payout);
+  });

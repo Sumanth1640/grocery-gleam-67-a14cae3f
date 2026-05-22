@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,7 @@ import { signOut } from "@/lib/use-auth";
 
 const items = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, adminOnly: false },
+  { to: "/admin/analytics", label: "Analytics", icon: BarChart3, exact: false, adminOnly: true },
   { to: "/admin/products", label: "Products", icon: Package, exact: false, adminOnly: true },
   { to: "/admin/categories", label: "Categories", icon: FolderTree, exact: false, adminOnly: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false, adminOnly: false },

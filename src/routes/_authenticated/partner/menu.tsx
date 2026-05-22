@@ -1,16 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock } from "@/lib/partner.functions";
+import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock, bulkImportDishes } from "@/lib/partner.functions";
 import { listMyOutlets } from "@/lib/outlets.functions";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Pencil, X } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, X, Upload, Download } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/partner/menu")({
   component: MenuPage,
 });
+
+const CSV_HEADERS = ["name", "description", "image", "price", "mrp", "veg", "spicy", "bestseller", "section", "in_stock"] as const;
+const CSV_TEMPLATE = CSV_HEADERS.join(",") + "\nMargherita Pizza,Classic cheese,,249,299,true,false,true,Pizza,true\nVeg Burger,House special,,149,,true,false,false,Burgers,true\n";
+
+function parseCsv(text: string): Array<Record<string, string>> {
+  const lines = text.replace(/\r\n?/g, "\n").trim().split("\n").filter(Boolean);
+  if (lines.length < 2) return [];
+  const parseLine = (l: string) => {
+    const out: string[] = []; let cur = ""; let q = false;
+    for (let i = 0; i < l.length; i++) {
+      const c = l[i];
+      if (q) { if (c === '"' && l[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+      else { if (c === '"') q = true; else if (c === ",") { out.push(cur); cur = ""; } else cur += c; }
+    }
+    out.push(cur);
+    return out;
+  };
+  const headers = parseLine(lines[0]).map((h) => h.trim().toLowerCase());
+  return lines.slice(1).map((l) => {
+    const cells = parseLine(l);
+    const obj: Record<string, string> = {};
+    headers.forEach((h, i) => (obj[h] = (cells[i] ?? "").trim()));
+    return obj;
+  });
+}
+
+function toBool(s: string, def = false) {
+  if (!s) return def;
+  return ["true", "1", "yes", "y"].includes(s.toLowerCase());
+}
 
 type DishForm = {
   name: string; description: string; image: string; price: number; mrp: number | null;
@@ -51,11 +81,51 @@ function MenuPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["my-dishes"] }),
   });
 
+  const bulkFn = useServerFn(bulkImportDishes);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const bulk = useMutation({
+    mutationFn: (dishes: any[]) => bulkFn({ data: { dishes } }),
+    onSuccess: (r) => { toast.success(`Imported ${r.inserted} dishes`); qc.invalidateQueries({ queryKey: ["my-dishes"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const onCsvFile = async (file: File) => {
+    const text = await file.text();
+    const rows = parseCsv(text);
+    if (rows.length === 0) return toast.error("CSV is empty or missing rows");
+    const dishes = rows.map((r) => ({
+      name: r.name,
+      description: r.description ?? "",
+      image: r.image ?? "",
+      price: Number(r.price || 0),
+      mrp: r.mrp ? Number(r.mrp) : null,
+      veg: toBool(r.veg, true),
+      spicy: toBool(r.spicy, false),
+      bestseller: toBool(r.bestseller, false),
+      section: r.section || "Mains",
+      in_stock: toBool(r.in_stock, true),
+    })).filter((d) => d.name && d.price >= 0);
+    if (dishes.length === 0) return toast.error("No valid rows found (need name + price)");
+    bulk.mutate(dishes);
+  };
+
+  const downloadTemplate = () => {
+    const blob = new Blob([CSV_TEMPLATE], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "menu-template.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-display text-2xl font-bold">Menu</h1>
-        <button onClick={() => setEditing({ form: emptyDish })} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-pop"><Plus className="h-4 w-4" /> Add dish</button>
+        <div className="flex flex-wrap gap-2">
+          <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onCsvFile(f); e.target.value = ""; }} />
+          <button onClick={downloadTemplate} className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-3 py-2 text-xs font-bold hover:bg-secondary"><Download className="h-3.5 w-3.5" /> Template</button>
+          <button disabled={bulk.isPending} onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-3 py-2 text-xs font-bold hover:bg-secondary disabled:opacity-60"><Upload className="h-3.5 w-3.5" /> {bulk.isPending ? "Importing…" : "Import CSV"}</button>
+          <button onClick={() => setEditing({ form: emptyDish })} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-pop"><Plus className="h-4 w-4" /> Add dish</button>
+        </div>
       </div>
       {q.isLoading ? <div className="grid place-items-center py-20"><Loader2 className="h-5 w-5 animate-spin" /></div> : (
         <ul className="mt-6 grid gap-3">

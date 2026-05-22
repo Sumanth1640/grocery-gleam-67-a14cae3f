@@ -35,6 +35,7 @@ import { Route as AuthenticatedPartnerIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
 import { Route as AuthenticatedPartnerProfileRouteImport } from './routes/_authenticated/partner/profile'
+import { Route as AuthenticatedPartnerPayoutsRouteImport } from './routes/_authenticated/partner/payouts'
 import { Route as AuthenticatedPartnerOutletsRouteImport } from './routes/_authenticated/partner/outlets'
 import { Route as AuthenticatedPartnerOrdersRouteImport } from './routes/_authenticated/partner/orders'
 import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenticated/partner/menu'
@@ -46,6 +47,7 @@ import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin/coupons'
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin/categories'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -179,6 +181,12 @@ const AuthenticatedPartnerProfileRoute =
     path: '/profile',
     getParentRoute: () => AuthenticatedPartnerRoute,
   } as any)
+const AuthenticatedPartnerPayoutsRoute =
+  AuthenticatedPartnerPayoutsRouteImport.update({
+    id: '/payouts',
+    path: '/payouts',
+    getParentRoute: () => AuthenticatedPartnerRoute,
+  } as any)
 const AuthenticatedPartnerOutletsRoute =
   AuthenticatedPartnerOutletsRouteImport.update({
     id: '/outlets',
@@ -243,6 +251,12 @@ const AuthenticatedAdminCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -266,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -277,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
   '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
+  '/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -302,6 +318,7 @@ export interface FileRoutesByTo {
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -313,6 +330,7 @@ export interface FileRoutesByTo {
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
   '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
+  '/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -342,6 +360,7 @@ export interface FileRoutesById {
   '/food/offers': typeof FoodOffersRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -353,6 +372,7 @@ export interface FileRoutesById {
   '/_authenticated/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/_authenticated/partner/orders': typeof AuthenticatedPartnerOrdersRoute
   '/_authenticated/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
+  '/_authenticated/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/_authenticated/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -382,6 +402,7 @@ export interface FileRouteTypes {
     | '/food/offers'
     | '/p/$id'
     | '/food/'
+    | '/admin/analytics'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/orders'
@@ -393,6 +414,7 @@ export interface FileRouteTypes {
     | '/partner/menu'
     | '/partner/orders'
     | '/partner/outlets'
+    | '/partner/payouts'
     | '/partner/profile'
     | '/food/r/$slug'
     | '/admin/'
@@ -418,6 +440,7 @@ export interface FileRouteTypes {
     | '/food/offers'
     | '/p/$id'
     | '/food'
+    | '/admin/analytics'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/orders'
@@ -429,6 +452,7 @@ export interface FileRouteTypes {
     | '/partner/menu'
     | '/partner/orders'
     | '/partner/outlets'
+    | '/partner/payouts'
     | '/partner/profile'
     | '/food/r/$slug'
     | '/admin'
@@ -457,6 +481,7 @@ export interface FileRouteTypes {
     | '/food/offers'
     | '/p/$id'
     | '/food/'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/categories'
     | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/orders'
@@ -468,6 +493,7 @@ export interface FileRouteTypes {
     | '/_authenticated/partner/menu'
     | '/_authenticated/partner/orders'
     | '/_authenticated/partner/outlets'
+    | '/_authenticated/partner/payouts'
     | '/_authenticated/partner/profile'
     | '/food/r/$slug'
     | '/_authenticated/admin/'
@@ -679,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPartnerProfileRouteImport
       parentRoute: typeof AuthenticatedPartnerRoute
     }
+    '/_authenticated/partner/payouts': {
+      id: '/_authenticated/partner/payouts'
+      path: '/payouts'
+      fullPath: '/partner/payouts'
+      preLoaderRoute: typeof AuthenticatedPartnerPayoutsRouteImport
+      parentRoute: typeof AuthenticatedPartnerRoute
+    }
     '/_authenticated/partner/outlets': {
       id: '/_authenticated/partner/outlets'
       path: '/outlets'
@@ -756,10 +789,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCategoriesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
@@ -770,6 +811,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
@@ -797,6 +839,7 @@ interface AuthenticatedPartnerRouteChildren {
   AuthenticatedPartnerMenuRoute: typeof AuthenticatedPartnerMenuRoute
   AuthenticatedPartnerOrdersRoute: typeof AuthenticatedPartnerOrdersRoute
   AuthenticatedPartnerOutletsRoute: typeof AuthenticatedPartnerOutletsRoute
+  AuthenticatedPartnerPayoutsRoute: typeof AuthenticatedPartnerPayoutsRoute
   AuthenticatedPartnerProfileRoute: typeof AuthenticatedPartnerProfileRoute
   AuthenticatedPartnerIndexRoute: typeof AuthenticatedPartnerIndexRoute
 }
@@ -805,6 +848,7 @@ const AuthenticatedPartnerRouteChildren: AuthenticatedPartnerRouteChildren = {
   AuthenticatedPartnerMenuRoute: AuthenticatedPartnerMenuRoute,
   AuthenticatedPartnerOrdersRoute: AuthenticatedPartnerOrdersRoute,
   AuthenticatedPartnerOutletsRoute: AuthenticatedPartnerOutletsRoute,
+  AuthenticatedPartnerPayoutsRoute: AuthenticatedPartnerPayoutsRoute,
   AuthenticatedPartnerProfileRoute: AuthenticatedPartnerProfileRoute,
   AuthenticatedPartnerIndexRoute: AuthenticatedPartnerIndexRoute,
 }

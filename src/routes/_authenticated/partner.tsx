@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin } from "lucide-react";
+import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin, Wallet } from "lucide-react";
 import { OrderAlerts, OrderAlertsControl } from "@/components/partner/OrderAlerts";
 
 export const Route = createFileRoute("/_authenticated/partner")({
@@ -19,6 +19,7 @@ const NAV = [
   { to: "/partner/menu", label: "Menu", icon: UtensilsCrossed, exact: false },
   { to: "/partner/outlets", label: "Outlets", icon: MapPin, exact: false },
   { to: "/partner/orders", label: "Orders", icon: ShoppingBag, exact: false },
+  { to: "/partner/payouts", label: "Payouts", icon: Wallet, exact: false },
 ] as const;
 
 function PartnerLayout() {
