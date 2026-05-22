@@ -10,6 +10,8 @@ import { applyCoupon, listActiveCoupons, type Coupon } from "@/lib/public-coupon
 import { listMyCouponUsage } from "@/lib/coupons.functions";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
+import { createRazorpayOrder, verifyAndPlaceOrder } from "@/lib/razorpay.functions";
+import { openRazorpayCheckout } from "@/lib/razorpay-client";
 import { resolveOutletForRestaurant } from "@/lib/fulfillment.functions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,6 +95,8 @@ function FoodCheckoutPage() {
 
   const placeOrderRpc = useServerFn(placeOrderFn);
   const saveAddressRpc = useServerFn(createAddress);
+  const createRpOrderRpc = useServerFn(createRazorpayOrder);
+  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
   const resolveOutletRpc = useServerFn(resolveOutletForRestaurant);
 
   const restaurantId = totals.items[0]?.restaurantId;
