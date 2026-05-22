@@ -24,7 +24,7 @@ const STATUS_STEPS = [
 ] as const;
 
 export const Route = createFileRoute("/_authenticated/orders/$id")({
-  head: () => ({ meta: [{ title: "Order details — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Order details — hallifresh" }] }),
   component: OrderDetailPage,
 });
 

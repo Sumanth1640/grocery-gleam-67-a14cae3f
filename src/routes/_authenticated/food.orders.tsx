@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Loader2, Utensils, RotateCcw, MapPin, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/food/orders")({
-  head: () => ({ meta: [{ title: "Food orders — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Food orders — hallifresh" }] }),
   component: FoodOrdersPage,
 });
 

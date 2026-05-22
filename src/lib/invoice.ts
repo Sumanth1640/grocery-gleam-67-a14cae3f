@@ -47,7 +47,7 @@ export function downloadInvoice(order: OrderLike) {
   .total{font-size:18px;font-weight:800}
   .badge{display:inline-block;padding:2px 8px;border-radius:6px;background:#e8f5ee;color:#0a7a3f;font-size:11px;font-weight:700;text-transform:uppercase}
 </style></head><body>
-  <h1>freshcart</h1>
+  <h1>hallifresh</h1>
   <div class="muted">Tax invoice</div>
   <div class="grid">
     <div>
@@ -74,7 +74,7 @@ export function downloadInvoice(order: OrderLike) {
       <tr><td colspan="3" style="text-align:right" class="total">Total</td><td style="text-align:right" class="total">₹${order.total}</td></tr>
     </tfoot>
   </table>
-  <p class="muted" style="margin-top:32px">Thank you for shopping with freshcart.</p>
+  <p class="muted" style="margin-top:32px">Thank you for shopping with hallifresh.</p>
   <script>window.onload=()=>setTimeout(()=>window.print(),200);</script>
 </body></html>`;
 

@@ -349,7 +349,7 @@ function StepSubmit({ r, onSubmitted, onBack }: { r: Awaited<ReturnType<typeof m
 
       {r?.status === "approved" && (
         <div className="mt-5 rounded-xl border border-success/30 bg-success/10 p-4 text-sm text-success">
-          <b>You're live!</b> Customers can now find {r.name} on freshcart.
+          <b>You're live!</b> Customers can now find {r.name} on hallifresh.
         </div>
       )}
 

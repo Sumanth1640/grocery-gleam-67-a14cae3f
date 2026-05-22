@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/food/offers")({
   head: () => ({
     meta: [
-      { title: "Food offers & coupons — freshcart" },
+      { title: "Food offers & coupons — hallifresh" },
       { name: "description", content: "Browse the latest food delivery coupons, discounts, and restaurant deals." },
     ],
   }),

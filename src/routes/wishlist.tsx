@@ -8,7 +8,7 @@ import { Heart, Trash2, ShoppingCart, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/wishlist")({
-  head: () => ({ meta: [{ title: "Your wishlist — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Your wishlist — hallifresh" }] }),
   component: WishlistPage,
 });
 
@@ -26,7 +26,7 @@ function WishlistPage() {
     const url = `${window.location.origin}/wishlist?items=${encodeURIComponent(ids)}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "My freshcart wishlist", url });
+        await navigator.share({ title: "My hallifresh wishlist", url });
       } else {
         await navigator.clipboard.writeText(url);
         toast.success("Wishlist link copied");

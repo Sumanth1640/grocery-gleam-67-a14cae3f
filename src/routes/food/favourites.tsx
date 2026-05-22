@@ -8,7 +8,7 @@ import { Heart, Star, Clock, MapPin, ArrowRight, X } from "lucide-react";
 export const Route = createFileRoute("/food/favourites")({
   head: () => ({
     meta: [
-      { title: "Your favourite restaurants — freshcart" },
+      { title: "Your favourite restaurants — hallifresh" },
       { name: "description", content: "Quickly reorder from the restaurants you love." },
     ],
   }),

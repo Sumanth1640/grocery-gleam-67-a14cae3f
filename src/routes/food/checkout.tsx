@@ -24,7 +24,7 @@ import {
 const searchSchema = z.object({ coupon: z.string().optional() });
 
 export const Route = createFileRoute("/food/checkout")({
-  head: () => ({ meta: [{ title: "Food checkout — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Food checkout — hallifresh" }] }),
   validateSearch: (s) => searchSchema.parse(s),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;

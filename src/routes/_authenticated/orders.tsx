@@ -68,7 +68,7 @@ function OrderTracker({ status }: { status: string }) {
 }
 
 export const Route = createFileRoute("/_authenticated/orders")({
-  head: () => ({ meta: [{ title: "Your orders — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Your orders — hallifresh" }] }),
   component: OrdersPage,
 });
 

@@ -13,7 +13,7 @@ import { Bell, Check, CheckCheck, Loader2, Package, Tag, Trash2, Sparkles } from
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — freshcart" }] }),
+  head: () => ({ meta: [{ title: "Notifications — hallifresh" }] }),
   component: NotificationsPage,
 });
 

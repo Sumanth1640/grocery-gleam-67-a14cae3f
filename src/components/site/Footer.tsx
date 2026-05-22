@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Zap } from "lucide-react";
+import logo from "@/assets/hallifresh-logo.jpeg";
 
 export function Footer() {
   return (
@@ -7,13 +7,11 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground">
-              <Zap className="h-5 w-5" strokeWidth={2.5} />
-            </div>
-            <div className="font-display text-lg font-bold">freshcart</div>
+            <img src={logo} alt="HalliFresh Veggies" className="h-9 w-9 rounded-xl object-cover" />
+            <div className="font-display text-lg font-bold">HalliFresh</div>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
-            Groceries delivered in minutes. Fresh, fast, and hand-picked.
+            Fresh from farm to home. Hand-picked vegetables and groceries delivered to your door.
           </p>
         </div>
         <div>
@@ -45,7 +43,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} freshcart. Crafted with care.
+        © {new Date().getFullYear()} HalliFresh Veggies. Fresh from farm to home.
       </div>
     </footer>
   );

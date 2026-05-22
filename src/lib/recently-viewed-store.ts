@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { Product } from "./catalog-types";
 
-const STORAGE_KEY = "freshcart:recently-viewed";
+const STORAGE_KEY = "hallifresh:recently-viewed";
 const MAX = 12;
 
 let state: Product[] = (() => {

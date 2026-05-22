@@ -25,7 +25,7 @@ export type Order = {
   eta: string;
 };
 
-const KEY = "freshcart:lastOrder";
+const KEY = "hallifresh:lastOrder";
 
 let last: Order | null = (() => {
   if (typeof window === "undefined") return null;

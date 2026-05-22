@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { Product } from "./catalog-types";
 
 type WishState = Record<string, Product>;
-const STORAGE_KEY = "freshcart:wishlist";
+const STORAGE_KEY = "hallifresh:wishlist";
 
 let state: WishState = (() => {
   if (typeof window === "undefined") return {};

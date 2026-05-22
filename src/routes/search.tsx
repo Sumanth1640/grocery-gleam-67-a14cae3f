@@ -18,7 +18,7 @@ type Sort = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 export const Route = createFileRoute("/search")({
   validateSearch: (s) => searchSchema.parse(s),
   head: ({ match }) => ({
-    meta: [{ title: `Search${match.search.q ? ` "${match.search.q}"` : ""} — freshcart` }],
+    meta: [{ title: `Search${match.search.q ? ` "${match.search.q}"` : ""} — hallifresh` }],
   }),
   component: SearchPage,
 });

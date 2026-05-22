@@ -17,7 +17,7 @@ export type FoodCartItem = {
 
 type State = Record<string, FoodCartItem>;
 
-const KEY = "freshcart:foodCart";
+const KEY = "hallifresh:foodCart";
 
 let state: State = (() => {
   if (typeof window === "undefined") return {};

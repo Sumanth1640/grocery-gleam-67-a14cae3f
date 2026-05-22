@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/help")({
   head: () => ({
     meta: [
-      { title: "Help & Support — freshcart" },
+      { title: "Help & Support — hallifresh" },
       { name: "description", content: "Get help with your orders, refunds, payments, deliveries and account." },
     ],
   }),
@@ -165,7 +165,7 @@ function HelpPage() {
 
           <aside className="space-y-3">
             <ContactCard icon={<Phone className="h-5 w-5" />} title="Call us" detail="+91 1800 123 456" sub="Mon–Sun · 7am – 11pm" />
-            <ContactCard icon={<Mail className="h-5 w-5" />} title="Email" detail="support@freshcart.app" sub="Reply within 24h" />
+            <ContactCard icon={<Mail className="h-5 w-5" />} title="Email" detail="support@hallifresh.app" sub="Reply within 24h" />
             <ContactCard icon={<MessageCircle className="h-5 w-5" />} title="Live chat" detail="Available 24×7" sub="Tap the chat bubble" />
           </aside>
         </div>

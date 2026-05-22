@@ -14,7 +14,7 @@ import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight } from "lucide-re
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "freshcart — Groceries delivered in 11 minutes" },
+      { title: "hallifresh — Groceries delivered in 11 minutes" },
       { name: "description", content: "Order fruits, vegetables, dairy, snacks & more. Fresh groceries delivered to your door in minutes." },
     ],
   }),
