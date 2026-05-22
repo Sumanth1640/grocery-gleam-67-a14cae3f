@@ -152,6 +152,7 @@ function CheckoutPage() {
         total: totals.total,
         coupon_id: couponData?.id ?? null,
         coupon_discount: discount,
+        scheduled_for: scheduledFor,
       };
       const row = await placeOrderRpc({ data: payload });
       if (saveAddr) {
