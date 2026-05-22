@@ -47,6 +47,7 @@ function FoodCheckoutPage() {
   const [step, setStep] = useState<Step>(1);
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [payment, setPayment] = useState<PaymentMethod>("upi");
+  const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [saveAddr, setSaveAddr] = useState(true);
   const { data: availableCoupons = [] } = useQuery({
