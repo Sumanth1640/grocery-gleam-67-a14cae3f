@@ -1,16 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock } from "@/lib/partner.functions";
+import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock, bulkImportDishes } from "@/lib/partner.functions";
 import { listMyOutlets } from "@/lib/outlets.functions";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Pencil, X } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, X, Upload, Download } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/partner/menu")({
   component: MenuPage,
 });
+
+const CSV_HEADERS = ["name", "description", "image", "price", "mrp", "veg", "spicy", "bestseller", "section", "in_stock"] as const;
+const CSV_TEMPLATE = CSV_HEADERS.join(",") + "\nMargherita Pizza,Classic cheese,,249,299,true,false,true,Pizza,true\nVeg Burger,House special,,149,,true,false,false,Burgers,true\n";
+
+function parseCsv(text: string): Array<Record<string, string>> {
+  const lines = text.replace(/\r\n?/g, "\n").trim().split("\n").filter(Boolean);
+  if (lines.length < 2) return [];
+  const parseLine = (l: string) => {
+    const out: string[] = []; let cur = ""; let q = false;
+    for (let i = 0; i < l.length; i++) {
+      const c = l[i];
+      if (q) { if (c === '"' && l[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+      else { if (c === '"') q = true; else if (c === ",") { out.push(cur); cur = ""; } else cur += c; }
+    }
+    out.push(cur);
+    return out;
+  };
+  const headers = parseLine(lines[0]).map((h) => h.trim().toLowerCase());
+  return lines.slice(1).map((l) => {
+    const cells = parseLine(l);
+    const obj: Record<string, string> = {};
+    headers.forEach((h, i) => (obj[h] = (cells[i] ?? "").trim()));
+    return obj;
+  });
+}
+
+function toBool(s: string, def = false) {
+  if (!s) return def;
+  return ["true", "1", "yes", "y"].includes(s.toLowerCase());
+}
 
 type DishForm = {
   name: string; description: string; image: string; price: number; mrp: number | null;
