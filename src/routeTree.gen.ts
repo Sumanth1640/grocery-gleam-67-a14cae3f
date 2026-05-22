@@ -35,6 +35,7 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPartnerIndexRouteImport } from './routes/_authenticated/partner/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
+import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as AuthenticatedPartnerProfileRouteImport } from './routes/_authenticated/partner/profile'
 import { Route as AuthenticatedPartnerPayoutsRouteImport } from './routes/_authenticated/partner/payouts'
 import { Route as AuthenticatedPartnerOutletsRouteImport } from './routes/_authenticated/partner/outlets'
@@ -187,6 +188,12 @@ const FoodRSlugRoute = FoodRSlugRouteImport.update({
   path: '/food/r/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRazorpayWebhookRoute =
+  ApiPublicRazorpayWebhookRouteImport.update({
+    id: '/api/public/razorpay-webhook',
+    path: '/api/public/razorpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedPartnerProfileRoute =
   AuthenticatedPartnerProfileRouteImport.update({
     id: '/profile',
@@ -349,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
   '/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/partner/': typeof AuthenticatedPartnerIndexRoute
@@ -394,6 +402,7 @@ export interface FileRoutesByTo {
   '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
   '/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/partner': typeof AuthenticatedPartnerIndexRoute
@@ -443,6 +452,7 @@ export interface FileRoutesById {
   '/_authenticated/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
   '/_authenticated/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/_authenticated/partner/profile': typeof AuthenticatedPartnerProfileRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/partner/': typeof AuthenticatedPartnerIndexRoute
@@ -492,6 +502,7 @@ export interface FileRouteTypes {
     | '/partner/outlets'
     | '/partner/payouts'
     | '/partner/profile'
+    | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/admin/'
     | '/partner/'
@@ -537,6 +548,7 @@ export interface FileRouteTypes {
     | '/partner/outlets'
     | '/partner/payouts'
     | '/partner/profile'
+    | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/admin'
     | '/partner'
@@ -585,6 +597,7 @@ export interface FileRouteTypes {
     | '/_authenticated/partner/outlets'
     | '/_authenticated/partner/payouts'
     | '/_authenticated/partner/profile'
+    | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/partner/'
@@ -609,6 +622,7 @@ export interface RootRouteChildren {
   FoodOffersRoute: typeof FoodOffersRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
+  ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   FoodRSlugRoute: typeof FoodRSlugRoute
 }
 
@@ -794,6 +808,13 @@ declare module '@tanstack/react-router' {
       path: '/food/r/$slug'
       fullPath: '/food/r/$slug'
       preLoaderRoute: typeof FoodRSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/razorpay-webhook': {
+      id: '/api/public/razorpay-webhook'
+      path: '/api/public/razorpay-webhook'
+      fullPath: '/api/public/razorpay-webhook'
+      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/partner/profile': {
@@ -1049,6 +1070,7 @@ const rootRouteChildren: RootRouteChildren = {
   FoodOffersRoute: FoodOffersRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
+  ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   FoodRSlugRoute: FoodRSlugRoute,
 }
 export const routeTree = rootRouteImport
