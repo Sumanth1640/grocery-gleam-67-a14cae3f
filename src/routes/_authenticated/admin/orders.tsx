@@ -148,7 +148,11 @@ function OrdersAdmin() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Update status</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Fulfilled by</div>
+                        <div className="mt-1 text-sm font-semibold">
+                          {o.warehouse ? `${o.warehouse.name} (${o.warehouse.code})` : <span className="text-destructive">No warehouse assigned</span>}
+                        </div>
+                        <div className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Update status</div>
                         <select
                           value={o.status}
                           onChange={(e) => mut.mutate({ id: o.id, status: e.target.value as Status })}
