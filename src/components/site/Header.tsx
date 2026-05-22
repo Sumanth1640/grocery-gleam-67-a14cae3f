@@ -2,7 +2,8 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, ShoppingCart, MapPin, ChevronDown, Zap, User as UserIcon, LogIn, Heart, Utensils, Bell } from "lucide-react";
+import { Search, ShoppingCart, MapPin, ChevronDown, User as UserIcon, LogIn, Heart, Utensils, Bell } from "lucide-react";
+import logo from "@/assets/hallifresh-logo.jpeg";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
@@ -31,12 +32,10 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 md:gap-6">
         <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground shadow-pop">
-            <Zap className="h-5 w-5" strokeWidth={2.5} />
-          </div>
+          <img src={logo} alt="HalliFresh Veggies" className="h-10 w-10 rounded-xl object-cover shadow-pop" />
           <div className="hidden font-display text-lg font-bold leading-none tracking-tight sm:block">
-            fresh<span className="text-primary">cart</span>
-            <div className="text-[10px] font-medium text-muted-foreground">delivery in 11 mins</div>
+            Halli<span className="text-primary">Fresh</span>
+            <div className="text-[10px] font-medium text-muted-foreground">Fresh from Farm to Home</div>
           </div>
         </Link>
 
