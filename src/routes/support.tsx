@@ -6,7 +6,6 @@ import { BottomNav } from "@/components/site/BottomNav";
 import {
   Headphones,
   MessageCircle,
-  Phone,
   Mail,
   Search,
   Package,
@@ -21,6 +20,8 @@ import {
   Clock,
   CheckCircle2,
   ExternalLink,
+  Instagram,
+  Facebook,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -155,14 +156,20 @@ function SupportPage() {
 
           {/* Quick contact strip */}
           <div className="mt-5 flex flex-wrap gap-2">
-            <QuickAction href="tel:+911800123456" icon={<Phone className="h-4 w-4" />} label="Call 1800 123 456" />
+            <QuickAction href="mailto:support@hallifresh.com" icon={<Mail className="h-4 w-4" />} label="support@hallifresh.com" />
+            <QuickAction href="mailto:HallifreshVeggies@gmail.com" icon={<Mail className="h-4 w-4" />} label="HallifreshVeggies@gmail.com" />
             <QuickAction
-              href="https://wa.me/911800123456?text=Hi%20HalliFresh%2C%20I%20need%20help%20with"
-              icon={<MessageCircle className="h-4 w-4" />}
-              label="WhatsApp chat"
+              href="https://www.instagram.com/hallifreshveggies?igsh=bzNxemw0ZWZybXVh"
+              icon={<Instagram className="h-4 w-4" />}
+              label="Instagram"
               external
             />
-            <QuickAction href="mailto:support@hallifresh.app" icon={<Mail className="h-4 w-4" />} label="Email us" />
+            <QuickAction
+              href="https://www.facebook.com/share/1DoTqcfpGd/"
+              icon={<Facebook className="h-4 w-4" />}
+              label="Facebook"
+              external
+            />
           </div>
         </div>
       </section>
@@ -295,9 +302,10 @@ function SupportPage() {
           </form>
 
           <aside className="space-y-3">
-            <ContactCard icon={<Phone className="h-5 w-5" />} title="Call us" detail="+91 1800 123 456" sub="Mon–Sun · 7am – 11pm" href="tel:+911800123456" />
-            <ContactCard icon={<MessageCircle className="h-5 w-5" />} title="WhatsApp" detail="Chat with HalliFresh" sub="Replies in minutes" href="https://wa.me/911800123456" external />
-            <ContactCard icon={<Mail className="h-5 w-5" />} title="Email" detail="support@hallifresh.app" sub="Reply within 24h" href="mailto:support@hallifresh.app" />
+            <ContactCard icon={<Mail className="h-5 w-5" />} title="Support email" detail="support@hallifresh.com" sub="Reply within 24h" href="mailto:support@hallifresh.com" />
+            <ContactCard icon={<Mail className="h-5 w-5" />} title="Company email" detail="HallifreshVeggies@gmail.com" sub="For business & press" href="mailto:HallifreshVeggies@gmail.com" />
+            <ContactCard icon={<Instagram className="h-5 w-5" />} title="Instagram" detail="@hallifreshveggies" sub="DM us — replies in hours" href="https://www.instagram.com/hallifreshveggies?igsh=bzNxemw0ZWZybXVh" external />
+            <ContactCard icon={<Facebook className="h-5 w-5" />} title="Facebook" detail="HalliFresh Veggies" sub="Follow & message us" href="https://www.facebook.com/share/1DoTqcfpGd/" external />
             <div className="rounded-2xl border bg-gradient-to-br from-primary/10 to-brand/10 p-4 shadow-card">
               <div className="text-xs font-bold uppercase tracking-wider text-primary">Partner support</div>
               <div className="mt-1 text-sm font-bold">Are you a restaurant or rider?</div>
