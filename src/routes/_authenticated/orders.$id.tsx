@@ -256,6 +256,76 @@ function OrderDetailPage() {
               </div>
             )}
 
+            {/* Refund request */}
+            {order.status !== "placed" && (
+              <div className="mt-4">
+                {refundQ.data ? (
+                  <div className={`rounded-2xl border p-4 ${
+                    refundQ.data.status === "approved" ? "border-success/30 bg-success/5" :
+                    refundQ.data.status === "rejected" ? "border-destructive/30 bg-destructive/5" :
+                    "border-amber-500/30 bg-amber-500/5"
+                  }`}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <div className="text-sm font-bold capitalize">Refund {refundQ.data.status}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {refundQ.data.reason} · ₹{refundQ.data.amount} · Filed {new Date(refundQ.data.created_at).toLocaleDateString()}
+                        </div>
+                        {refundQ.data.admin_note && (
+                          <div className="mt-1 text-xs text-muted-foreground">Note: {refundQ.data.admin_note}</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : canRequestRefund ? (
+                  <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+                    {!showRefund ? (
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="text-sm font-semibold">Something wrong with this order? Request a refund.</div>
+                        <button onClick={() => setShowRefund(true)} className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-bold text-white shadow-pop hover:opacity-95">
+                          Request refund
+                        </button>
+                      </div>
+                    ) : (
+                      <form onSubmit={(e) => { e.preventDefault(); refundM.mutate(); }} className="space-y-3">
+                        <div className="text-sm font-bold">Refund request</div>
+                        <label className="block text-xs font-semibold">
+                          <span className="mb-1 block text-muted-foreground">Reason</span>
+                          <select value={refundReason} onChange={(e) => setRefundReason(e.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm">
+                            <option>Item missing</option>
+                            <option>Wrong item delivered</option>
+                            <option>Damaged / spoiled</option>
+                            <option>Quality issue</option>
+                            <option>Never delivered</option>
+                            <option>Other</option>
+                          </select>
+                        </label>
+                        <label className="block text-xs font-semibold">
+                          <span className="mb-1 block text-muted-foreground">Details (optional)</span>
+                          <textarea
+                            value={refundDetails}
+                            onChange={(e) => setRefundDetails(e.target.value)}
+                            rows={3}
+                            maxLength={1000}
+                            placeholder="Share more so we can help faster"
+                            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-focus"
+                          />
+                        </label>
+                        <div className="text-[11px] text-muted-foreground">Refund amount of ₹{order.total} will be reviewed by our team.</div>
+                        <div className="flex gap-2">
+                          <button type="submit" disabled={refundM.isPending} className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white shadow-pop disabled:opacity-50">
+                            {refundM.isPending ? "Submitting…" : "Submit request"}
+                          </button>
+                          <button type="button" onClick={() => setShowRefund(false)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-secondary">Cancel</button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+
             {/* Status timeline */}
             <div className="mt-6 rounded-2xl border bg-card p-6 shadow-card">
               <div className="text-sm font-bold text-foreground">Track your Order</div>
