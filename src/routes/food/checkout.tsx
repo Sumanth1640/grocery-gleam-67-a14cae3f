@@ -19,8 +19,16 @@ import { toast } from "sonner";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import { DeliverySlotPicker } from "@/components/site/DeliverySlotPicker";
 import {
-  ArrowLeft, ArrowRight, Check, Clock, CreditCard, Home as HomeIcon,
-  MapPin, Smartphone, Wallet, Tag,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Clock,
+  CreditCard,
+  Home as HomeIcon,
+  MapPin,
+  Smartphone,
+  Wallet,
+  Tag,
 } from "lucide-react";
 
 const searchSchema = z.object({ coupon: z.string().optional() });
@@ -39,7 +47,13 @@ export const Route = createFileRoute("/food/checkout")({
 type Step = 1 | 2 | 3;
 
 const emptyAddress: Address = {
-  fullName: "", phone: "", line1: "", line2: "", city: "", pincode: "", type: "Home",
+  fullName: "",
+  phone: "",
+  line1: "",
+  line2: "",
+  city: "",
+  pincode: "",
+  type: "Home",
 };
 
 function FoodCheckoutPage() {
@@ -67,8 +81,24 @@ function FoodCheckoutPage() {
     const r = applyCoupon(availableCoupons, search.coupon, foodCartTotals(cart).subtotal, myUsage);
     return r.ok ? r.coupon! : null;
   }, [availableCoupons, search.coupon, cart, myUsage]);
-  const discount = couponData ? applyCoupon(availableCoupons, couponData.code, foodCartTotals(cart).subtotal, myUsage).discount : 0;
+  const discount = couponData
+    ? applyCoupon(availableCoupons, couponData.code, foodCartTotals(cart).subtotal, myUsage)
+        .discount
+    : 0;
   const totals = foodCartTotals(cart, discount);
+  const placeOrderRpc = useServerFn(placeOrderFn);
+  const saveAddressRpc = useServerFn(createAddress);
+  const createRpOrderRpc = useServerFn(createRazorpayOrder);
+  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
+  const resolveOutletRpc = useServerFn(resolveOutletForRestaurant);
+
+  const restaurantId = totals.items[0]?.restaurantId;
+  const outletQ = useQuery({
+    queryKey: ["resolve-outlet", restaurantId],
+    queryFn: () => resolveOutletRpc({ data: { restaurant_id: restaurantId! } }),
+    enabled: !!restaurantId,
+    staleTime: 60_000,
+  });
 
   if (totals.itemsCount === 0) {
     return (
@@ -76,7 +106,10 @@ function FoodCheckoutPage() {
         <Header />
         <div className="mx-auto max-w-2xl px-4 py-24 text-center">
           <h1 className="font-display text-2xl font-bold">Your food cart is empty</h1>
-          <Link to="/food" className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-pop">
+          <Link
+            to="/food"
+            className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-pop"
+          >
             Browse restaurants
           </Link>
         </div>
@@ -93,26 +126,14 @@ function FoodCheckoutPage() {
     address.city.trim().length > 1 &&
     /^\d{6}$/.test(address.pincode);
 
-  const placeOrderRpc = useServerFn(placeOrderFn);
-  const saveAddressRpc = useServerFn(createAddress);
-  const createRpOrderRpc = useServerFn(createRazorpayOrder);
-  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
-  const resolveOutletRpc = useServerFn(resolveOutletForRestaurant);
-
-  const restaurantId = totals.items[0]?.restaurantId;
-  const outletQ = useQuery({
-    queryKey: ["resolve-outlet", restaurantId],
-    queryFn: () => resolveOutletRpc({ data: { restaurant_id: restaurantId! } }),
-    enabled: !!restaurantId,
-    staleTime: 60_000,
-  });
-
   const placeOrder = async () => {
     setSubmitting(true);
     try {
       // Map food line items to the order item schema
       const items = totals.items.map((it) => {
-        const summary = [it.variant?.name, ...it.addons.map((a) => a.name)].filter(Boolean).join(" + ");
+        const summary = [it.variant?.name, ...it.addons.map((a) => a.name)]
+          .filter(Boolean)
+          .join(" + ");
         return {
           product: {
             id: it.lineId,
@@ -148,7 +169,11 @@ function FoodCheckoutPage() {
       };
 
       const finalize = (row: { id: string; created_at: string }) => {
-        if (saveAddr) { saveAddressRpc({ data: payload.address }).catch(() => { /* ignore */ }); }
+        if (saveAddr) {
+          saveAddressRpc({ data: payload.address }).catch(() => {
+            /* ignore */
+          });
+        }
         orderStore.place({
           id: row.id,
           items: totals.items.map((it) => ({
@@ -167,7 +192,8 @@ function FoodCheckoutPage() {
             },
             qty: it.qty,
           })),
-          address, payment,
+          address,
+          payment,
           subtotal: totals.subtotal,
           delivery: totals.delivery,
           total: totals.total,
@@ -195,8 +221,28 @@ function FoodCheckoutPage() {
         description: `Food order · ${payload.items.length} item(s)`,
         prefill: { name: payload.address.full_name, contact: payload.address.phone },
         theme: { color: "#16a34a" },
-        // Don't restrict methods — let Razorpay show all enabled flows (QR + Collect + Intent for UPI)
-        modal: { ondismiss: () => { setSubmitting(false); toast.message("Payment cancelled"); } },
+        method: payment === "upi" ? { upi: true } : { card: true },
+        config:
+          payment === "upi"
+            ? {
+                display: {
+                  blocks: {
+                    upiCollect: {
+                      name: "Pay via UPI ID",
+                      instruments: [{ method: "upi", flows: ["collect"] }],
+                    },
+                  },
+                  sequence: ["block.upiCollect"],
+                  preferences: { show_default_blocks: false },
+                },
+              }
+            : undefined,
+        modal: {
+          ondismiss: () => {
+            setSubmitting(false);
+            toast.message("Payment cancelled");
+          },
+        },
         handler: async (resp) => {
           try {
             const row = await verifyAndPlaceRpc({
@@ -224,7 +270,10 @@ function FoodCheckoutPage() {
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Header />
       <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
-        <Link to="/food/cart" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
+        <Link
+          to="/food/cart"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to cart
         </Link>
         <h1 className="mt-2 font-display text-2xl font-bold md:text-3xl">Food checkout</h1>
@@ -233,44 +282,84 @@ function FoodCheckoutPage() {
 
         <div className="mt-6 grid gap-6 md:grid-cols-[1fr_360px]">
           <div className="rounded-2xl border bg-card p-5 shadow-card md:p-6">
-            {step === 1 && <AddressStep address={address} setAddress={setAddress} saveAddr={saveAddr} setSaveAddr={setSaveAddr} />}
-            {step === 2 && (<><PaymentStep payment={payment} setPayment={setPayment} /><div className="mt-5"><DeliverySlotPicker value={scheduledFor} onChange={setScheduledFor} baseEtaMins={outletQ.data?.outlet?.eta_mins ?? 30} /></div></>)}
-            {step === 3 && <ReviewStep address={address} payment={payment} restaurantName={totals.items[0].restaurantName} itemsCount={totals.itemsCount} total={totals.total} />}
+            {step === 1 && (
+              <AddressStep
+                address={address}
+                setAddress={setAddress}
+                saveAddr={saveAddr}
+                setSaveAddr={setSaveAddr}
+              />
+            )}
+            {step === 2 && (
+              <>
+                <PaymentStep payment={payment} setPayment={setPayment} />
+                <div className="mt-5">
+                  <DeliverySlotPicker
+                    value={scheduledFor}
+                    onChange={setScheduledFor}
+                    baseEtaMins={outletQ.data?.outlet?.eta_mins ?? 30}
+                  />
+                </div>
+              </>
+            )}
+            {step === 3 && (
+              <ReviewStep
+                address={address}
+                payment={payment}
+                restaurantName={totals.items[0].restaurantName}
+                itemsCount={totals.itemsCount}
+                total={totals.total}
+              />
+            )}
 
             <div className="mt-6 flex items-center justify-between gap-3 border-t pt-5">
               <button
                 onClick={() => setStep((s) => (s > 1 ? ((s - 1) as Step) : s))}
                 disabled={step === 1}
                 className="rounded-xl border px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-              >Back</button>
+              >
+                Back
+              </button>
               {step < 3 ? (
                 <button
                   onClick={() => setStep((s) => (s + 1) as Step)}
                   disabled={step === 1 && !addressValid}
                   className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-pop disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-95"
-                >Continue <ArrowRight className="h-4 w-4" /></button>
+                >
+                  Continue <ArrowRight className="h-4 w-4" />
+                </button>
               ) : (
                 <button
                   onClick={placeOrder}
                   disabled={submitting}
                   className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-pop disabled:opacity-60 hover:opacity-95"
-                >{submitting ? "Placing order…" : `Pay ₹${totals.total}`}</button>
+                >
+                  {submitting ? "Placing order…" : `Pay ₹${totals.total}`}
+                </button>
               )}
             </div>
           </div>
 
           <aside className="h-fit rounded-2xl border bg-card p-5 shadow-card md:sticky md:top-20">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">
-              <Clock className="h-3.5 w-3.5" /> Delivery in {outletQ.data?.outlet?.eta_mins ?? 30}–{(outletQ.data?.outlet?.eta_mins ?? 30) + 5} min
+              <Clock className="h-3.5 w-3.5" /> Delivery in {outletQ.data?.outlet?.eta_mins ?? 30}–
+              {(outletQ.data?.outlet?.eta_mins ?? 30) + 5} min
             </div>
             {outletQ.data?.outlet && (
               <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
-                <div className="font-bold text-primary">From outlet: {outletQ.data.outlet.name}</div>
-                <div className="text-muted-foreground">{outletQ.data.outlet.area ?? ""}{outletQ.data.outlet.pincode ? ` · ${outletQ.data.outlet.pincode}` : ""}</div>
+                <div className="font-bold text-primary">
+                  From outlet: {outletQ.data.outlet.name}
+                </div>
+                <div className="text-muted-foreground">
+                  {outletQ.data.outlet.area ?? ""}
+                  {outletQ.data.outlet.pincode ? ` · ${outletQ.data.outlet.pincode}` : ""}
+                </div>
               </div>
             )}
             <h3 className="mt-4 font-display text-lg font-bold">Order summary</h3>
-            <div className="mt-1 text-xs text-muted-foreground">{totals.items[0].restaurantName}</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {totals.items[0].restaurantName}
+            </div>
             <ul className="mt-3 max-h-56 space-y-2 overflow-auto pr-1 text-xs">
               {totals.items.map((it) => (
                 <li key={it.lineId} className="flex items-center gap-2">
@@ -285,8 +374,14 @@ function FoodCheckoutPage() {
             </ul>
             <dl className="mt-4 space-y-1.5 border-t pt-4 text-sm">
               <Row label="Subtotal" value={`₹${totals.subtotal}`} />
-              {discount > 0 && <Row label={`Coupon (${couponData?.code})`} value={`- ₹${discount}`} positive />}
-              <Row label="Delivery" value={totals.delivery > 0 ? `₹${totals.delivery}` : "FREE"} positive={totals.delivery === 0} />
+              {discount > 0 && (
+                <Row label={`Coupon (${couponData?.code})`} value={`- ₹${discount}`} positive />
+              )}
+              <Row
+                label="Delivery"
+                value={totals.delivery > 0 ? `₹${totals.delivery}` : "FREE"}
+                positive={totals.delivery === 0}
+              />
               <Row label="Packaging" value={`₹${totals.packaging}`} />
               <Row label="Taxes" value={`₹${totals.taxes}`} />
             </dl>
@@ -314,13 +409,20 @@ function Stepper({ step }: { step: Step }) {
     <div className="mt-5 flex items-center gap-2">
       {labels.map((l, i) => {
         const n = (i + 1) as Step;
-        const active = n === step; const done = n < step;
+        const active = n === step;
+        const done = n < step;
         return (
           <div key={l} className="flex flex-1 items-center gap-2">
-            <div className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold transition ${done ? "bg-primary text-primary-foreground" : active ? "bg-foreground text-background" : "bg-secondary text-muted-foreground"}`}>
+            <div
+              className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold transition ${done ? "bg-primary text-primary-foreground" : active ? "bg-foreground text-background" : "bg-secondary text-muted-foreground"}`}
+            >
               {done ? <Check className="h-3.5 w-3.5" /> : n}
             </div>
-            <div className={`text-xs font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>{l}</div>
+            <div
+              className={`text-xs font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}
+            >
+              {l}
+            </div>
             {i < labels.length - 1 && <div className="ml-1 h-px flex-1 bg-border" />}
           </div>
         );
@@ -329,25 +431,93 @@ function Stepper({ step }: { step: Step }) {
   );
 }
 
-function AddressStep({ address, setAddress, saveAddr, setSaveAddr }: { address: Address; setAddress: (a: Address) => void; saveAddr: boolean; setSaveAddr: (b: boolean) => void }) {
+function AddressStep({
+  address,
+  setAddress,
+  saveAddr,
+  setSaveAddr,
+}: {
+  address: Address;
+  setAddress: (a: Address) => void;
+  saveAddr: boolean;
+  setSaveAddr: (b: boolean) => void;
+}) {
   const set = <K extends keyof Address>(k: K, v: Address[K]) => setAddress({ ...address, [k]: v });
-  const inputCls = "w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-focus";
+  const inputCls =
+    "w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-focus";
   return (
     <div>
-      <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /><h2 className="font-display text-lg font-bold">Delivery address</h2></div>
+      <div className="flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-primary" />
+        <h2 className="font-display text-lg font-bold">Delivery address</h2>
+      </div>
       <div className="mt-4">
         <SavedAddressPicker
           activeSignature={`${address.line1}|${address.pincode}`}
-          onPick={(a) => setAddress({ fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, pincode: a.pincode, type: a.type })}
+          onPick={(a) =>
+            setAddress({
+              fullName: a.fullName,
+              phone: a.phone,
+              line1: a.line1,
+              line2: a.line2 ?? "",
+              city: a.city,
+              pincode: a.pincode,
+              type: a.type,
+            })
+          }
         />
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <Field label="Full name"><input value={address.fullName} onChange={(e) => set("fullName", e.target.value)} className={inputCls} placeholder="Jane Doe" /></Field>
-        <Field label="Phone (10 digits)"><input value={address.phone} onChange={(e) => set("phone", e.target.value.replace(/\D/g, "").slice(0, 10))} inputMode="numeric" className={inputCls} placeholder="9876543210" /></Field>
-        <Field label="Address line 1" className="sm:col-span-2"><input value={address.line1} onChange={(e) => set("line1", e.target.value)} className={inputCls} placeholder="Flat / House no, Building" /></Field>
-        <Field label="Address line 2 (optional)" className="sm:col-span-2"><input value={address.line2 ?? ""} onChange={(e) => set("line2", e.target.value)} className={inputCls} placeholder="Street, Area, Landmark" /></Field>
-        <Field label="City"><input value={address.city} onChange={(e) => set("city", e.target.value)} className={inputCls} placeholder="Bangalore" /></Field>
-        <Field label="Pincode"><input value={address.pincode} onChange={(e) => set("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" className={inputCls} placeholder="560001" /></Field>
+        <Field label="Full name">
+          <input
+            value={address.fullName}
+            onChange={(e) => set("fullName", e.target.value)}
+            className={inputCls}
+            placeholder="Jane Doe"
+          />
+        </Field>
+        <Field label="Phone (10 digits)">
+          <input
+            value={address.phone}
+            onChange={(e) => set("phone", e.target.value.replace(/\D/g, "").slice(0, 10))}
+            inputMode="numeric"
+            className={inputCls}
+            placeholder="9876543210"
+          />
+        </Field>
+        <Field label="Address line 1" className="sm:col-span-2">
+          <input
+            value={address.line1}
+            onChange={(e) => set("line1", e.target.value)}
+            className={inputCls}
+            placeholder="Flat / House no, Building"
+          />
+        </Field>
+        <Field label="Address line 2 (optional)" className="sm:col-span-2">
+          <input
+            value={address.line2 ?? ""}
+            onChange={(e) => set("line2", e.target.value)}
+            className={inputCls}
+            placeholder="Street, Area, Landmark"
+          />
+        </Field>
+        <Field label="City">
+          <input
+            value={address.city}
+            onChange={(e) => set("city", e.target.value)}
+            className={inputCls}
+            placeholder="Bangalore"
+          />
+        </Field>
+        <Field label="Pincode">
+          <input
+            value={address.pincode}
+            onChange={(e) => set("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))}
+            inputMode="numeric"
+            className={inputCls}
+            placeholder="560001"
+          />
+        </Field>
       </div>
       <div className="mt-5">
         <div className="text-xs font-semibold text-muted-foreground">Save as</div>
@@ -355,7 +525,11 @@ function AddressStep({ address, setAddress, saveAddr, setSaveAddr }: { address: 
           {(["Home", "Work", "Other"] as const).map((t) => {
             const active = address.type === t;
             return (
-              <button key={t} onClick={() => set("type", t)} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? "border-primary bg-primary/10 text-primary" : "hover:bg-secondary"}`}>
+              <button
+                key={t}
+                onClick={() => set("type", t)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? "border-primary bg-primary/10 text-primary" : "hover:bg-secondary"}`}
+              >
                 <HomeIcon className="h-3.5 w-3.5" /> {t}
               </button>
             );
@@ -370,10 +544,21 @@ function AddressStep({ address, setAddress, saveAddr, setSaveAddr }: { address: 
   );
 }
 
-function PaymentStep({ payment, setPayment }: { payment: PaymentMethod; setPayment: (p: PaymentMethod) => void }) {
+function PaymentStep({
+  payment,
+  setPayment,
+}: {
+  payment: PaymentMethod;
+  setPayment: (p: PaymentMethod) => void;
+}) {
   const opts = [
     { id: "upi" as const, label: "UPI", desc: "GPay, PhonePe, Paytm and more", icon: Smartphone },
-    { id: "card" as const, label: "Credit / Debit card", desc: "Visa, Mastercard, RuPay", icon: CreditCard },
+    {
+      id: "card" as const,
+      label: "Credit / Debit card",
+      desc: "Visa, Mastercard, RuPay",
+      icon: CreditCard,
+    },
     { id: "cod" as const, label: "Cash on delivery", desc: "Pay in cash on arrival", icon: Wallet },
   ];
   return (
@@ -381,12 +566,28 @@ function PaymentStep({ payment, setPayment }: { payment: PaymentMethod; setPayme
       <h2 className="font-display text-lg font-bold">Payment method</h2>
       <div className="mt-5 space-y-2.5">
         {opts.map((o) => {
-          const active = payment === o.id; const Icon = o.icon;
+          const active = payment === o.id;
+          const Icon = o.icon;
           return (
-            <button key={o.id} onClick={() => setPayment(o.id)} className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition ${active ? "border-primary bg-primary/5 ring-focus" : "hover:bg-secondary"}`}>
-              <div className={`grid h-10 w-10 place-items-center rounded-lg ${active ? "bg-primary text-primary-foreground" : "bg-secondary"}`}><Icon className="h-5 w-5" /></div>
-              <div className="flex-1"><div className="text-sm font-bold">{o.label}</div><div className="text-xs text-muted-foreground">{o.desc}</div></div>
-              <div className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? "border-primary" : "border-border"}`}>{active && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}</div>
+            <button
+              key={o.id}
+              onClick={() => setPayment(o.id)}
+              className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition ${active ? "border-primary bg-primary/5 ring-focus" : "hover:bg-secondary"}`}
+            >
+              <div
+                className={`grid h-10 w-10 place-items-center rounded-lg ${active ? "bg-primary text-primary-foreground" : "bg-secondary"}`}
+              >
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-bold">{o.label}</div>
+                <div className="text-xs text-muted-foreground">{o.desc}</div>
+              </div>
+              <div
+                className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? "border-primary" : "border-border"}`}
+              >
+                {active && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
+              </div>
             </button>
           );
         })}
@@ -395,19 +596,45 @@ function PaymentStep({ payment, setPayment }: { payment: PaymentMethod; setPayme
   );
 }
 
-function ReviewStep({ address, payment, restaurantName, itemsCount, total }: { address: Address; payment: PaymentMethod; restaurantName: string; itemsCount: number; total: number }) {
-  const payLabel = payment === "upi" ? "UPI" : payment === "card" ? "Credit / Debit card" : "Cash on delivery";
+function ReviewStep({
+  address,
+  payment,
+  restaurantName,
+  itemsCount,
+  total,
+}: {
+  address: Address;
+  payment: PaymentMethod;
+  restaurantName: string;
+  itemsCount: number;
+  total: number;
+}) {
+  const payLabel =
+    payment === "upi" ? "UPI" : payment === "card" ? "Credit / Debit card" : "Cash on delivery";
   return (
     <div>
       <h2 className="font-display text-lg font-bold">Review your order</h2>
       <div className="mt-5 space-y-4">
-        <Block title="Ordering from"><div className="text-sm font-semibold">{restaurantName}</div></Block>
-        <Block title="Delivering to">
-          <div className="text-sm font-semibold">{address.fullName} <span className="text-muted-foreground">· {address.phone}</span></div>
-          <div className="text-xs text-muted-foreground">{address.line1}{address.line2 ? `, ${address.line2}` : ""}, {address.city} — {address.pincode}</div>
+        <Block title="Ordering from">
+          <div className="text-sm font-semibold">{restaurantName}</div>
         </Block>
-        <Block title="Paying with"><div className="text-sm font-semibold">{payLabel}</div></Block>
-        <Block title={`${itemsCount} item${itemsCount > 1 ? "s" : ""}`}><div className="text-xs text-muted-foreground">Total to pay: <span className="font-bold text-foreground">₹{total}</span></div></Block>
+        <Block title="Delivering to">
+          <div className="text-sm font-semibold">
+            {address.fullName} <span className="text-muted-foreground">· {address.phone}</span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {address.line1}
+            {address.line2 ? `, ${address.line2}` : ""}, {address.city} — {address.pincode}
+          </div>
+        </Block>
+        <Block title="Paying with">
+          <div className="text-sm font-semibold">{payLabel}</div>
+        </Block>
+        <Block title={`${itemsCount} item${itemsCount > 1 ? "s" : ""}`}>
+          <div className="text-xs text-muted-foreground">
+            Total to pay: <span className="font-bold text-foreground">₹{total}</span>
+          </div>
+        </Block>
       </div>
     </div>
   );
@@ -416,13 +643,23 @@ function ReviewStep({ address, payment, restaurantName, itemsCount, total }: { a
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl border bg-secondary/30 p-4">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{title}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </div>
       <div className="mt-1.5">{children}</div>
     </div>
   );
 }
 
-function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <label className={`block ${className}`}>
       <div className="mb-1 text-xs font-semibold text-muted-foreground">{label}</div>
