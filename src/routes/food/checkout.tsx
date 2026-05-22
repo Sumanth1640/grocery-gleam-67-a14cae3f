@@ -221,22 +221,6 @@ function FoodCheckoutPage() {
         description: `Food order · ${payload.items.length} item(s)`,
         prefill: { name: payload.address.full_name, contact: payload.address.phone },
         theme: { color: "#16a34a" },
-        method: payment === "upi" ? { upi: true } : { card: true },
-        config:
-          payment === "upi"
-            ? {
-                display: {
-                  blocks: {
-                    upiCollect: {
-                      name: "Pay via UPI ID",
-                      instruments: [{ method: "upi", flows: ["collect"] }],
-                    },
-                  },
-                  sequence: ["block.upiCollect"],
-                  preferences: { show_default_blocks: false },
-                },
-              }
-            : undefined,
         modal: {
           ondismiss: () => {
             setSubmitting(false);
