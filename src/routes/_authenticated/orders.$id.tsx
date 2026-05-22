@@ -1,15 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { getOrder } from "@/lib/account.functions";
+import { getOrder, cancelOrder } from "@/lib/account.functions";
 import { cartStore } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck, Download, X, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog-types";
+import { downloadInvoice } from "@/lib/invoice";
+import { upsertReview } from "@/lib/reviews.functions";
 
 type OrderItem = { product: Product; qty: number };
 
