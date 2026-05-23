@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { adminListRestaurants, adminSetRestaurantStatus, adminGetDocSignedUrl } from "@/lib/admin.functions";
+import { adminListRestaurants, adminSetRestaurantStatus, adminGetDocSignedUrl, adminSetRestaurantBlocked } from "@/lib/admin.functions";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, ExternalLink, FileText } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, ExternalLink, FileText, Lock, Unlock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/restaurants")({
   component: AdminRestaurantsPage,
