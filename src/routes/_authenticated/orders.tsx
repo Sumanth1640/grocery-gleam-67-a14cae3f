@@ -79,11 +79,29 @@ export const Route = createFileRoute("/_authenticated/orders")({
 function OrdersPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const fetchOrders = useServerFn(listOrders);
+  const { session } = useAuth();
+  const qc = useQueryClient();
+  const userId = session?.user.id;
+  const token = session?.access_token;
   const { data, isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: () => fetchOrders(),
     enabled: pathname === "/orders",
   });
+
+  useEffect(() => {
+    if (!userId) return;
+    if (token) {
+      try { supabase.realtime.setAuth(token); } catch { /* ignore */ }
+    }
+    const ch = supabase
+      .channel(`user-orders-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${userId}` }, () => {
+        qc.invalidateQueries({ queryKey: ["orders"] });
+      })
+      .subscribe();
+    return () => { void supabase.removeChannel(ch); };
+  }, [userId, token, qc]);
 
   if (pathname !== "/orders") {
     return <Outlet />;
