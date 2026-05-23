@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
-import { findRestaurant, type Dish, type Restaurant } from "@/lib/food-data";
+import { type Dish, type Restaurant } from "@/lib/food-data";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
 import { DishCustomizeDialog, VegBadge, QtyStepper } from "@/components/site/DishCustomizeDialog";
 import { ArrowLeft, Star, Clock, MapPin, Plus, Flame, Award, ShoppingBag, Heart } from "lucide-react";
@@ -20,8 +20,6 @@ export const Route = createFileRoute("/food/r/$slug")({
     meta: [{ title: `${params.slug} — Order online · hallifresh` }],
   }),
   loader: async ({ params }) => {
-    const local = findRestaurant(params.slug);
-    if (local) return local;
     const db = await getApprovedRestaurant({ data: { slug: params.slug } });
     if (!db) throw notFound();
     const dishes = (db.partner_dishes ?? []) as Array<{

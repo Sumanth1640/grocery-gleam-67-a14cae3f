@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
-import { RESTAURANTS, CUISINES, type Restaurant } from "@/lib/food-data";
+import { CUISINES, type Restaurant } from "@/lib/food-data";
 import { listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 import { Search, Star, Clock, MapPin, Filter, X, ChevronDown, Utensils, Heart } from "lucide-react";
@@ -53,7 +53,7 @@ function FoodHome() {
       offer: r.offer ?? undefined,
       menu: [],
     }));
-    return [...partners, ...RESTAURANTS];
+    return partners;
   }, [partnerQ.data]);
 
   const visible = useMemo(() => {
