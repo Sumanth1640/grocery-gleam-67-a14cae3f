@@ -239,7 +239,9 @@ function FoodCheckoutPage() {
             });
             finalize(row);
           } catch (e) {
-            toast.error(e instanceof Error ? e.message : "Payment verification failed");
+            console.error("verifyAndPlaceOrder failed:", e);
+            const msg = e instanceof Error ? e.message : "Payment verification failed";
+            toast.error(msg, { duration: 8000 });
             setSubmitting(false);
           }
         },
