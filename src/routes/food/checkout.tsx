@@ -160,7 +160,7 @@ function FoodCheckoutPage() {
         },
         payment,
         subtotal: totals.subtotal,
-        delivery: totals.delivery + totals.packaging + totals.taxes - discount,
+        delivery: Math.max(0, totals.delivery + totals.packaging + totals.taxes - discount),
         total: totals.total,
         restaurant_id: totals.items[0]?.restaurantId,
         coupon_id: couponData?.id ?? null,
