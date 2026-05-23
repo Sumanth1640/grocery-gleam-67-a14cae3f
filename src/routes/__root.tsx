@@ -135,7 +135,7 @@ function RootComponent() {
   );
 }
 
-const CUSTOMER_BLOCKED = ["/cart", "/checkout", "/order-success", "/search", "/account", "/wishlist", "/orders", "/c/", "/p/"];
+const CUSTOMER_BLOCKED = ["/cart", "/checkout", "/search", "/account", "/wishlist", "/orders", "/c/", "/p/"];
 
 function AdminGuard({ isAdmin }: { isAdmin: boolean }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
