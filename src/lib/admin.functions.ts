@@ -352,8 +352,9 @@ export const adminAnalytics = createServerFn({ method: "POST" })
     const payments = new Map<string, number>();
     for (const o of list) payments.set(o.payment ?? "other", (payments.get(o.payment ?? "other") ?? 0) + 1);
 
-    const revenue = list.reduce((s, o) => s + (o.total ?? 0), 0);
-    const aov = list.length ? Math.round(revenue / list.length) : 0;
+    const revenue = delivered.reduce((s, o) => s + (o.total ?? 0), 0);
+    const aov = delivered.length ? Math.round(revenue / delivered.length) : 0;
+
 
     return {
       revenue,
