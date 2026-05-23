@@ -72,7 +72,7 @@ export function AdminOrderAlerts() {
       toast(`[debug] INSERT ${row.id?.slice(0, 6)} · ₹${row.total}`, { duration: 4000 });
       invalidateAll();
       if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
-      if (soundRef.current) playBeep();
+      if (soundRef.current) playAlert("admin_order");
       toast.success(`New product order — ₹${row.total}`, {
         description: `Order #${row.id.slice(0, 6)} just placed`,
         duration: 8000,
