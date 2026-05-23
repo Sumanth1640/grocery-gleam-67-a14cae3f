@@ -20,8 +20,6 @@ export const Route = createFileRoute("/food/r/$slug")({
     meta: [{ title: `${params.slug} — Order online · hallifresh` }],
   }),
   loader: async ({ params }) => {
-    const local = findRestaurant(params.slug);
-    if (local) return local;
     const db = await getApprovedRestaurant({ data: { slug: params.slug } });
     if (!db) throw notFound();
     const dishes = (db.partner_dishes ?? []) as Array<{
