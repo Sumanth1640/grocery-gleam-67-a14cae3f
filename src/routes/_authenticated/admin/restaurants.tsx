@@ -88,9 +88,10 @@ function AdminRestaurantsPage() {
   );
 }
 
-function RestaurantRow({ r, onAction, pending }: {
+function RestaurantRow({ r, onAction, onToggleBlock, pending }: {
   r: any;
   onAction: (vars: { id: string; status: "approved" | "rejected" | "pending"; commission_rate?: number; rejection_reason?: string | null }) => void;
+  onToggleBlock: (vars: { id: string; is_blocked: boolean }) => void;
   pending: boolean;
 }) {
   const [open, setOpen] = useState(false);
