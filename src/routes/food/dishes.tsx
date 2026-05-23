@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
-import { RESTAURANTS, type Dish, type Restaurant } from "@/lib/food-data";
+import type { Dish, Restaurant } from "@/lib/food-data";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
 import { DishCustomizeDialog, VegBadge } from "@/components/site/DishCustomizeDialog";
 import { Search, Star, Flame, Plus, ShoppingBag, SlidersHorizontal, X } from "lucide-react";
