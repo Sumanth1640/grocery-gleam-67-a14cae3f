@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { adminListRestaurants, adminSetRestaurantStatus, adminGetDocSignedUrl } from "@/lib/admin.functions";
+import { adminListRestaurants, adminSetRestaurantStatus, adminGetDocSignedUrl, adminSetRestaurantBlocked } from "@/lib/admin.functions";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, ExternalLink, FileText } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, ExternalLink, FileText, Lock, Unlock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/restaurants")({
   component: AdminRestaurantsPage,
@@ -16,6 +16,7 @@ function AdminRestaurantsPage() {
   const qc = useQueryClient();
   const listFn = useServerFn(adminListRestaurants);
   const setFn = useServerFn(adminSetRestaurantStatus);
+  const blockFn = useServerFn(adminSetRestaurantBlocked);
   const [filter, setFilter] = useState<Status>("pending");
 
   const q = useQuery({
@@ -28,6 +29,15 @@ function AdminRestaurantsPage() {
       setFn({ data: vars }),
     onSuccess: () => {
       toast.success("Updated");
+      qc.invalidateQueries({ queryKey: ["admin-restaurants"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setBlocked = useMutation({
+    mutationFn: (vars: { id: string; is_blocked: boolean }) => blockFn({ data: vars }),
+    onSuccess: (_d, vars) => {
+      toast.success(vars.is_blocked ? "Restaurant locked" : "Restaurant unlocked");
       qc.invalidateQueries({ queryKey: ["admin-restaurants"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -64,7 +74,13 @@ function AdminRestaurantsPage() {
       ) : (
         <ul className="mt-6 grid gap-3">
           {(q.data ?? []).map((r) => (
-            <RestaurantRow key={r.id} r={r} onAction={(vars) => setStatus.mutate(vars)} pending={setStatus.isPending} />
+            <RestaurantRow
+              key={r.id}
+              r={r}
+              onAction={(vars) => setStatus.mutate(vars)}
+              onToggleBlock={(vars) => setBlocked.mutate(vars)}
+              pending={setStatus.isPending || setBlocked.isPending}
+            />
           ))}
         </ul>
       )}
@@ -72,9 +88,10 @@ function AdminRestaurantsPage() {
   );
 }
 
-function RestaurantRow({ r, onAction, pending }: {
+function RestaurantRow({ r, onAction, onToggleBlock, pending }: {
   r: any;
   onAction: (vars: { id: string; status: "approved" | "rejected" | "pending"; commission_rate?: number; rejection_reason?: string | null }) => void;
+  onToggleBlock: (vars: { id: string; is_blocked: boolean }) => void;
   pending: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -89,6 +106,11 @@ function RestaurantRow({ r, onAction, pending }: {
           <div className="flex flex-wrap items-center gap-2">
             <div className="font-display text-base font-bold">{r.name}</div>
             <StatusPill status={r.status} />
+            {r.is_blocked && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
+                <Lock className="h-3 w-3" /> Locked
+              </span>
+            )}
             {r.agreement_accepted_at ? (
               <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">Agreement signed</span>
             ) : (
@@ -137,6 +159,15 @@ function RestaurantRow({ r, onAction, pending }: {
         {r.status !== "pending" && (
           <button onClick={() => onAction({ id: r.id, status: "pending" })} disabled={pending} className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary disabled:opacity-50">
             <Clock className="h-3.5 w-3.5" /> Pending
+          </button>
+        )}
+        {r.is_blocked ? (
+          <button onClick={() => onToggleBlock({ id: r.id, is_blocked: false })} disabled={pending} className="inline-flex items-center gap-1 rounded-full bg-success px-3 py-1.5 text-xs font-bold text-success-foreground hover:opacity-90 disabled:opacity-50">
+            <Unlock className="h-3.5 w-3.5" /> Unlock
+          </button>
+        ) : (
+          <button onClick={() => { if (!confirm(`Lock ${r.name}? It will be hidden from customers.`)) return; onToggleBlock({ id: r.id, is_blocked: true }); }} disabled={pending} className="inline-flex items-center gap-1 rounded-full border border-destructive bg-destructive/10 px-3 py-1.5 text-xs font-bold text-destructive hover:bg-destructive/15 disabled:opacity-50">
+            <Lock className="h-3.5 w-3.5" /> Lock
           </button>
         )}
       </div>
