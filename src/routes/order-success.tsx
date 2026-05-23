@@ -4,11 +4,53 @@ import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { useLastOrder } from "@/lib/order-store";
+import { useLastOrder, type Order } from "@/lib/order-store";
 import { getOrder } from "@/lib/account.functions";
 import { CheckCircle2, Clock, MapPin, Package, Receipt } from "lucide-react";
 
 const searchSchema = z.object({ order: z.string().uuid().optional() });
+
+type DbOrder = {
+  id: string;
+  items: Order["items"];
+  address: {
+    full_name?: string;
+    phone?: string;
+    line1?: string;
+    line2?: string | null;
+    city?: string;
+    pincode?: string;
+    type?: Order["address"]["type"];
+  };
+  payment: Order["payment"];
+  subtotal: number;
+  delivery: number;
+  total: number;
+  created_at: string;
+  restaurant_id?: string | null;
+};
+
+function normalizeDbOrder(row: DbOrder): Order {
+  return {
+    id: row.id,
+    items: row.items,
+    address: {
+      fullName: row.address.full_name ?? "Customer",
+      phone: row.address.phone ?? "",
+      line1: row.address.line1 ?? "",
+      line2: row.address.line2 ?? "",
+      city: row.address.city ?? "",
+      pincode: row.address.pincode ?? "",
+      type: row.address.type ?? "Home",
+    },
+    payment: row.payment,
+    subtotal: row.subtotal,
+    delivery: row.delivery,
+    total: row.total,
+    placedAt: new Date(row.created_at).getTime(),
+    eta: row.restaurant_id ? "30 minutes" : "11 minutes",
+  };
+}
 
 export const Route = createFileRoute("/order-success")({
   head: () => ({ meta: [{ title: "Order placed — hallifresh" }] }),
