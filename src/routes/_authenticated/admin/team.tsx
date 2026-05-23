@@ -165,21 +165,26 @@ function TeamRow({ user, onManage, onChanged }: { user: TeamUser; onManage: () =
       <div className="flex items-center justify-end gap-1">
         {user.is_admin ? (
           <button
-            onClick={() => confirm("Revoke admin role from this user?") && revokeMut.mutate()}
+            onClick={() => {
+              const name = user.full_name || user.email || "this user";
+              if (confirm(`REVOKE admin access from ${name}?\n\nThey will lose all admin permissions.`)) {
+                revokeMut.mutate();
+              }
+            }}
             disabled={revokeMut.isPending}
             title="Revoke admin"
-            className="rounded-md border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-destructive/40 px-2 py-1 text-xs font-semibold text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50"
           >
-            <ShieldOff className="h-3.5 w-3.5" />
+            <ShieldOff className="h-3.5 w-3.5" /> Revoke
           </button>
         ) : (
           <button
             onClick={() => grantMut.mutate()}
             disabled={grantMut.isPending}
             title="Grant admin"
-            className="rounded-md border p-1.5 text-primary hover:bg-primary/10 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-primary/40 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/10 disabled:opacity-50"
           >
-            <ShieldCheck className="h-3.5 w-3.5" />
+            <ShieldCheck className="h-3.5 w-3.5" /> Make admin
           </button>
         )}
         <button
