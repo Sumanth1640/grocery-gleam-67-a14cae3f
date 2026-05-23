@@ -1,16 +1,48 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useLastOrder } from "@/lib/order-store";
+import { getOrder } from "@/lib/account.functions";
 import { CheckCircle2, Clock, MapPin, Package, Receipt } from "lucide-react";
+
+const searchSchema = z.object({ order: z.string().uuid().optional() });
 
 export const Route = createFileRoute("/order-success")({
   head: () => ({ meta: [{ title: "Order placed — hallifresh" }] }),
+  validateSearch: (s) => searchSchema.parse(s),
   component: SuccessPage,
 });
 
 function SuccessPage() {
-  const order = useLastOrder();
+  const localOrder = useLastOrder();
+  const search = Route.useSearch();
+  const getOrderRpc = useServerFn(getOrder);
+  const shouldLoadOrder = !!search.order && localOrder?.id !== search.order;
+  const orderQ = useQuery({
+    queryKey: ["order-success", search.order],
+    queryFn: () => getOrderRpc({ data: { id: search.order! } }),
+    enabled: shouldLoadOrder,
+    retry: false,
+  });
+
+  const order = orderQ.data ? normalizeDbOrder(orderQ.data) : localOrder;
+
+  if (!order && orderQ.isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="mx-auto max-w-2xl px-4 py-24 text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <h1 className="mt-5 font-display text-2xl font-bold">Confirming your order…</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Please wait while we load your order details.</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -41,7 +73,7 @@ function SuccessPage() {
           </div>
           <h1 className="mt-5 font-display text-3xl font-extrabold">Order placed!</h1>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            Thanks {order.address.fullName.split(" ")[0]}, we're packing your groceries now.
+            Thanks {order.address.fullName.split(" ")[0]}, we're preparing your order now.
           </p>
           <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-sm font-bold text-brand-foreground">
             <Clock className="h-4 w-4" /> Arriving in {order.eta}
