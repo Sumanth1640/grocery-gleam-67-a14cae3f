@@ -67,9 +67,6 @@ export function AdminOrderAlerts() {
 
     const insertHandler = (payload: { new: { id: string; total: number; created_at: string } }) => {
       const row = payload.new;
-      // DEBUG: confirm realtime delivery
-      console.log("[AdminOrderAlerts] INSERT received", payload);
-      toast(`[debug] INSERT ${row.id?.slice(0, 6)} · ₹${row.total}`, { duration: 4000 });
       invalidateAll();
       if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
       if (soundRef.current) playAlert("admin_order");
@@ -87,8 +84,6 @@ export function AdminOrderAlerts() {
 
     const updateHandler = (payload: { new: { id: string; status?: string } }) => {
       // Status / payment updates — silently refresh dashboards & lists.
-      console.log("[AdminOrderAlerts] UPDATE received", payload);
-      toast(`[debug] UPDATE ${payload.new?.id?.slice(0, 6)} → ${payload.new?.status ?? "?"}`, { duration: 3000 });
       invalidateAll();
     };
 
