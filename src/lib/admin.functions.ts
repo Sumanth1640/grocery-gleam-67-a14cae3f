@@ -310,8 +310,10 @@ export const adminAnalytics = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const list = (orders ?? []).filter((o: any) => o.status !== "cancelled");
+    // Revenue only counts successfully delivered orders
+    const delivered = list.filter((o: any) => o.status === "delivered");
 
-    // Daily revenue series
+    // Daily revenue series (revenue from delivered orders; orders count = all non-cancelled)
     const byDay = new Map<string, { revenue: number; orders: number }>();
     for (let i = 0; i < data.days; i++) {
       const d = new Date(since);
@@ -322,10 +324,11 @@ export const adminAnalytics = createServerFn({ method: "POST" })
     for (const o of list) {
       const k = new Date(o.created_at).toISOString().slice(0, 10);
       const cur = byDay.get(k) ?? { revenue: 0, orders: 0 };
-      cur.revenue += o.total ?? 0;
+      if (o.status === "delivered") cur.revenue += o.total ?? 0;
       cur.orders += 1;
       byDay.set(k, cur);
     }
+
     const series = Array.from(byDay.entries()).map(([date, v]) => ({ date, ...v }));
 
     // Top items
