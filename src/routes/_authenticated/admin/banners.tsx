@@ -65,7 +65,7 @@ function BannersPage() {
         {(q.data ?? []).map((b: any) => (
           <div key={b.id} className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-4 shadow-card">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="h-12 w-20 rounded-lg" style={{ background: b.bg }} />
+              <div className="h-12 w-20 overflow-hidden rounded-lg bg-cover bg-center" style={{ background: b.image ? `center/cover no-repeat url(${b.image})` : b.bg }} />
               <div className="min-w-0">
                 <div className="truncate font-semibold">{b.title}</div>
                 <div className="truncate text-xs text-muted-foreground">{b.subtitle} · → {b.link_to}</div>
