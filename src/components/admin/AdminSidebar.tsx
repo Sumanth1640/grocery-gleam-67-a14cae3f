@@ -1,6 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3, Image as ImageIcon, Users, ReceiptText, AlertTriangle, Bike, LineChart, ShieldCheck } from "lucide-react";
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3, Image as ImageIcon, Users, ReceiptText, AlertTriangle, Bike, LineChart, ShieldCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
