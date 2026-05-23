@@ -102,7 +102,7 @@ function DishesPage() {
       case "price-desc": list.sort((a, b) => b.price - a.price); break;
     }
     return list;
-  }, [q, vegOnly, bestsellerOnly, section, maxPrice, minRating, sort]);
+  }, [ALL_DISHES, q, vegOnly, bestsellerOnly, section, maxPrice, minRating, sort]);
 
   const handleAdd = (d: DishWithRestaurant) => {
     if (totals.items.length > 0 && totals.items[0].restaurantId !== d.restaurant.id) {
