@@ -153,7 +153,7 @@ function OutletOrdersPage() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-3">
                   {STATUSES.map((s) => (
                     <button key={s} disabled={update.isPending || s === status}
                       onClick={() => update.mutate({ id: x.id, status: s })}
@@ -161,6 +161,13 @@ function OutletOrdersPage() {
                       {STATUS_LABEL[s]}
                     </button>
                   ))}
+                  <button
+                    onClick={() => printKOT(x)}
+                    className="ml-auto inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary"
+                    title="Print kitchen ticket"
+                  >
+                    <Printer className="h-3.5 w-3.5" /> KOT
+                  </button>
                 </div>
               </li>
             );
