@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Clock, Search } from "lucide-react";
+import { Loader2, Clock, Search, Printer } from "lucide-react";
 import { myManagedOutlets, listOutletOrders, updateOutletOrderStatus } from "@/lib/outlet-managers.functions";
 
 const searchSchema = z.object({ outlet: z.string().uuid().optional() });
@@ -153,7 +153,7 @@ function OutletOrdersPage() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-3">
                   {STATUSES.map((s) => (
                     <button key={s} disabled={update.isPending || s === status}
                       onClick={() => update.mutate({ id: x.id, status: s })}
@@ -161,6 +161,13 @@ function OutletOrdersPage() {
                       {STATUS_LABEL[s]}
                     </button>
                   ))}
+                  <button
+                    onClick={() => printKOT(x)}
+                    className="ml-auto inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary"
+                    title="Print kitchen ticket"
+                  >
+                    <Printer className="h-3.5 w-3.5" /> KOT
+                  </button>
                 </div>
               </li>
             );
@@ -170,3 +177,52 @@ function OutletOrdersPage() {
     </div>
   );
 }
+
+type KOTOrder = {
+  id: string; status: string; total: number; created_at: string; payment: string;
+  items: Array<{ name: string; qty: number; price: number }>;
+  address: { full_name?: string; phone?: string; line1?: string; city?: string };
+};
+
+function printKOT(x: KOTOrder) {
+  const items = Array.isArray(x.items) ? x.items : [];
+  const rows = items.map((it) => `
+    <tr>
+      <td style="padding:4px 0;font-weight:700;width:38px;">${it.qty}×</td>
+      <td style="padding:4px 0;">${escapeHtml(it.name)}</td>
+    </tr>`).join("");
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>KOT #${x.id.slice(0, 8)}</title>
+    <style>
+      @media print { @page { size: 80mm auto; margin: 4mm; } body { margin: 0; } }
+      body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #000; font-size: 13px; width: 72mm; }
+      h1 { text-align:center; margin: 0 0 4px; font-size: 16px; letter-spacing: 2px; }
+      .sub { text-align:center; font-size: 11px; margin-bottom: 8px; }
+      hr { border: none; border-top: 1px dashed #000; margin: 6px 0; }
+      table { width: 100%; border-collapse: collapse; }
+      .meta { font-size: 11px; line-height: 1.4; }
+      .foot { margin-top: 6px; font-size: 11px; text-align: center; }
+    </style></head><body>
+      <h1>KOT</h1>
+      <div class="sub">#${x.id.slice(0, 8).toUpperCase()} · ${new Date(x.created_at).toLocaleString()}</div>
+      <hr />
+      <div class="meta">
+        <div><b>Customer:</b> ${escapeHtml(x.address?.full_name ?? "—")}</div>
+        <div><b>Phone:</b> ${escapeHtml(x.address?.phone ?? "—")}</div>
+        <div><b>Addr:</b> ${escapeHtml((x.address?.line1 ?? "") + ", " + (x.address?.city ?? ""))}</div>
+        <div><b>Payment:</b> ${escapeHtml(x.payment)} · <b>Status:</b> ${escapeHtml(x.status)}</div>
+      </div>
+      <hr />
+      <table>${rows}</table>
+      <hr />
+      <div class="foot">Total ₹${x.total}</div>
+      <script>window.onload = () => { window.print(); setTimeout(() => window.close(), 300); };</script>
+    </body></html>`;
+  const w = window.open("", "_blank", "width=380,height=600");
+  if (!w) return;
+  w.document.open(); w.document.write(html); w.document.close();
+}
+
+function escapeHtml(s: string) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+

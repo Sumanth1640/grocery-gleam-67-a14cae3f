@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tansta
 import { supabase } from "@/integrations/supabase/client";
 import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin, Wallet, UserCog } from "lucide-react";
 import { OrderAlerts, OrderAlertsControl } from "@/components/partner/OrderAlerts";
+import { OnboardingBanner } from "@/components/partner/OnboardingBanner";
 
 export const Route = createFileRoute("/_authenticated/partner")({
   head: () => ({ meta: [{ title: "Partner portal — hallifresh" }] }),
@@ -43,7 +44,9 @@ function PartnerLayout() {
           <OrderAlertsControl />
         </div>
         <OrderAlerts />
+        <OnboardingBanner />
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2">
+
           {NAV.map((n) => {
             const active = isActive(n.to, n.exact);
             const Icon = n.icon;
