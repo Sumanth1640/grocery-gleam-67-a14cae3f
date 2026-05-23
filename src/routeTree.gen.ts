@@ -44,6 +44,7 @@ import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenti
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedFoodOrdersRouteImport } from './routes/_authenticated/food.orders'
 import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_authenticated/admin/warehouses'
+import { Route as AuthenticatedAdminTeamRouteImport } from './routes/_authenticated/admin/team'
 import { Route as AuthenticatedAdminRidersRouteImport } from './routes/_authenticated/admin/riders'
 import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin/restaurants'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
@@ -240,6 +241,11 @@ const AuthenticatedAdminWarehousesRoute =
     path: '/warehouses',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTeamRoute = AuthenticatedAdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminRidersRoute =
   AuthenticatedAdminRidersRouteImport.update({
     id: '/riders',
@@ -348,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/admin/riders': typeof AuthenticatedAdminRidersRoute
+  '/admin/team': typeof AuthenticatedAdminTeamRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
@@ -394,6 +401,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/admin/riders': typeof AuthenticatedAdminRidersRoute
+  '/admin/team': typeof AuthenticatedAdminTeamRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/_authenticated/admin/riders': typeof AuthenticatedAdminRidersRoute
+  '/_authenticated/admin/team': typeof AuthenticatedAdminTeamRoute
   '/_authenticated/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/_authenticated/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
@@ -494,6 +503,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/restaurants'
     | '/admin/riders'
+    | '/admin/team'
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
@@ -540,6 +550,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/restaurants'
     | '/admin/riders'
+    | '/admin/team'
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
@@ -589,6 +600,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/restaurants'
     | '/_authenticated/admin/riders'
+    | '/_authenticated/admin/team'
     | '/_authenticated/admin/warehouses'
     | '/_authenticated/food/orders'
     | '/_authenticated/orders/$id'
@@ -873,6 +885,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminWarehousesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/team': {
+      id: '/_authenticated/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AuthenticatedAdminTeamRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/riders': {
       id: '/_authenticated/admin/riders'
       path: '/riders'
@@ -973,6 +992,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminRestaurantsRoute: typeof AuthenticatedAdminRestaurantsRoute
   AuthenticatedAdminRidersRoute: typeof AuthenticatedAdminRidersRoute
+  AuthenticatedAdminTeamRoute: typeof AuthenticatedAdminTeamRoute
   AuthenticatedAdminWarehousesRoute: typeof AuthenticatedAdminWarehousesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -990,6 +1010,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminRestaurantsRoute: AuthenticatedAdminRestaurantsRoute,
   AuthenticatedAdminRidersRoute: AuthenticatedAdminRidersRoute,
+  AuthenticatedAdminTeamRoute: AuthenticatedAdminTeamRoute,
   AuthenticatedAdminWarehousesRoute: AuthenticatedAdminWarehousesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
