@@ -5,6 +5,7 @@ import { useState } from "react";
 import { adminListBanners, adminSaveBanner, adminDeleteBanner } from "@/lib/admin-extra.functions";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/admin/banners")({
   head: () => ({ meta: [{ title: "Banners — Admin" }] }),
