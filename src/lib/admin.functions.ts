@@ -31,15 +31,24 @@ async function ensureAdminOrManager(userId: string): Promise<{ isAdmin: boolean;
 export const adminStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await ensureAdmin(context.supabase, context.userId);
-    const [{ count: products }, { count: categories }, { count: orders }, { data: revRows }] =
-      await Promise.all([
-        supabaseAdmin.from("products").select("id", { count: "exact", head: true }),
-        supabaseAdmin.from("categories").select("id", { count: "exact", head: true }),
-        supabaseAdmin.from("orders").select("id", { count: "exact", head: true }),
-        supabaseAdmin.from("orders").select("total"),
-      ]);
+    const { isAdmin, warehouseIds } = await ensureAdminOrManager(context.userId);
+
+    // Catalog counts are global (visible to managers too)
+    const [{ count: products }, { count: categories }] = await Promise.all([
+      supabaseAdmin.from("products").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("categories").select("id", { count: "exact", head: true }),
+    ]);
+
+    // Orders + revenue: scoped to manager's warehouses if not admin
+    let ordersQ = supabaseAdmin.from("orders").select("id", { count: "exact", head: true });
+    let revQ = supabaseAdmin.from("orders").select("total");
+    if (!isAdmin) {
+      ordersQ = ordersQ.in("warehouse_id", warehouseIds);
+      revQ = revQ.in("warehouse_id", warehouseIds);
+    }
+    const [{ count: orders }, { data: revRows }] = await Promise.all([ordersQ, revQ]);
     const revenue = (revRows ?? []).reduce((s: number, r: any) => s + (r.total ?? 0), 0);
+
     return {
       products: products ?? 0,
       categories: categories ?? 0,
@@ -47,6 +56,7 @@ export const adminStats = createServerFn({ method: "GET" })
       revenue,
     };
   });
+
 
 // ---------- Products ----------
 const productInput = z.object({

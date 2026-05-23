@@ -80,8 +80,17 @@ export function AdminOrderAlerts() {
     const seenAt = Date.now();
     if (typeof window !== "undefined") sessionStorage.setItem(SEEN_KEY, String(seenAt));
 
-    const handler = (payload: { new: { id: string; total: number; created_at: string } }) => {
+    const invalidateAll = () => {
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+      qc.invalidateQueries({ queryKey: ["admin-assignable"] });
+      qc.invalidateQueries({ queryKey: ["admin-analytics"] });
+      qc.invalidateQueries({ queryKey: ["admin-low-stock"] });
+    };
+
+    const insertHandler = (payload: { new: { id: string; total: number; created_at: string } }) => {
       const row = payload.new;
+      invalidateAll();
       if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
       if (soundRef.current) playBeep();
       toast.success(`New product order — ₹${row.total}`, {
@@ -94,8 +103,11 @@ export function AdminOrderAlerts() {
           },
         },
       });
-      qc.invalidateQueries({ queryKey: ["admin-orders"] });
-      qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
+    };
+
+    const updateHandler = () => {
+      // Status / payment updates — silently refresh dashboards & lists.
+      invalidateAll();
     };
 
     const channels: ReturnType<typeof supabase.channel>[] = [];
@@ -106,7 +118,12 @@ export function AdminOrderAlerts() {
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "orders", filter: "restaurant_id=is.null" },
-          handler as never,
+          insertHandler as never,
+        )
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "orders", filter: "restaurant_id=is.null" },
+          updateHandler as never,
         )
         .subscribe();
       channels.push(ch);
@@ -117,12 +134,18 @@ export function AdminOrderAlerts() {
           .on(
             "postgres_changes",
             { event: "INSERT", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
-            handler as never,
+            insertHandler as never,
+          )
+          .on(
+            "postgres_changes",
+            { event: "UPDATE", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
+            updateHandler as never,
           )
           .subscribe();
         channels.push(ch);
       }
     }
+
 
     return () => {
       for (const ch of channels) void supabase.removeChannel(ch);
