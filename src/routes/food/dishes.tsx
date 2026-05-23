@@ -125,7 +125,7 @@ function DishesPage() {
       <div className="border-b bg-gradient-to-br from-brand/10 via-background to-primary/5">
         <div className="mx-auto max-w-6xl px-4 py-8 md:py-10">
           <h1 className="font-display text-3xl font-extrabold md:text-4xl">All dishes</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{ALL_DISHES.length} dishes across {RESTAURANTS.length} restaurants</p>
+          <p className="mt-1 text-sm text-muted-foreground">{ALL_DISHES.length} dishes from approved restaurants</p>
 
           <div className="mt-5 flex gap-2">
             <div className="relative flex-1">
