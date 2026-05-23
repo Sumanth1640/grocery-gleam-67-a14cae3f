@@ -255,6 +255,32 @@ export const adminSetRestaurantStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminSetRestaurantBlocked = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid(), is_blocked: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data: r, error } = await supabaseAdmin
+      .from("partner_restaurants")
+      .update({ is_blocked: data.is_blocked } as any)
+      .eq("id", data.id)
+      .select("owner_id, name")
+      .single();
+    if (error) throw new Error(error.message);
+    if (r) {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: r.owner_id,
+        kind: "system",
+        title: data.is_blocked ? "Restaurant locked" : "Restaurant unlocked",
+        body: data.is_blocked
+          ? `${r.name} has been locked by admin and is hidden from customers.`
+          : `${r.name} has been unlocked and is visible to customers again.`,
+        link: "/partner",
+      });
+    }
+    return { ok: true };
+  });
+
 // Signed URL for any partner document (admin only)
 export const adminGetDocSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
