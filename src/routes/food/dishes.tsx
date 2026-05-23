@@ -65,8 +65,7 @@ function DishesPage() {
   });
 
   const ALL_DISHES: DishWithRestaurant[] = useMemo(() => {
-    const fromDb = (dbDishes ?? []).map(mapDbDish);
-    return [...fromDb, ...SEED_DISHES];
+    return (dbDishes ?? []).map(mapDbDish);
   }, [dbDishes]);
   const SECTIONS = useMemo(() => Array.from(new Set(ALL_DISHES.map((d) => d.section))).sort(), [ALL_DISHES]);
 
