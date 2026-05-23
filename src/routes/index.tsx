@@ -98,13 +98,6 @@ function HomePage() {
 
       <BannerCarousel />
 
-      {/* FOOD DELIVERY PROMO */}
-      <section className="mx-auto max-w-7xl px-4 pt-8">
-        <Link
-          to="/food"
-          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-3xl border bg-discount/10 p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft md:p-8"
-        >
-          <div>
       {/* FOOD DELIVERY — slim strip (10%) */}
       <section className="mx-auto max-w-7xl px-4 pt-8">
         <Link
@@ -125,6 +118,13 @@ function HomePage() {
           </span>
         </Link>
       </section>
+
+      {/* CATEGORIES */}
+      <section id="categories" className="mx-auto max-w-7xl px-4 py-12">
+        <SectionHeader title="Shop by category" subtitle="Everything you need, neatly stacked" />
+        {catsQ.isLoading ? (
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4 md:gap-4 lg:grid-cols-8">
+            {Array.from({ length: 8 }).map((_, i) => (
 
               <div key={i} className="rounded-2xl border bg-card p-3">
                 <div className="aspect-square w-full animate-pulse rounded-xl bg-muted" />
