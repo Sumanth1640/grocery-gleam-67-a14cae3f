@@ -161,6 +161,15 @@ function RestaurantRow({ r, onAction, onToggleBlock, pending }: {
             <Clock className="h-3.5 w-3.5" /> Pending
           </button>
         )}
+        {r.is_blocked ? (
+          <button onClick={() => onToggleBlock({ id: r.id, is_blocked: false })} disabled={pending} className="inline-flex items-center gap-1 rounded-full bg-success px-3 py-1.5 text-xs font-bold text-success-foreground hover:opacity-90 disabled:opacity-50">
+            <Unlock className="h-3.5 w-3.5" /> Unlock
+          </button>
+        ) : (
+          <button onClick={() => { if (!confirm(`Lock ${r.name}? It will be hidden from customers.`)) return; onToggleBlock({ id: r.id, is_blocked: true }); }} disabled={pending} className="inline-flex items-center gap-1 rounded-full border border-destructive bg-destructive/10 px-3 py-1.5 text-xs font-bold text-destructive hover:bg-destructive/15 disabled:opacity-50">
+            <Lock className="h-3.5 w-3.5" /> Lock
+          </button>
+        )}
       </div>
     </li>
   );
