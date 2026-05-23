@@ -608,6 +608,7 @@ export type Database = {
           gst_number: string | null
           id: string
           image: string
+          is_blocked: boolean
           is_open: boolean
           name: string
           offer: string | null
@@ -653,6 +654,7 @@ export type Database = {
           gst_number?: string | null
           id?: string
           image?: string
+          is_blocked?: boolean
           is_open?: boolean
           name: string
           offer?: string | null
@@ -698,6 +700,7 @@ export type Database = {
           gst_number?: string | null
           id?: string
           image?: string
+          is_blocked?: boolean
           is_open?: boolean
           name?: string
           offer?: string | null
