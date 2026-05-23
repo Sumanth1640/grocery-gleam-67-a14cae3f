@@ -57,6 +57,19 @@ function DishesPage() {
   const totals = foodCartTotals(cart);
   const [openDish, setOpenDish] = useState<DishWithRestaurant | null>(null);
 
+  const fetchDishes = useServerFn(listAllApprovedDishes);
+  const { data: dbDishes } = useQuery({
+    queryKey: ["public-all-dishes"],
+    queryFn: () => fetchDishes(),
+    staleTime: 60_000,
+  });
+
+  const ALL_DISHES: DishWithRestaurant[] = useMemo(() => {
+    const fromDb = (dbDishes ?? []).map(mapDbDish);
+    return [...fromDb, ...SEED_DISHES];
+  }, [dbDishes]);
+  const SECTIONS = useMemo(() => Array.from(new Set(ALL_DISHES.map((d) => d.section))).sort(), [ALL_DISHES]);
+
   const [q, setQ] = useState("");
   const [vegOnly, setVegOnly] = useState(false);
   const [bestsellerOnly, setBestsellerOnly] = useState(false);
@@ -68,6 +81,7 @@ function DishesPage() {
 
   const visible = useMemo(() => {
     let list = ALL_DISHES.slice();
+
     if (q.trim()) {
       const needle = q.toLowerCase();
       list = list.filter(
