@@ -40,14 +40,16 @@ export const adminStats = createServerFn({ method: "GET" })
     ]);
 
     // Orders + revenue: scoped to manager's warehouses if not admin
+    // Revenue only counts successfully delivered orders
     let ordersQ = supabaseAdmin.from("orders").select("id", { count: "exact", head: true });
-    let revQ = supabaseAdmin.from("orders").select("total");
+    let revQ = supabaseAdmin.from("orders").select("total").eq("status", "delivered");
     if (!isAdmin) {
       ordersQ = ordersQ.in("warehouse_id", warehouseIds);
       revQ = revQ.in("warehouse_id", warehouseIds);
     }
     const [{ count: orders }, { data: revRows }] = await Promise.all([ordersQ, revQ]);
     const revenue = (revRows ?? []).reduce((s: number, r: any) => s + (r.total ?? 0), 0);
+
 
     return {
       products: products ?? 0,
