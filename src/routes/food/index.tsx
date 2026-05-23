@@ -53,7 +53,7 @@ function FoodHome() {
       offer: r.offer ?? undefined,
       menu: [],
     }));
-    return [...partners, ...RESTAURANTS];
+    return partners;
   }, [partnerQ.data]);
 
   const visible = useMemo(() => {
