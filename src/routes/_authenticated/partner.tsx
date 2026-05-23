@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tansta
 import { supabase } from "@/integrations/supabase/client";
 import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin, Wallet, UserCog } from "lucide-react";
 import { OrderAlerts, OrderAlertsControl } from "@/components/partner/OrderAlerts";
+import { OnboardingBanner } from "@/components/partner/OnboardingBanner";
 
 export const Route = createFileRoute("/_authenticated/partner")({
   head: () => ({ meta: [{ title: "Partner portal — hallifresh" }] }),
