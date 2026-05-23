@@ -14,17 +14,14 @@ type Banner = {
   fg: string;
 };
 
-const fallback: Banner[] = [
-  {
-    id: "1",
-    title: "Up to 40% off fresh produce",
-    subtitle: "Hand-picked daily from local farms",
-    cta_label: "Shop fruits",
-    link_to: "/c/fruits",
-    bg: "linear-gradient(135deg, oklch(0.92 0.13 80), oklch(0.88 0.16 50))",
-    fg: "oklch(0.25 0.05 40)",
-  },
-];
+export function BannerCarousel() {
+  const fetchBanners = useServerFn(listBanners);
+  const { data } = useQuery({
+    queryKey: ["banners"],
+    queryFn: () => fetchBanners(),
+    staleTime: 60_000,
+  });
+  const banners: Banner[] = (data ?? []) as any;
 
 export function BannerCarousel() {
   const fetchBanners = useServerFn(listBanners);
