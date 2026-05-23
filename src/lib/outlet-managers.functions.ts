@@ -218,3 +218,17 @@ export const toggleOutletDishStock = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const toggleOutletOpen = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ outlet_id: z.string().uuid(), is_open: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: mine } = await supabase
+      .from("partner_outlet_managers").select("outlet_id").eq("user_id", userId).eq("outlet_id", data.outlet_id).maybeSingle();
+    if (!mine) throw new Error("Not your outlet");
+    const { error } = await supabaseAdmin
+      .from("partner_outlets").update({ is_open: data.is_open }).eq("id", data.outlet_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
