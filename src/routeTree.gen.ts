@@ -45,6 +45,7 @@ import { Route as AuthenticatedPartnerOrdersRouteImport } from './routes/_authen
 import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenticated/partner/menu'
 import { Route as AuthenticatedPartnerManagersRouteImport } from './routes/_authenticated/partner/managers'
 import { Route as AuthenticatedOutletOrdersRouteImport } from './routes/_authenticated/outlet/orders'
+import { Route as AuthenticatedOutletMenuRouteImport } from './routes/_authenticated/outlet/menu'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedFoodOrdersRouteImport } from './routes/_authenticated/food.orders'
 import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_authenticated/admin/warehouses'
@@ -252,6 +253,11 @@ const AuthenticatedOutletOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedOutletRoute,
   } as any)
+const AuthenticatedOutletMenuRoute = AuthenticatedOutletMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => AuthenticatedOutletRoute,
+} as any)
 const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/outlet/menu': typeof AuthenticatedOutletMenuRoute
   '/outlet/orders': typeof AuthenticatedOutletOrdersRoute
   '/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
@@ -436,6 +443,7 @@ export interface FileRoutesByTo {
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/outlet/menu': typeof AuthenticatedOutletMenuRoute
   '/outlet/orders': typeof AuthenticatedOutletOrdersRoute
   '/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
@@ -491,6 +499,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/_authenticated/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/_authenticated/outlet/menu': typeof AuthenticatedOutletMenuRoute
   '/_authenticated/outlet/orders': typeof AuthenticatedOutletOrdersRoute
   '/_authenticated/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/_authenticated/partner/menu': typeof AuthenticatedPartnerMenuRoute
@@ -546,6 +555,7 @@ export interface FileRouteTypes {
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
+    | '/outlet/menu'
     | '/outlet/orders'
     | '/partner/managers'
     | '/partner/menu'
@@ -596,6 +606,7 @@ export interface FileRouteTypes {
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
+    | '/outlet/menu'
     | '/outlet/orders'
     | '/partner/managers'
     | '/partner/menu'
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/warehouses'
     | '/_authenticated/food/orders'
     | '/_authenticated/orders/$id'
+    | '/_authenticated/outlet/menu'
     | '/_authenticated/outlet/orders'
     | '/_authenticated/partner/managers'
     | '/_authenticated/partner/menu'
@@ -941,6 +953,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOutletOrdersRouteImport
       parentRoute: typeof AuthenticatedOutletRoute
     }
+    '/_authenticated/outlet/menu': {
+      id: '/_authenticated/outlet/menu'
+      path: '/menu'
+      fullPath: '/outlet/menu'
+      preLoaderRoute: typeof AuthenticatedOutletMenuRouteImport
+      parentRoute: typeof AuthenticatedOutletRoute
+    }
     '/_authenticated/orders/$id': {
       id: '/_authenticated/orders/$id'
       path: '/$id'
@@ -1107,11 +1126,13 @@ const AuthenticatedOrdersRouteWithChildren =
   AuthenticatedOrdersRoute._addFileChildren(AuthenticatedOrdersRouteChildren)
 
 interface AuthenticatedOutletRouteChildren {
+  AuthenticatedOutletMenuRoute: typeof AuthenticatedOutletMenuRoute
   AuthenticatedOutletOrdersRoute: typeof AuthenticatedOutletOrdersRoute
   AuthenticatedOutletIndexRoute: typeof AuthenticatedOutletIndexRoute
 }
 
 const AuthenticatedOutletRouteChildren: AuthenticatedOutletRouteChildren = {
+  AuthenticatedOutletMenuRoute: AuthenticatedOutletMenuRoute,
   AuthenticatedOutletOrdersRoute: AuthenticatedOutletOrdersRoute,
   AuthenticatedOutletIndexRoute: AuthenticatedOutletIndexRoute,
 }

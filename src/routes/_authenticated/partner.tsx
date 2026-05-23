@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin, Wallet } from "lucide-react";
+import { Store, LayoutDashboard, UtensilsCrossed, ShoppingBag, Settings, ArrowLeft, MapPin, Wallet, UserCog } from "lucide-react";
 import { OrderAlerts, OrderAlertsControl } from "@/components/partner/OrderAlerts";
 
 export const Route = createFileRoute("/_authenticated/partner")({
