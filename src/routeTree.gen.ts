@@ -28,11 +28,13 @@ import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
 import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
+import { Route as AuthenticatedOutletRouteImport } from './routes/_authenticated/outlet'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedPartnerIndexRouteImport } from './routes/_authenticated/partner/index'
+import { Route as AuthenticatedOutletIndexRouteImport } from './routes/_authenticated/outlet/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
@@ -41,6 +43,9 @@ import { Route as AuthenticatedPartnerPayoutsRouteImport } from './routes/_authe
 import { Route as AuthenticatedPartnerOutletsRouteImport } from './routes/_authenticated/partner/outlets'
 import { Route as AuthenticatedPartnerOrdersRouteImport } from './routes/_authenticated/partner/orders'
 import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenticated/partner/menu'
+import { Route as AuthenticatedPartnerManagersRouteImport } from './routes/_authenticated/partner/managers'
+import { Route as AuthenticatedOutletOrdersRouteImport } from './routes/_authenticated/outlet/orders'
+import { Route as AuthenticatedOutletMenuRouteImport } from './routes/_authenticated/outlet/menu'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedFoodOrdersRouteImport } from './routes/_authenticated/food.orders'
 import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_authenticated/admin/warehouses'
@@ -152,6 +157,11 @@ const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
   path: '/partner',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedOutletRoute = AuthenticatedOutletRouteImport.update({
+  id: '/outlet',
+  path: '/outlet',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -178,6 +188,12 @@ const AuthenticatedPartnerIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedPartnerRoute,
+  } as any)
+const AuthenticatedOutletIndexRoute =
+  AuthenticatedOutletIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedOutletRoute,
   } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
@@ -225,6 +241,23 @@ const AuthenticatedPartnerMenuRoute =
     path: '/menu',
     getParentRoute: () => AuthenticatedPartnerRoute,
   } as any)
+const AuthenticatedPartnerManagersRoute =
+  AuthenticatedPartnerManagersRouteImport.update({
+    id: '/managers',
+    path: '/managers',
+    getParentRoute: () => AuthenticatedPartnerRoute,
+  } as any)
+const AuthenticatedOutletOrdersRoute =
+  AuthenticatedOutletOrdersRouteImport.update({
+    id: '/orders',
+    path: '/orders',
+    getParentRoute: () => AuthenticatedOutletRoute,
+  } as any)
+const AuthenticatedOutletMenuRoute = AuthenticatedOutletMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => AuthenticatedOutletRoute,
+} as any)
 const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -333,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
+  '/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
@@ -358,6 +392,9 @@ export interface FileRoutesByFullPath {
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/outlet/menu': typeof AuthenticatedOutletMenuRoute
+  '/outlet/orders': typeof AuthenticatedOutletOrdersRoute
+  '/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
   '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
@@ -366,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/outlet/': typeof AuthenticatedOutletIndexRoute
   '/partner/': typeof AuthenticatedPartnerIndexRoute
 }
 export interface FileRoutesByTo {
@@ -405,6 +443,9 @@ export interface FileRoutesByTo {
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/outlet/menu': typeof AuthenticatedOutletMenuRoute
+  '/outlet/orders': typeof AuthenticatedOutletOrdersRoute
+  '/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
   '/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
@@ -413,6 +454,7 @@ export interface FileRoutesByTo {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/outlet': typeof AuthenticatedOutletIndexRoute
   '/partner': typeof AuthenticatedPartnerIndexRoute
 }
 export interface FileRoutesById {
@@ -431,6 +473,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
+  '/_authenticated/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/_authenticated/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/food/cart': typeof FoodCartRoute
@@ -456,6 +499,9 @@ export interface FileRoutesById {
   '/_authenticated/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/_authenticated/food/orders': typeof AuthenticatedFoodOrdersRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/_authenticated/outlet/menu': typeof AuthenticatedOutletMenuRoute
+  '/_authenticated/outlet/orders': typeof AuthenticatedOutletOrdersRoute
+  '/_authenticated/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/_authenticated/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/_authenticated/partner/orders': typeof AuthenticatedPartnerOrdersRoute
   '/_authenticated/partner/outlets': typeof AuthenticatedPartnerOutletsRoute
@@ -464,6 +510,7 @@ export interface FileRoutesById {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/outlet/': typeof AuthenticatedOutletIndexRoute
   '/_authenticated/partner/': typeof AuthenticatedPartnerIndexRoute
 }
 export interface FileRouteTypes {
@@ -482,6 +529,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/notifications'
     | '/orders'
+    | '/outlet'
     | '/partner'
     | '/c/$slug'
     | '/food/cart'
@@ -507,6 +555,9 @@ export interface FileRouteTypes {
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
+    | '/outlet/menu'
+    | '/outlet/orders'
+    | '/partner/managers'
     | '/partner/menu'
     | '/partner/orders'
     | '/partner/outlets'
@@ -515,6 +566,7 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/admin/'
+    | '/outlet/'
     | '/partner/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -554,6 +606,9 @@ export interface FileRouteTypes {
     | '/admin/warehouses'
     | '/food/orders'
     | '/orders/$id'
+    | '/outlet/menu'
+    | '/outlet/orders'
+    | '/partner/managers'
     | '/partner/menu'
     | '/partner/orders'
     | '/partner/outlets'
@@ -562,6 +617,7 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/admin'
+    | '/outlet'
     | '/partner'
   id:
     | '__root__'
@@ -579,6 +635,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/notifications'
     | '/_authenticated/orders'
+    | '/_authenticated/outlet'
     | '/_authenticated/partner'
     | '/c/$slug'
     | '/food/cart'
@@ -604,6 +661,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/warehouses'
     | '/_authenticated/food/orders'
     | '/_authenticated/orders/$id'
+    | '/_authenticated/outlet/menu'
+    | '/_authenticated/outlet/orders'
+    | '/_authenticated/partner/managers'
     | '/_authenticated/partner/menu'
     | '/_authenticated/partner/orders'
     | '/_authenticated/partner/outlets'
@@ -612,6 +672,7 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/_authenticated/admin/'
+    | '/_authenticated/outlet/'
     | '/_authenticated/partner/'
   fileRoutesById: FileRoutesById
 }
@@ -773,6 +834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPartnerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/outlet': {
+      id: '/_authenticated/outlet'
+      path: '/outlet'
+      fullPath: '/outlet'
+      preLoaderRoute: typeof AuthenticatedOutletRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/orders': {
       id: '/_authenticated/orders'
       path: '/orders'
@@ -807,6 +875,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/partner/'
       preLoaderRoute: typeof AuthenticatedPartnerIndexRouteImport
       parentRoute: typeof AuthenticatedPartnerRoute
+    }
+    '/_authenticated/outlet/': {
+      id: '/_authenticated/outlet/'
+      path: '/'
+      fullPath: '/outlet/'
+      preLoaderRoute: typeof AuthenticatedOutletIndexRouteImport
+      parentRoute: typeof AuthenticatedOutletRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -863,6 +938,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/partner/menu'
       preLoaderRoute: typeof AuthenticatedPartnerMenuRouteImport
       parentRoute: typeof AuthenticatedPartnerRoute
+    }
+    '/_authenticated/partner/managers': {
+      id: '/_authenticated/partner/managers'
+      path: '/managers'
+      fullPath: '/partner/managers'
+      preLoaderRoute: typeof AuthenticatedPartnerManagersRouteImport
+      parentRoute: typeof AuthenticatedPartnerRoute
+    }
+    '/_authenticated/outlet/orders': {
+      id: '/_authenticated/outlet/orders'
+      path: '/orders'
+      fullPath: '/outlet/orders'
+      preLoaderRoute: typeof AuthenticatedOutletOrdersRouteImport
+      parentRoute: typeof AuthenticatedOutletRoute
+    }
+    '/_authenticated/outlet/menu': {
+      id: '/_authenticated/outlet/menu'
+      path: '/menu'
+      fullPath: '/outlet/menu'
+      preLoaderRoute: typeof AuthenticatedOutletMenuRouteImport
+      parentRoute: typeof AuthenticatedOutletRoute
     }
     '/_authenticated/orders/$id': {
       id: '/_authenticated/orders/$id'
@@ -1029,7 +1125,23 @@ const AuthenticatedOrdersRouteChildren: AuthenticatedOrdersRouteChildren = {
 const AuthenticatedOrdersRouteWithChildren =
   AuthenticatedOrdersRoute._addFileChildren(AuthenticatedOrdersRouteChildren)
 
+interface AuthenticatedOutletRouteChildren {
+  AuthenticatedOutletMenuRoute: typeof AuthenticatedOutletMenuRoute
+  AuthenticatedOutletOrdersRoute: typeof AuthenticatedOutletOrdersRoute
+  AuthenticatedOutletIndexRoute: typeof AuthenticatedOutletIndexRoute
+}
+
+const AuthenticatedOutletRouteChildren: AuthenticatedOutletRouteChildren = {
+  AuthenticatedOutletMenuRoute: AuthenticatedOutletMenuRoute,
+  AuthenticatedOutletOrdersRoute: AuthenticatedOutletOrdersRoute,
+  AuthenticatedOutletIndexRoute: AuthenticatedOutletIndexRoute,
+}
+
+const AuthenticatedOutletRouteWithChildren =
+  AuthenticatedOutletRoute._addFileChildren(AuthenticatedOutletRouteChildren)
+
 interface AuthenticatedPartnerRouteChildren {
+  AuthenticatedPartnerManagersRoute: typeof AuthenticatedPartnerManagersRoute
   AuthenticatedPartnerMenuRoute: typeof AuthenticatedPartnerMenuRoute
   AuthenticatedPartnerOrdersRoute: typeof AuthenticatedPartnerOrdersRoute
   AuthenticatedPartnerOutletsRoute: typeof AuthenticatedPartnerOutletsRoute
@@ -1039,6 +1151,7 @@ interface AuthenticatedPartnerRouteChildren {
 }
 
 const AuthenticatedPartnerRouteChildren: AuthenticatedPartnerRouteChildren = {
+  AuthenticatedPartnerManagersRoute: AuthenticatedPartnerManagersRoute,
   AuthenticatedPartnerMenuRoute: AuthenticatedPartnerMenuRoute,
   AuthenticatedPartnerOrdersRoute: AuthenticatedPartnerOrdersRoute,
   AuthenticatedPartnerOutletsRoute: AuthenticatedPartnerOutletsRoute,
@@ -1055,6 +1168,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRouteWithChildren
+  AuthenticatedOutletRoute: typeof AuthenticatedOutletRouteWithChildren
   AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRouteWithChildren
   AuthenticatedFoodOrdersRoute: typeof AuthenticatedFoodOrdersRoute
 }
@@ -1064,6 +1178,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRouteWithChildren,
+  AuthenticatedOutletRoute: AuthenticatedOutletRouteWithChildren,
   AuthenticatedPartnerRoute: AuthenticatedPartnerRouteWithChildren,
   AuthenticatedFoodOrdersRoute: AuthenticatedFoodOrdersRoute,
 }

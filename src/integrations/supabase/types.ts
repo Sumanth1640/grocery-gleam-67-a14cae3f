@@ -524,6 +524,33 @@ export type Database = {
           },
         ]
       }
+      partner_outlet_managers: {
+        Row: {
+          created_at: string
+          id: string
+          outlet_id: string
+          restaurant_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          outlet_id: string
+          restaurant_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          outlet_id?: string
+          restaurant_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       partner_outlets: {
         Row: {
           address: string
@@ -1106,7 +1133,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_outlet_manager: { Args: { _user_id: string }; Returns: boolean }
       is_warehouse_manager: { Args: { _user_id: string }; Returns: boolean }
+      manages_outlet: {
+        Args: { _outlet_id: string; _user_id: string }
+        Returns: boolean
+      }
       manages_warehouse: {
         Args: { _user_id: string; _warehouse_id: string }
         Returns: boolean

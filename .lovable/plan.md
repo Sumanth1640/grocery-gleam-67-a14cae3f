@@ -1,70 +1,70 @@
-# Multi-warehouse & multi-outlet support
+## Goal
 
-Scope: full system across both grocery (products) and food (restaurants), covering CRUD, per-location stock, nearest-location routing on checkout, and multiple outlets per partner.
+Mirror the warehouse-manager pattern for restaurants: each outlet of a restaurant can have its own manager/cashier. The restaurant owner (partner) assigns managers per outlet from their partner panel. Each assigned manager logs in and sees a dedicated **Outlet Manager panel** scoped to only the outlets they manage — orders, menu availability toggles, and basic outlet ops — without seeing the whole restaurant.
 
-## 1. Data model (new tables + columns)
+## What changes
 
-**Grocery side**
-- `warehouses` — name, code, address, city, pincode, lat, lng, is_active, sort_order
-- `warehouse_pincodes` — warehouse_id, pincode (which pincodes each warehouse serves)
-- `product_stock` — warehouse_id, product_id, qty, low_stock_threshold (unique on pair)
-- `orders` → add `warehouse_id` (nullable, set on checkout)
+### 1. Database (migration)
 
-**Food side**
-- `partner_outlets` — restaurant_id, name, address, area, pincode, lat, lng, eta_mins, is_open, is_active
-- `partner_dishes` → add `outlet_id` nullable (null = available at all outlets of that restaurant)
-- `orders` → add `outlet_id` nullable
+- New table `partner_outlet_managers`
+  - `id`, `outlet_id` (→ partner_outlets), `user_id` (→ auth user), `restaurant_id` (denormalized for fast RLS), `role` ('manager' | 'cashier'), `created_at`
+  - Unique `(outlet_id, user_id)`
+  - RLS:
+    - Restaurant owner can full-manage rows where they own the restaurant (uses existing `owns_restaurant`).
+    - Manager can `SELECT` their own rows.
+    - Admin full access.
+- Security-definer helpers:
+  - `manages_outlet(_user_id uuid, _outlet_id uuid) returns boolean`
+  - `is_outlet_manager(_user_id uuid) returns boolean`
+- Extend RLS on existing tables so outlet managers can do their job:
+  - `orders`: SELECT + UPDATE when `outlet_id` matches a row in `partner_outlet_managers` for `auth.uid()`.
+  - `partner_dishes`: UPDATE (availability/stock toggle) when `outlet_id` matches their managed outlets, scoped to that outlet only.
+  - `order_assignments`: SELECT when the underlying order belongs to a managed outlet.
+- New notification trigger `notify_outlet_managers_on_order` — inserts a notification for every manager of `NEW.outlet_id` (alongside existing owner notification).
 
-All tables: RLS on. Admin full access. Owners can manage outlets of restaurants they own (reuse `owns_restaurant`). Public read for active rows.
+### 2. Server functions (`src/lib/outlet-managers.functions.ts`, new)
 
-## 2. Server functions
+Owner-side (uses `requireSupabaseAuth`, gated by `owns_restaurant`):
+- `listOutletManagers({ restaurant_id })`
+- `addOutletManager({ outlet_id, email, role })` — looks up user by email via `supabaseAdmin`, inserts row.
+- `removeOutletManager({ id })`
 
-`src/lib/warehouses.functions.ts` (admin)
-- listWarehouses / saveWarehouse / deleteWarehouse
-- setWarehousePincodes
-- listProductStock(warehouseId) / setProductStock
+Manager-side:
+- `listMyManagedOutlets()` — returns outlets the current user manages (with restaurant name).
+- `listOutletOrders({ outlet_id })` — orders for an outlet they manage.
+- `updateOutletOrderStatus({ order_id, status })`.
 
-`src/lib/outlets.functions.ts` (partner + admin)
-- listMyOutlets / saveOutlet / deleteOutlet (owner-scoped)
-- adminListOutlets
+### 3. Partner panel UI
 
-`src/lib/fulfillment.functions.ts` (public, used at checkout)
-- resolveWarehouseForPincode(pincode) → returns best warehouse + serviceable boolean
-- resolveOutletForRestaurant(restaurantId, pincode) → nearest active outlet
+- New route `src/routes/_authenticated/partner/outlet-managers.tsx`
+  - Per restaurant → list outlets → per outlet show assigned managers, "Add manager by email" form, remove button.
+- Add link in partner sidebar / `partner/outlets.tsx`.
 
-## 3. Checkout integration
-- Grocery checkout: before placing order, call `resolveWarehouseForPincode`. If none serviceable → block with "We don't deliver here yet". Otherwise stamp `warehouse_id` on order and decrement `product_stock` in a transaction (DB function `place_grocery_order`).
-- Food checkout: call `resolveOutletForRestaurant`, stamp `outlet_id`.
+### 4. New "Outlet" panel (separate from partner/admin/warehouse)
 
-## 4. Admin UI
-- New route `/admin/warehouses` — table + create/edit dialog, pincode chips, stock sub-table per warehouse.
-- `/admin/restaurants` row expansion → add "Outlets" tab listing outlets for that restaurant.
-- Sidebar entry "Warehouses".
+- New layout `src/routes/_authenticated/outlet.tsx` — gated by `is_outlet_manager` check; redirects elsewhere if not.
+- Pages:
+  - `outlet/index.tsx` — outlet picker (if user manages multiple) + today's stats.
+  - `outlet/orders.tsx` — live order list with status update (accept / prepare / ready / out for delivery), reusing the existing `OrderAlerts` sound component.
+  - `outlet/menu.tsx` — toggle dish availability / in-stock for that outlet's dishes only.
+- Add post-login routing: if user is outlet-manager-only, land them on `/outlet`.
 
-## 5. Partner UI
-- New route `/partner/outlets` — owner manages outlets (name, address, pincode, lat/lng, ETA, open/closed).
-- Partner nav gets "Outlets" link.
-- Dish form gains optional outlet picker (defaults to "All outlets").
+### 5. Header/menu adjustments
 
-## 6. Public surfaces
-- Product page / cart shows "Delivered from <warehouse>, ETA …" once pincode known.
-- Restaurant page picks nearest outlet for ETA + distance.
-
-## 7. Order routing notifications
-- `notify_restaurant_on_order` trigger updated to also notify the outlet owner channel (same owner, but include outlet name in body).
+- Add an "Outlet panel" entry in the user dropdown when `is_outlet_manager()` returns true (similar to existing partner/admin entries).
+- Block customer-only routes the same way warehouse managers are handled in `__root.tsx`, if needed.
 
 ## Technical notes
-- Distance: simple Haversine in SQL (or app-side) when lat/lng present; fallback to pincode-list match.
-- Stock decrement uses a `security definer` Postgres function to keep it atomic and bypass RLS safely; rejects if any line goes negative.
-- `partner_restaurants.area / eta_mins / distance_km` become derived from the chosen outlet at query time; the columns remain for the restaurant-level default/fallback.
-- No data migration needed: existing restaurants work with zero outlets (system falls back to restaurant-level fields). Existing products work with no stock rows (treated as in stock, no warehouse) until admin sets up warehouses.
 
-## Rollout order
-1. Migration (warehouses, outlets, stock, order columns, RLS, helper SQL fns)
-2. Server functions
-3. Admin warehouse UI + outlet tab
-4. Partner outlets UI
-5. Checkout integration (grocery + food)
-6. Public display tweaks
+- Email lookup for "add manager" uses `supabaseAdmin.auth.admin.listUsers` filtered by email (same pattern used in `warehouse-managers.functions.ts` — will mirror that file).
+- All new RLS uses security-definer helpers — no recursive policies.
+- Realtime: add `partner_outlet_managers` and ensure `orders` is already in `supabase_realtime` publication so the outlet panel can subscribe to new orders for their outlet.
+- Existing owner notifications stay; outlet-manager notifications are additive.
 
-Note on hosting: project is TanStack Start (React/TS). Reminder per saved memory — Hostinger/PHP target would require a separate port; this build stays on the current stack.
+## Out of scope (ask later if needed)
+
+- Payout/revenue splitting per outlet.
+- Cashier-specific permissions distinct from manager (role column is stored but treated equally for now).
+- Inviting users who don't yet have an account (today they must sign up first, same as warehouse managers).
+
+Shall I proceed?
