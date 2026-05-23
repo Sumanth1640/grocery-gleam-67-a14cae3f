@@ -84,6 +84,11 @@ export function OrderAlerts() {
       sessionStorage.setItem(SEEN_KEY, String(seenAt));
     }
 
+    const invalidateAll = () => {
+      qc.invalidateQueries({ queryKey: ["partner-dashboard"] });
+      qc.invalidateQueries({ queryKey: ["partner-orders"] });
+    };
+
     const channel = supabase
       .channel(`partner-orders-${restaurantId}`)
       .on(
@@ -96,6 +101,7 @@ export function OrderAlerts() {
         },
         (payload) => {
           const row = payload.new as { id: string; total: number; created_at: string };
+          invalidateAll();
           if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
           if (soundRef.current) playBeep();
           const pushOn = typeof window !== "undefined" && localStorage.getItem(PUSH_KEY) === "1";
@@ -116,12 +122,20 @@ export function OrderAlerts() {
               },
             },
           });
-          // Refresh dashboard + orders queries
-          qc.invalidateQueries({ queryKey: ["partner-dashboard"] });
-          qc.invalidateQueries({ queryKey: ["my-restaurant-orders"] });
         },
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+          filter: `restaurant_id=eq.${restaurantId}`,
+        },
+        () => invalidateAll(),
+      )
       .subscribe();
+
 
     return () => {
       void supabase.removeChannel(channel);
