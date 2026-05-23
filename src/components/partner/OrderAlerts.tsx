@@ -79,7 +79,7 @@ export function OrderAlerts() {
           const row = payload.new as { id: string; total: number; created_at: string };
           invalidateAll();
           if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
-          if (soundRef.current) playBeep();
+          if (soundRef.current) playAlert("partner_order");
           const pushOn = typeof window !== "undefined" && localStorage.getItem(PUSH_KEY) === "1";
           if (pushOn) {
             showBrowserNotification(
