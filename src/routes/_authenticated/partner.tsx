@@ -44,7 +44,10 @@ function PartnerLayout() {
           <OrderAlertsControl />
         </div>
         <OrderAlerts />
+        <OrderAlerts />
+        <OnboardingBanner />
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2">
+
           {NAV.map((n) => {
             const active = isActive(n.to, n.exact);
             const Icon = n.icon;
