@@ -106,6 +106,11 @@ function RestaurantRow({ r, onAction, onToggleBlock, pending }: {
           <div className="flex flex-wrap items-center gap-2">
             <div className="font-display text-base font-bold">{r.name}</div>
             <StatusPill status={r.status} />
+            {r.is_blocked && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
+                <Lock className="h-3 w-3" /> Locked
+              </span>
+            )}
             {r.agreement_accepted_at ? (
               <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">Agreement signed</span>
             ) : (
