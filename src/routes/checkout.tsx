@@ -176,7 +176,7 @@ function CheckoutPage() {
           eta: "11 minutes",
         });
         cartStore.clear();
-        navigate({ to: "/order-success" });
+        void navigate({ to: "/order-success", search: { order: row.id } });
       };
 
       if (payment === "cod") {
