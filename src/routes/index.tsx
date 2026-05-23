@@ -171,11 +171,27 @@ function HomePage() {
         </div>
       </section>
 
+      {/* FRUITS & VEGETABLES */}
+      <section className="mx-auto max-w-7xl px-4 py-6">
+        <SectionHeader title="Fresh fruits & vegetables" subtitle="Hand-picked from the farm, every morning" />
+        <div className="mt-6">
+          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={fruitsAndVeg} />}
+        </div>
+      </section>
+
       {/* DAIRY/BAKERY */}
       <section className="mx-auto max-w-7xl px-4 py-6">
         <SectionHeader title="Dairy, bread & eggs" subtitle="Stock up on the fridge basics" />
         <div className="mt-6">
           {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={dairyAndBakery} />}
+        </div>
+      </section>
+
+      {/* SNACKS & BEVERAGES */}
+      <section className="mx-auto max-w-7xl px-4 py-6">
+        <SectionHeader title="Snacks & beverages" subtitle="Munchies, drinks & late-night treats" />
+        <div className="mt-6">
+          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={snacksAndBev} />}
         </div>
       </section>
 
