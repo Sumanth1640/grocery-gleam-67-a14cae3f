@@ -1,27 +1,15 @@
 # HalliFresh — Customer Mobile App (Capacitor)
 
-The customer side of the web app is wrapped with **Capacitor** so it can ship
+The customer side of the web app is wrapped with **Capacitor** so it ships
 as a real Android (APK / Play Store) and iOS (IPA / App Store) app while
-reusing 100% of the existing React code (home, food, cart, checkout,
-account, orders, notifications).
+reusing 100% of the existing React code: home, food, cart, checkout,
+account, orders, notifications, bottom nav.
 
-The admin / partner / outlet dashboards are **not** part of the mobile build
-— they continue to live on the web only.
+The admin / partner / outlet dashboards stay web-only.
 
-## How it works
+## One-time setup (on YOUR machine — Lovable cannot build APK/IPA)
 
-- `capacitor.config.ts` points the native shell at the live Lovable preview
-  during development (hot reload on device). For production builds you bundle
-  the static `dist/` output instead.
-- `src/components/native/NativeInit.tsx` hides the splash screen, tints the
-  status bar, and wires the Android hardware back button to the router.
-- `src/lib/use-native.ts` exposes `useIsNative()` so any component can
-  conditionally show/hide web-only UI.
-
-## One-time setup (on your local machine, NOT in Lovable)
-
-1. Export the project to GitHub (top-right "GitHub" button) and `git clone`
-   it locally.
+1. Top-right **GitHub → Connect / Open repo**, then `git clone` it locally.
 2. `npm install`
 3. Add the platforms:
    ```bash
@@ -29,33 +17,33 @@ The admin / partner / outlet dashboards are **not** part of the mobile build
    npx cap add ios     # macOS only
    ```
 
-## Build & run
-
-**Hot-reload dev build** (uses the Lovable preview URL — no rebuild needed
-when you change code in Lovable):
+## Dev build (hot-reload on a real phone)
 
 ```bash
 npx cap sync
 npx cap run android        # or: npx cap run ios
 ```
 
-**Production / store build** (fully offline-bundled app):
+The app opens on your device/emulator and hot-reloads from the Lovable
+preview URL. Edit code in Lovable → see it on the phone immediately.
 
-1. In `capacitor.config.ts`, delete the entire `server: { ... }` block.
+## Production / store build (offline-bundled)
+
+1. In `capacitor.config.ts`, delete the entire `server: { … }` block.
 2. ```bash
    npm run build
    npx cap sync
-   npx cap open android    # opens Android Studio → Build → Generate APK / AAB
-   npx cap open ios        # opens Xcode → Archive → upload to App Store
+   npx cap open android    # Android Studio → Build → Generate Signed APK / AAB
+   npx cap open ios        # Xcode → Archive → upload to App Store Connect
    ```
 
 ## Requirements
 
 - **Android**: Android Studio + JDK 17
-- **iOS**: macOS + Xcode 15+ + an Apple Developer account for store upload
+- **iOS**: macOS + Xcode 15+ + Apple Developer account
 
 ## What changed in the web app?
 
-Nothing user-visible. The web preview behaves exactly as before — Capacitor
-APIs are only activated when `Capacitor.isNativePlatform()` is true, which is
-only the case inside the native shell.
+Nothing user-visible. Capacitor APIs only activate inside the native shell
+(`Capacitor.isNativePlatform()`), so the Lovable preview and any normal
+web deploy keep behaving exactly as before.
