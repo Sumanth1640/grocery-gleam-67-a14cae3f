@@ -12,17 +12,9 @@ const searchSchema = z.object({ order: z.string().uuid().optional() });
 
 type DbOrder = {
   id: string;
-  items: Order["items"];
-  address: {
-    full_name?: string;
-    phone?: string;
-    line1?: string;
-    line2?: string | null;
-    city?: string;
-    pincode?: string;
-    type?: Order["address"]["type"];
-  };
-  payment: Order["payment"];
+  items: unknown;
+  address: unknown;
+  payment: string;
   subtotal: number;
   delivery: number;
   total: number;
@@ -30,25 +22,37 @@ type DbOrder = {
   restaurant_id?: string | null;
 };
 
-function normalizeDbOrder(row: DbOrder): Order {
+type DbAddress = {
+    full_name?: string;
+    phone?: string;
+    line1?: string;
+    line2?: string | null;
+    city?: string;
+    pincode?: string;
+    type?: Order["address"]["type"];
+};
+
+function normalizeDbOrder(row: unknown): Order {
+  const r = row as DbOrder;
+  const address = (r.address ?? {}) as DbAddress;
   return {
-    id: row.id,
-    items: row.items,
+    id: r.id,
+    items: Array.isArray(r.items) ? (r.items as Order["items"]) : [],
     address: {
-      fullName: row.address.full_name ?? "Customer",
-      phone: row.address.phone ?? "",
-      line1: row.address.line1 ?? "",
-      line2: row.address.line2 ?? "",
-      city: row.address.city ?? "",
-      pincode: row.address.pincode ?? "",
-      type: row.address.type ?? "Home",
+      fullName: address.full_name ?? "Customer",
+      phone: address.phone ?? "",
+      line1: address.line1 ?? "",
+      line2: address.line2 ?? "",
+      city: address.city ?? "",
+      pincode: address.pincode ?? "",
+      type: address.type ?? "Home",
     },
-    payment: row.payment,
-    subtotal: row.subtotal,
-    delivery: row.delivery,
-    total: row.total,
-    placedAt: new Date(row.created_at).getTime(),
-    eta: row.restaurant_id ? "30 minutes" : "11 minutes",
+    payment: r.payment === "card" ? "card" : r.payment === "cod" ? "cod" : "upi",
+    subtotal: r.subtotal,
+    delivery: r.delivery,
+    total: r.total,
+    placedAt: new Date(r.created_at).getTime(),
+    eta: r.restaurant_id ? "30 minutes" : "11 minutes",
   };
 }
 
