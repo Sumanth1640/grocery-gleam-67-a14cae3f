@@ -30,6 +30,14 @@ function HomePage() {
   const categories = catsQ.data ?? [];
   const products = prodsQ.data ?? [];
   const trending = products.slice(0, 10);
+  const fruitsAndVeg = [
+    ...products.filter((p) => p.category_slug === "fruits"),
+    ...products.filter((p) => p.category_slug === "vegetables"),
+  ].slice(0, 10);
+  const snacksAndBev = [
+    ...products.filter((p) => p.category_slug === "snacks"),
+    ...products.filter((p) => p.category_slug === "beverages"),
+  ].slice(0, 10);
   const dairyAndBakery = [
     ...products.filter((p) => p.category_slug === "dairy"),
     ...products.filter((p) => p.category_slug === "bakery"),
@@ -90,30 +98,24 @@ function HomePage() {
 
       <BannerCarousel />
 
-      {/* FOOD DELIVERY PROMO */}
+      {/* FOOD DELIVERY — slim strip (10%) */}
       <section className="mx-auto max-w-7xl px-4 pt-8">
         <Link
           to="/food"
-          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-3xl border bg-discount/10 p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft md:p-8"
+          className="group flex items-center justify-between gap-3 overflow-hidden rounded-2xl border bg-discount/10 px-4 py-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
         >
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-discount px-3 py-1 text-xs font-bold text-white shadow-pop">
-              <Utensils className="h-3.5 w-3.5" /> NEW · Food delivery
-            </div>
-            <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight md:text-3xl">
-              Hungry? Order from your favourite restaurants.
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">Pizzas, biryanis, burgers, salads — delivered in 30 minutes.</p>
-            <span className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-foreground px-4 py-2 text-xs font-bold text-background">
-              Browse restaurants <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+          <div className="flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-discount text-white shadow-pop">
+              <Utensils className="h-4 w-4" />
             </span>
+            <div>
+              <div className="text-sm font-bold leading-tight">Also hungry? Order food from nearby restaurants</div>
+              <div className="text-xs text-muted-foreground">Pizzas, biryanis, burgers · 30 min delivery</div>
+            </div>
           </div>
-          <img
-            src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=70"
-            alt=""
-            className="hidden aspect-square w-44 rounded-2xl object-cover shadow-pop md:block"
-            loading="lazy"
-          />
+          <span className="hidden shrink-0 items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-bold text-background sm:inline-flex">
+            Browse <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
+          </span>
         </Link>
       </section>
 
@@ -123,6 +125,7 @@ function HomePage() {
         {catsQ.isLoading ? (
           <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4 md:gap-4 lg:grid-cols-8">
             {Array.from({ length: 8 }).map((_, i) => (
+
               <div key={i} className="rounded-2xl border bg-card p-3">
                 <div className="aspect-square w-full animate-pulse rounded-xl bg-muted" />
                 <div className="mt-2 h-3 w-3/4 animate-pulse rounded bg-muted" />
@@ -168,11 +171,27 @@ function HomePage() {
         </div>
       </section>
 
+      {/* FRUITS & VEGETABLES */}
+      <section className="mx-auto max-w-7xl px-4 py-6">
+        <SectionHeader title="Fresh fruits & vegetables" subtitle="Hand-picked from the farm, every morning" />
+        <div className="mt-6">
+          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={fruitsAndVeg} />}
+        </div>
+      </section>
+
       {/* DAIRY/BAKERY */}
       <section className="mx-auto max-w-7xl px-4 py-6">
         <SectionHeader title="Dairy, bread & eggs" subtitle="Stock up on the fridge basics" />
         <div className="mt-6">
           {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={dairyAndBakery} />}
+        </div>
+      </section>
+
+      {/* SNACKS & BEVERAGES */}
+      <section className="mx-auto max-w-7xl px-4 py-6">
+        <SectionHeader title="Snacks & beverages" subtitle="Munchies, drinks & late-night treats" />
+        <div className="mt-6">
+          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={snacksAndBev} />}
         </div>
       </section>
 
