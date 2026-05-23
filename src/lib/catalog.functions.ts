@@ -117,9 +117,9 @@ export const isAdmin = createServerFn({ method: "GET" }).handler(async () => {
   const { getRequest } = await import("@tanstack/react-start/server");
   const req = getRequest();
   const authHeader = req?.headers?.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) return { isAdmin: false, isWarehouseManager: false };
+  if (!authHeader?.startsWith("Bearer ")) return { isAdmin: false, isWarehouseManager: false, warehouseIds: [] as string[] };
   const token = authHeader.slice(7);
-  if (!token) return { isAdmin: false, isWarehouseManager: false };
+  if (!token) return { isAdmin: false, isWarehouseManager: false, warehouseIds: [] as string[] };
 
   const { createClient } = await import("@supabase/supabase-js");
   const supabase = createClient(
@@ -129,11 +129,12 @@ export const isAdmin = createServerFn({ method: "GET" }).handler(async () => {
   );
   const { data: claims } = await supabase.auth.getClaims(token);
   const userId = claims?.claims?.sub;
-  if (!userId) return { isAdmin: false, isWarehouseManager: false };
+  if (!userId) return { isAdmin: false, isWarehouseManager: false, warehouseIds: [] as string[] };
 
-  const [{ data: adminRow }, { data: wmRow }] = await Promise.all([
+  const [{ data: adminRow }, { data: wmRows }] = await Promise.all([
     supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
-    supabaseAdmin.from("warehouse_managers").select("id").eq("user_id", userId).limit(1).maybeSingle(),
+    supabaseAdmin.from("warehouse_managers").select("warehouse_id").eq("user_id", userId),
   ]);
-  return { isAdmin: !!adminRow, isWarehouseManager: !!wmRow };
+  const warehouseIds = (wmRows ?? []).map((r: { warehouse_id: string | null }) => r.warehouse_id).filter(Boolean) as string[];
+  return { isAdmin: !!adminRow, isWarehouseManager: warehouseIds.length > 0, warehouseIds };
 });
