@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/use-auth";
+import { isAdmin as isAdminFn } from "@/lib/catalog.functions";
 
 const SOUND_KEY = "admin-alert-sound";
 const SEEN_KEY = "admin-alert-seen";
@@ -33,9 +36,18 @@ function playBeep() {
   }
 }
 
-/** Subscribes to all product (grocery) orders — restaurant_id IS NULL. */
+/** Subscribes to all product (grocery) orders for admins, or only warehouse-scoped orders for managers. */
 export function AdminOrderAlerts() {
   const qc = useQueryClient();
+  const { session } = useAuth();
+  const check = useServerFn(isAdminFn);
+  const { data: role } = useQuery({
+    queryKey: ["is-admin", session?.user.id],
+    queryFn: () => check(),
+    enabled: !!session,
+    refetchOnWindowFocus: false,
+  });
+
   const [sound, setSound] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem(SOUND_KEY) !== "0";
@@ -46,44 +58,76 @@ export function AdminOrderAlerts() {
     if (typeof window !== "undefined") localStorage.setItem(SOUND_KEY, sound ? "1" : "0");
   }, [sound]);
 
+  const isAdminUser = !!role?.isAdmin;
+  const warehouseIds = role?.warehouseIds ?? [];
+  // Serialize for stable effect deps
+  const whKey = warehouseIds.slice().sort().join(",");
+  const token = session?.access_token;
+
   useEffect(() => {
+    if (!session) return;
+    if (!isAdminUser && warehouseIds.length === 0) return;
+
+    // Ensure realtime is authenticated for RLS-aware postgres_changes
+    if (token) {
+      try {
+        supabase.realtime.setAuth(token);
+      } catch {
+        /* ignore */
+      }
+    }
+
     const seenAt = Date.now();
     if (typeof window !== "undefined") sessionStorage.setItem(SEEN_KEY, String(seenAt));
 
-    const channel = supabase
-      .channel("admin-product-orders")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "orders",
-          filter: "restaurant_id=is.null",
+    const handler = (payload: { new: { id: string; total: number; created_at: string } }) => {
+      const row = payload.new;
+      if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
+      if (soundRef.current) playBeep();
+      toast.success(`New product order — ₹${row.total}`, {
+        description: `Order #${row.id.slice(0, 6)} just placed`,
+        duration: 8000,
+        action: {
+          label: "Open",
+          onClick: () => {
+            window.location.href = "/admin/orders";
+          },
         },
-        (payload) => {
-          const row = payload.new as { id: string; total: number; created_at: string };
-          if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
-          if (soundRef.current) playBeep();
-          toast.success(`New product order — ₹${row.total}`, {
-            description: `Order #${row.id.slice(0, 6)} just placed`,
-            duration: 8000,
-            action: {
-              label: "Open",
-              onClick: () => {
-                window.location.href = "/admin/orders";
-              },
-            },
-          });
-          qc.invalidateQueries({ queryKey: ["admin-orders"] });
-          qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
-        },
-      )
-      .subscribe();
+      });
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
+    };
+
+    const channels: ReturnType<typeof supabase.channel>[] = [];
+
+    if (isAdminUser) {
+      const ch = supabase
+        .channel("admin-product-orders")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "orders", filter: "restaurant_id=is.null" },
+          handler as never,
+        )
+        .subscribe();
+      channels.push(ch);
+    } else {
+      for (const wid of warehouseIds) {
+        const ch = supabase
+          .channel(`wm-orders-${wid}`)
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
+            handler as never,
+          )
+          .subscribe();
+        channels.push(ch);
+      }
+    }
 
     return () => {
-      void supabase.removeChannel(channel);
+      for (const ch of channels) void supabase.removeChannel(ch);
     };
-  }, [qc]);
+  }, [qc, session, isAdminUser, whKey, token, warehouseIds]);
 
   return null;
 }
