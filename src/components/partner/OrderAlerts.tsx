@@ -6,37 +6,13 @@ import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { myRestaurant } from "@/lib/partner.functions";
+import { playAlert } from "@/lib/alert-sounds";
+import { AlertSoundSettingsButton } from "@/components/admin/AlertSoundSettings";
 
 const SOUND_KEY = "partner-alert-sound";
 const PUSH_KEY = "partner-alert-push";
 const SEEN_KEY = "partner-alert-seen";
 
-// Synthesize a short two-tone beep via WebAudio — no asset required.
-function playBeep() {
-  try {
-    type WindowWithWebkit = Window & { webkitAudioContext?: typeof AudioContext };
-    const Ctx = window.AudioContext ?? (window as WindowWithWebkit).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const now = ctx.currentTime;
-    const tones = [880, 1320];
-    tones.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, now + i * 0.18);
-      gain.gain.exponentialRampToValueAtTime(0.25, now + i * 0.18 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.16);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now + i * 0.18);
-      osc.stop(now + i * 0.18 + 0.18);
-    });
-    setTimeout(() => ctx.close(), 700);
-  } catch {
-    /* ignore */
-  }
-}
 
 function showBrowserNotification(title: string, body: string, orderId: string) {
   try {
@@ -103,7 +79,7 @@ export function OrderAlerts() {
           const row = payload.new as { id: string; total: number; created_at: string };
           invalidateAll();
           if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
-          if (soundRef.current) playBeep();
+          if (soundRef.current) playAlert("partner_order");
           const pushOn = typeof window !== "undefined" && localStorage.getItem(PUSH_KEY) === "1";
           if (pushOn) {
             showBrowserNotification(
@@ -223,6 +199,12 @@ export function OrderAlertsControl() {
       >
         {sound ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
       </button>
+      <AlertSoundSettingsButton
+        rows={[
+          { channel: "partner_order", label: "New order", description: "Plays when a customer places an order at your restaurant." },
+          { channel: "notification", label: "Other notifications", description: "Status changes, payouts and general alerts." },
+        ]}
+      />
       <button
         onClick={togglePush}
         title={push ? "Disable browser alerts" : "Enable browser alerts"}
