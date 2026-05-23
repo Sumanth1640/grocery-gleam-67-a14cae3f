@@ -22,15 +22,7 @@ export function BannerCarousel() {
     staleTime: 60_000,
   });
   const banners: Banner[] = (data ?? []) as any;
-
-export function BannerCarousel() {
-  const fetchBanners = useServerFn(listBanners);
-  const { data } = useQuery({
-    queryKey: ["banners"],
-    queryFn: () => fetchBanners(),
-    staleTime: 60_000,
-  });
-  const banners: Banner[] = (data && data.length > 0 ? (data as any) : fallback);
+  if (banners.length === 0) return null;
 
   const [i, setI] = useState(0);
   useEffect(() => {
