@@ -74,7 +74,13 @@ function AdminRestaurantsPage() {
       ) : (
         <ul className="mt-6 grid gap-3">
           {(q.data ?? []).map((r) => (
-            <RestaurantRow key={r.id} r={r} onAction={(vars) => setStatus.mutate(vars)} pending={setStatus.isPending} />
+            <RestaurantRow
+              key={r.id}
+              r={r}
+              onAction={(vars) => setStatus.mutate(vars)}
+              onToggleBlock={(vars) => setBlocked.mutate(vars)}
+              pending={setStatus.isPending || setBlocked.isPending}
+            />
           ))}
         </ul>
       )}
