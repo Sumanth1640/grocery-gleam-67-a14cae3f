@@ -531,7 +531,7 @@ export const partnerPayouts = createServerFn({ method: "POST" })
         payout: gross - commission,
       };
     });
-    const active = rows.filter((r) => r.status !== "cancelled");
+    const active = rows.filter((r) => r.status === "delivered");
     const totals = {
       orders: active.length,
       gross: active.reduce((s, x) => s + x.gross, 0),
