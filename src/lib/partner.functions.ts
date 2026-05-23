@@ -428,22 +428,22 @@ export const partnerDashboard = createServerFn({ method: "GET" })
     const todayKey = new Date().toISOString().slice(0, 10);
     const isToday = (iso: string) => iso.slice(0, 10) === todayKey;
 
-    const today = orders.filter((o) => isToday(o.created_at));
+    const today = orders.filter((o) => isToday(o.created_at) && o.status === "delivered");
     const todayRevenue = today.reduce((s, o) => s + (o.total ?? 0), 0);
     const pending = orders.filter((o) => ["placed", "preparing", "ready"].includes(o.status));
     const cancelled7 = orders.filter((o) => o.status === "cancelled");
     const delivered7 = orders.filter((o) => o.status === "delivered");
-    const revenue7 = orders.filter((o) => o.status !== "cancelled").reduce((s, o) => s + (o.total ?? 0), 0);
-    const aov = orders.length ? Math.round(revenue7 / orders.length) : 0;
+    const revenue7 = delivered7.reduce((s, o) => s + (o.total ?? 0), 0);
+    const aov = delivered7.length ? Math.round(revenue7 / delivered7.length) : 0;
 
-    // 7-day revenue series
+    // 7-day revenue series (delivered orders only)
     const series: { day: string; label: string; revenue: number; count: number }[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       d.setHours(0, 0, 0, 0);
       const key = d.toISOString().slice(0, 10);
-      const dayOrders = orders.filter((o) => o.created_at.slice(0, 10) === key && o.status !== "cancelled");
+      const dayOrders = orders.filter((o) => o.created_at.slice(0, 10) === key && o.status === "delivered");
       series.push({
         day: key,
         label: d.toLocaleDateString(undefined, { weekday: "short" }),
@@ -451,6 +451,7 @@ export const partnerDashboard = createServerFn({ method: "GET" })
         count: dayOrders.length,
       });
     }
+
 
     // Top dishes (by qty in last 7d orders)
     const tally = new Map<string, { name: string; image: string; qty: number; revenue: number }>();
