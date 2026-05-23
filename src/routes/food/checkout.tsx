@@ -201,7 +201,7 @@ function FoodCheckoutPage() {
           eta: "30 minutes",
         });
         foodCartStore.clear();
-        navigate({ to: "/order-success" });
+        void navigate({ to: "/order-success", search: { order: row.id } });
       };
 
       if (payment === "cod") {
