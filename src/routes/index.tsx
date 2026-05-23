@@ -179,15 +179,60 @@ function HomePage() {
         </div>
       </section>
 
-      {/* FRUITS & VEGETABLES */}
+      {/* POPULAR RESTAURANTS (food) */}
       <section className="mx-auto max-w-7xl px-4 py-6">
-        <SectionHeader title="Fresh fruits & vegetables" subtitle="Hand-picked from the farm, every morning" />
+        <SectionHeader title="Popular restaurants near you" subtitle="Top-rated kitchens, delivered hot" />
         <div className="mt-6">
-          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={fruitsAndVeg} />}
+          {restosQ.isLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border bg-card p-3">
+                  <div className="aspect-[16/10] w-full animate-pulse rounded-xl bg-muted" />
+                  <div className="mt-3 h-4 w-2/3 animate-pulse rounded bg-muted" />
+                  <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {popularRestos.map((r: any) => (
+                <Link
+                  key={r.id}
+                  to="/food/r/$slug"
+                  params={{ slug: r.slug }}
+                  className="group overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+                    {r.offer && (
+                      <div className="absolute left-3 top-3 rounded-md bg-discount px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">
+                        {r.offer}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-display text-sm font-bold leading-tight">{r.name}</h3>
+                      <div className="inline-flex items-center gap-0.5 rounded-md bg-success px-1.5 py-0.5 text-[11px] font-bold text-success-foreground">
+                        <Star className="h-3 w-3 fill-current" /> {r.rating}
+                      </div>
+                    </div>
+                    <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                      {(r.cuisines ?? []).join(" · ")}
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {r.eta_mins} min</span>
+                      <span>₹{r.cost_for_two} for two</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* DAIRY/BAKERY */}
+      {/* DAIRY/BAKERY (grocery) */}
       <section className="mx-auto max-w-7xl px-4 py-6">
         <SectionHeader title="Dairy, bread & eggs" subtitle="Stock up on the fridge basics" />
         <div className="mt-6">
@@ -195,11 +240,40 @@ function HomePage() {
         </div>
       </section>
 
-      {/* SNACKS & BEVERAGES */}
+      {/* POPULAR DISHES (food) */}
       <section className="mx-auto max-w-7xl px-4 py-6">
-        <SectionHeader title="Snacks & beverages" subtitle="Munchies, drinks & late-night treats" />
+        <SectionHeader title="Crave-worthy dishes" subtitle="Loved by foodies in your area" />
         <div className="mt-6">
-          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={snacksAndBev} />}
+          {dishesQ.isLoading ? (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border bg-card p-3">
+                  <div className="aspect-square w-full animate-pulse rounded-xl bg-muted" />
+                  <div className="mt-2 h-3 w-3/4 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {popularDishes.map((d: any) => (
+                <Link
+                  key={d.id}
+                  to="/food/r/$slug"
+                  params={{ slug: d.restaurant?.slug ?? "" }}
+                  className="group overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+                >
+                  <div className="aspect-square overflow-hidden">
+                    <img src={d.image} alt={d.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="line-clamp-1 text-sm font-bold">{d.name}</h3>
+                    <div className="line-clamp-1 text-[11px] text-muted-foreground">{d.restaurant?.name}</div>
+                    <div className="mt-1 text-sm font-bold text-primary">₹{d.price}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
