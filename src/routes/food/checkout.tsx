@@ -56,6 +56,8 @@ const emptyAddress: Address = {
   type: "Home",
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function FoodCheckoutPage() {
   const cart = useFoodCart();
   const search = Route.useSearch();
@@ -129,6 +131,15 @@ function FoodCheckoutPage() {
   const placeOrder = async () => {
     setSubmitting(true);
     try {
+      const restaurantId = totals.items[0]?.restaurantId;
+      if (!restaurantId || !UUID_RE.test(restaurantId)) {
+        foodCartStore.clear();
+        toast.error("This cart is from an old menu. Please add dishes again.", { duration: 7000 });
+        setSubmitting(false);
+        void navigate({ to: "/food" });
+        return;
+      }
+
       // Map food line items to the order item schema
       const items = totals.items.map((it) => {
         const summary = [it.variant?.name, ...it.addons.map((a) => a.name)]
@@ -162,7 +173,7 @@ function FoodCheckoutPage() {
         subtotal: totals.subtotal,
         delivery: Math.max(0, totals.delivery + totals.packaging + totals.taxes - discount),
         total: totals.total,
-        restaurant_id: totals.items[0]?.restaurantId,
+        restaurant_id: restaurantId,
         coupon_id: couponData?.id ?? null,
         coupon_discount: discount,
         scheduled_for: scheduledFor,
