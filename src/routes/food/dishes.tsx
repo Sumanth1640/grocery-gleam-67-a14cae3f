@@ -8,6 +8,9 @@ import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-stor
 import { DishCustomizeDialog, VegBadge } from "@/components/site/DishCustomizeDialog";
 import { Search, Star, Flame, Plus, ShoppingBag, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
+import { listAllApprovedDishes } from "@/lib/partner-public.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 
 type DishWithRestaurant = Dish & { restaurant: Restaurant };
 
@@ -23,16 +26,49 @@ export const Route = createFileRoute("/food/dishes")({
   component: DishesPage,
 });
 
-const ALL_DISHES: DishWithRestaurant[] = RESTAURANTS.flatMap((r) =>
+const SEED_DISHES: DishWithRestaurant[] = RESTAURANTS.flatMap((r) =>
   r.menu.map((d) => ({ ...d, restaurant: r })),
 );
 
-const SECTIONS = Array.from(new Set(ALL_DISHES.map((d) => d.section))).sort();
+function mapDbDish(d: any): DishWithRestaurant {
+  const r = d.restaurant ?? {};
+  const restaurant: Restaurant = {
+    id: r.id, slug: r.slug, name: r.name,
+    image: r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+    cover: r.cover || r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
+    cuisines: r.cuisines ?? [], rating: Number(r.rating ?? 4.5), reviewsCount: r.reviews_count ?? 0,
+    etaMins: r.eta_mins ?? 30, distanceKm: Number(r.distance_km ?? 1),
+    costForTwo: r.cost_for_two ?? 400, priceTier: (r.price_tier ?? 2) as 1 | 2 | 3,
+    veg: !!r.veg, area: r.area ?? "", offer: r.offer ?? undefined, menu: [],
+  };
+  return {
+    id: d.id, name: d.name, desc: d.description ?? "", image: d.image || "",
+    price: d.price, mrp: d.mrp ?? undefined, veg: !!d.veg, spicy: !!d.spicy,
+    bestseller: !!d.bestseller, section: d.section, rating: Number(d.rating ?? 4.5),
+    variants: (d.partner_dish_variants ?? []).map((v: any) => ({ id: v.id, name: v.name, price: v.price })),
+    addons: (d.partner_dish_addons ?? []).map((a: any) => ({ id: a.id, name: a.name, price: a.price })),
+    restaurant,
+  };
+}
+
 
 function DishesPage() {
   const cart = useFoodCart();
   const totals = foodCartTotals(cart);
   const [openDish, setOpenDish] = useState<DishWithRestaurant | null>(null);
+
+  const fetchDishes = useServerFn(listAllApprovedDishes);
+  const { data: dbDishes } = useQuery({
+    queryKey: ["public-all-dishes"],
+    queryFn: () => fetchDishes(),
+    staleTime: 60_000,
+  });
+
+  const ALL_DISHES: DishWithRestaurant[] = useMemo(() => {
+    const fromDb = (dbDishes ?? []).map(mapDbDish);
+    return [...fromDb, ...SEED_DISHES];
+  }, [dbDishes]);
+  const SECTIONS = useMemo(() => Array.from(new Set(ALL_DISHES.map((d) => d.section))).sort(), [ALL_DISHES]);
 
   const [q, setQ] = useState("");
   const [vegOnly, setVegOnly] = useState(false);
@@ -45,6 +81,7 @@ function DishesPage() {
 
   const visible = useMemo(() => {
     let list = ALL_DISHES.slice();
+
     if (q.trim()) {
       const needle = q.toLowerCase();
       list = list.filter(
@@ -65,7 +102,7 @@ function DishesPage() {
       case "price-desc": list.sort((a, b) => b.price - a.price); break;
     }
     return list;
-  }, [q, vegOnly, bestsellerOnly, section, maxPrice, minRating, sort]);
+  }, [ALL_DISHES, q, vegOnly, bestsellerOnly, section, maxPrice, minRating, sort]);
 
   const handleAdd = (d: DishWithRestaurant) => {
     if (totals.items.length > 0 && totals.items[0].restaurantId !== d.restaurant.id) {
