@@ -5,6 +5,7 @@ import { useState } from "react";
 import { adminListBanners, adminSaveBanner, adminDeleteBanner } from "@/lib/admin-extra.functions";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/_authenticated/admin/banners")({
   head: () => ({ meta: [{ title: "Banners — Admin" }] }),
@@ -64,7 +65,7 @@ function BannersPage() {
         {(q.data ?? []).map((b: any) => (
           <div key={b.id} className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-4 shadow-card">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="h-12 w-20 rounded-lg" style={{ background: b.bg }} />
+              <div className="h-12 w-20 overflow-hidden rounded-lg bg-cover bg-center" style={{ background: b.image ? `center/cover no-repeat url(${b.image})` : b.bg }} />
               <div className="min-w-0">
                 <div className="truncate font-semibold">{b.title}</div>
                 <div className="truncate text-xs text-muted-foreground">{b.subtitle} · → {b.link_to}</div>
@@ -97,15 +98,19 @@ function BannersPage() {
                 <Field label="CTA label"><input className="w-full rounded-lg border bg-background px-3 py-2 text-sm" value={editing.cta_label} onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })} /></Field>
                 <Field label="Link (e.g. /c/fruits)"><input className="w-full rounded-lg border bg-background px-3 py-2 text-sm" value={editing.link_to} onChange={(e) => setEditing({ ...editing, link_to: e.target.value })} /></Field>
               </div>
-              <Field label="Background (CSS)"><input className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-mono" value={editing.bg} onChange={(e) => setEditing({ ...editing, bg: e.target.value })} /></Field>
+              <Field label="Photo (recommended)">
+                <ImageUpload value={editing.image} folder="banners" onChange={(url) => setEditing({ ...editing, image: url })} />
+              </Field>
+              <Field label="Background (CSS) — used when no photo"><input className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-mono" value={editing.bg} onChange={(e) => setEditing({ ...editing, bg: e.target.value })} /></Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Foreground color"><input className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-mono" value={editing.fg} onChange={(e) => setEditing({ ...editing, fg: e.target.value })} /></Field>
                 <Field label="Sort"><input type="number" className="w-full rounded-lg border bg-background px-3 py-2 text-sm" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} /></Field>
               </div>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_active} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Active</label>
-              <div className="rounded-xl p-4" style={{ background: editing.bg, color: editing.fg }}>
-                <div className="font-display text-base font-extrabold">{editing.title || "Preview"}</div>
-                <div className="text-xs opacity-80">{editing.subtitle}</div>
+              <div className="relative overflow-hidden rounded-xl p-4" style={{ background: editing.bg, color: editing.fg, minHeight: 90 }}>
+                {editing.image && (<><img src={editing.image} alt="" className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" /></>)}
+                <div className="relative font-display text-base font-extrabold" style={{ color: editing.image ? "#fff" : editing.fg }}>{editing.title || "Preview"}</div>
+                <div className="relative text-xs opacity-90" style={{ color: editing.image ? "#fff" : editing.fg }}>{editing.subtitle}</div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setEditing(null)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-secondary">Cancel</button>
