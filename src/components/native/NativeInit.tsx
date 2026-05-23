@@ -1,12 +1,8 @@
 import { useEffect } from "react";
 
 /**
- * Initialises native-only behaviour when the app is running inside a
- * Capacitor shell (Android/iOS). On the web this is a no-op.
- *
- * - Hides the splash screen once React has mounted
- * - Tints the status bar to match the brand
- * - Wires the hardware back button to router history on Android
+ * Initialises native-only behaviour when running inside Capacitor.
+ * On the web this is a no-op.
  */
 export function NativeInit() {
   useEffect(() => {
@@ -33,7 +29,7 @@ export function NativeInit() {
         });
         cleanup = () => handle.remove();
       } catch {
-        // not in a native shell or plugin missing — safe to ignore
+        // not a native shell — ignore
       }
     })();
 
