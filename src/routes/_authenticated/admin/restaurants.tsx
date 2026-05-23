@@ -16,6 +16,7 @@ function AdminRestaurantsPage() {
   const qc = useQueryClient();
   const listFn = useServerFn(adminListRestaurants);
   const setFn = useServerFn(adminSetRestaurantStatus);
+  const blockFn = useServerFn(adminSetRestaurantBlocked);
   const [filter, setFilter] = useState<Status>("pending");
 
   const q = useQuery({
@@ -28,6 +29,15 @@ function AdminRestaurantsPage() {
       setFn({ data: vars }),
     onSuccess: () => {
       toast.success("Updated");
+      qc.invalidateQueries({ queryKey: ["admin-restaurants"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setBlocked = useMutation({
+    mutationFn: (vars: { id: string; is_blocked: boolean }) => blockFn({ data: vars }),
+    onSuccess: (_d, vars) => {
+      toast.success(vars.is_blocked ? "Restaurant locked" : "Restaurant unlocked");
       qc.invalidateQueries({ queryKey: ["admin-restaurants"] });
     },
     onError: (e: Error) => toast.error(e.message),
