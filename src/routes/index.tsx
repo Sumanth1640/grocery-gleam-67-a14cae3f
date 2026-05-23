@@ -98,24 +98,32 @@ function HomePage() {
 
       <BannerCarousel />
 
-      {/* FOOD DELIVERY — slim strip (10%) */}
+      {/* FOOD DELIVERY — equal weight (50%) */}
       <section className="mx-auto max-w-7xl px-4 pt-8">
         <Link
           to="/food"
-          className="group flex items-center justify-between gap-3 overflow-hidden rounded-2xl border bg-discount/10 px-4 py-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-3xl border bg-discount/10 p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft md:p-8"
         >
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-discount text-white shadow-pop">
-              <Utensils className="h-4 w-4" />
-            </span>
-            <div>
-              <div className="text-sm font-bold leading-tight">Also hungry? Order food from nearby restaurants</div>
-              <div className="text-xs text-muted-foreground">Pizzas, biryanis, burgers · 30 min delivery</div>
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-discount px-3 py-1 text-xs font-bold text-white shadow-pop">
+              <Utensils className="h-3.5 w-3.5" /> Food delivery
             </div>
+            <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight md:text-4xl">
+              Hungry? Order from your favourite restaurants.
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground md:text-base">
+              Pizzas, biryanis, burgers, salads — delivered in 30 minutes.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-foreground px-4 py-2 text-xs font-bold text-background">
+              Browse restaurants <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </span>
           </div>
-          <span className="hidden shrink-0 items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-bold text-background sm:inline-flex">
-            Browse <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
-          </span>
+          <img
+            src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=70"
+            alt=""
+            className="hidden aspect-square w-44 rounded-2xl object-cover shadow-pop md:block"
+            loading="lazy"
+          />
         </Link>
       </section>
 
