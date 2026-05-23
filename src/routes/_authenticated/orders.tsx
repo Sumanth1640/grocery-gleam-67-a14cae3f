@@ -1,10 +1,14 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { listOrders } from "@/lib/account.functions";
+import { useAuth } from "@/lib/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Package, Check } from "lucide-react";
+
 
 const STATUS_STEPS = ["placed", "packed", "out_for_delivery", "delivered"] as const;
 type StepId = typeof STATUS_STEPS[number];
