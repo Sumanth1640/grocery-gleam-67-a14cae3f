@@ -169,12 +169,19 @@ export function AdminOrderAlertsControl() {
       >
         {sound ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
       </button>
+      <AlertSoundSettingsButton
+        rows={[
+          { channel: "admin_order", label: "New order", description: "Plays when a new product order arrives." },
+          { channel: "notification", label: "Other notifications", description: "Status updates, low-stock and general alerts." },
+        ]}
+      />
       <span
         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-card text-muted-foreground"
         title="Order alerts"
       >
         {sound ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
       </span>
+
     </div>
   );
 }
