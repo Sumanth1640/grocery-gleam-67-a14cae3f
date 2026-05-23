@@ -199,6 +199,12 @@ export function OrderAlertsControl() {
       >
         {sound ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
       </button>
+      <AlertSoundSettingsButton
+        rows={[
+          { channel: "partner_order", label: "New order", description: "Plays when a customer places an order at your restaurant." },
+          { channel: "notification", label: "Other notifications", description: "Status changes, payouts and general alerts." },
+        ]}
+      />
       <button
         onClick={togglePush}
         title={push ? "Disable browser alerts" : "Enable browser alerts"}
