@@ -25,24 +25,22 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const cats = useServerFn(listCategories);
   const prods = useServerFn(listProducts);
+  const restos = useServerFn(listApprovedRestaurants);
+  const dishes = useServerFn(listAllApprovedDishes);
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
   const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => prods() });
+  const restosQ = useQuery({ queryKey: ["home-restaurants"], queryFn: () => restos() });
+  const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dishes() });
 
   const categories = catsQ.data ?? [];
   const products = prodsQ.data ?? [];
   const trending = products.slice(0, 10);
-  const fruitsAndVeg = [
-    ...products.filter((p) => p.category_slug === "fruits"),
-    ...products.filter((p) => p.category_slug === "vegetables"),
-  ].slice(0, 10);
-  const snacksAndBev = [
-    ...products.filter((p) => p.category_slug === "snacks"),
-    ...products.filter((p) => p.category_slug === "beverages"),
-  ].slice(0, 10);
   const dairyAndBakery = [
     ...products.filter((p) => p.category_slug === "dairy"),
     ...products.filter((p) => p.category_slug === "bakery"),
   ].slice(0, 10);
+  const popularRestos = (restosQ.data ?? []).slice(0, 4);
+  const popularDishes = (dishesQ.data ?? []).slice(0, 5);
 
   return (
     <div className="min-h-screen bg-background">
