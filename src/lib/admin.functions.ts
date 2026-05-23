@@ -40,14 +40,16 @@ export const adminStats = createServerFn({ method: "GET" })
     ]);
 
     // Orders + revenue: scoped to manager's warehouses if not admin
+    // Revenue only counts successfully delivered orders
     let ordersQ = supabaseAdmin.from("orders").select("id", { count: "exact", head: true });
-    let revQ = supabaseAdmin.from("orders").select("total");
+    let revQ = supabaseAdmin.from("orders").select("total").eq("status", "delivered");
     if (!isAdmin) {
       ordersQ = ordersQ.in("warehouse_id", warehouseIds);
       revQ = revQ.in("warehouse_id", warehouseIds);
     }
     const [{ count: orders }, { data: revRows }] = await Promise.all([ordersQ, revQ]);
     const revenue = (revRows ?? []).reduce((s: number, r: any) => s + (r.total ?? 0), 0);
+
 
     return {
       products: products ?? 0,
@@ -308,8 +310,10 @@ export const adminAnalytics = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const list = (orders ?? []).filter((o: any) => o.status !== "cancelled");
+    // Revenue only counts successfully delivered orders
+    const delivered = list.filter((o: any) => o.status === "delivered");
 
-    // Daily revenue series
+    // Daily revenue series (revenue from delivered orders; orders count = all non-cancelled)
     const byDay = new Map<string, { revenue: number; orders: number }>();
     for (let i = 0; i < data.days; i++) {
       const d = new Date(since);
@@ -320,10 +324,11 @@ export const adminAnalytics = createServerFn({ method: "POST" })
     for (const o of list) {
       const k = new Date(o.created_at).toISOString().slice(0, 10);
       const cur = byDay.get(k) ?? { revenue: 0, orders: 0 };
-      cur.revenue += o.total ?? 0;
+      if (o.status === "delivered") cur.revenue += o.total ?? 0;
       cur.orders += 1;
       byDay.set(k, cur);
     }
+
     const series = Array.from(byDay.entries()).map(([date, v]) => ({ date, ...v }));
 
     // Top items
@@ -347,8 +352,9 @@ export const adminAnalytics = createServerFn({ method: "POST" })
     const payments = new Map<string, number>();
     for (const o of list) payments.set(o.payment ?? "other", (payments.get(o.payment ?? "other") ?? 0) + 1);
 
-    const revenue = list.reduce((s, o) => s + (o.total ?? 0), 0);
-    const aov = list.length ? Math.round(revenue / list.length) : 0;
+    const revenue = delivered.reduce((s, o) => s + (o.total ?? 0), 0);
+    const aov = delivered.length ? Math.round(revenue / delivered.length) : 0;
+
 
     return {
       revenue,

@@ -340,7 +340,7 @@ export const adminReports = createServerFn({ method: "POST" })
       supabaseAdmin.from("coupons").select("id, code"),
     ]);
 
-    const live = (orders ?? []).filter((o) => o.status !== "cancelled");
+    const live = (orders ?? []).filter((o) => o.status === "delivered");
 
     // GMV by week
     const weekMap = new Map<string, { gmv: number; orders: number }>();
