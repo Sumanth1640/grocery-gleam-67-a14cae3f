@@ -30,6 +30,14 @@ function HomePage() {
   const categories = catsQ.data ?? [];
   const products = prodsQ.data ?? [];
   const trending = products.slice(0, 10);
+  const fruitsAndVeg = [
+    ...products.filter((p) => p.category_slug === "fruits"),
+    ...products.filter((p) => p.category_slug === "vegetables"),
+  ].slice(0, 10);
+  const snacksAndBev = [
+    ...products.filter((p) => p.category_slug === "snacks"),
+    ...products.filter((p) => p.category_slug === "beverages"),
+  ].slice(0, 10);
   const dairyAndBakery = [
     ...products.filter((p) => p.category_slug === "dairy"),
     ...products.filter((p) => p.category_slug === "bakery"),
