@@ -44,7 +44,6 @@ function PartnerLayout() {
           <OrderAlertsControl />
         </div>
         <OrderAlerts />
-        <OrderAlerts />
         <OnboardingBanner />
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2">
 
