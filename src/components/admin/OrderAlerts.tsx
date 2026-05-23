@@ -6,35 +6,12 @@ import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { isAdmin as isAdminFn } from "@/lib/catalog.functions";
+import { playAlert } from "@/lib/alert-sounds";
+import { AlertSoundSettingsButton } from "./AlertSoundSettings";
 
 const SOUND_KEY = "admin-alert-sound";
 const SEEN_KEY = "admin-alert-seen";
 
-function playBeep() {
-  try {
-    type WindowWithWebkit = Window & { webkitAudioContext?: typeof AudioContext };
-    const Ctx = window.AudioContext ?? (window as WindowWithWebkit).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const now = ctx.currentTime;
-    const tones = [660, 990, 1320];
-    tones.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, now + i * 0.15);
-      gain.gain.exponentialRampToValueAtTime(0.25, now + i * 0.15 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.15 + 0.14);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now + i * 0.15);
-      osc.stop(now + i * 0.15 + 0.16);
-    });
-    setTimeout(() => ctx.close(), 800);
-  } catch {
-    /* ignore */
-  }
-}
 
 /** Subscribes to all product (grocery) orders for admins, or only warehouse-scoped orders for managers. */
 export function AdminOrderAlerts() {
