@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
-import { RESTAURANTS, type Dish, type Restaurant } from "@/lib/food-data";
+import type { Dish, Restaurant } from "@/lib/food-data";
 import { foodCartStore, foodCartTotals, useFoodCart } from "@/lib/food-cart-store";
 import { DishCustomizeDialog, VegBadge } from "@/components/site/DishCustomizeDialog";
 import { Search, Star, Flame, Plus, ShoppingBag, SlidersHorizontal, X } from "lucide-react";
@@ -25,10 +25,6 @@ export const Route = createFileRoute("/food/dishes")({
   }),
   component: DishesPage,
 });
-
-const SEED_DISHES: DishWithRestaurant[] = RESTAURANTS.flatMap((r) =>
-  r.menu.map((d) => ({ ...d, restaurant: r })),
-);
 
 function mapDbDish(d: any): DishWithRestaurant {
   const r = d.restaurant ?? {};
@@ -65,8 +61,7 @@ function DishesPage() {
   });
 
   const ALL_DISHES: DishWithRestaurant[] = useMemo(() => {
-    const fromDb = (dbDishes ?? []).map(mapDbDish);
-    return [...fromDb, ...SEED_DISHES];
+    return (dbDishes ?? []).map(mapDbDish);
   }, [dbDishes]);
   const SECTIONS = useMemo(() => Array.from(new Set(ALL_DISHES.map((d) => d.section))).sort(), [ALL_DISHES]);
 
@@ -130,7 +125,7 @@ function DishesPage() {
       <div className="border-b bg-gradient-to-br from-brand/10 via-background to-primary/5">
         <div className="mx-auto max-w-6xl px-4 py-8 md:py-10">
           <h1 className="font-display text-3xl font-extrabold md:text-4xl">All dishes</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{ALL_DISHES.length} dishes across {RESTAURANTS.length} restaurants</p>
+          <p className="mt-1 text-sm text-muted-foreground">{ALL_DISHES.length} dishes from approved restaurants</p>
 
           <div className="mt-5 flex gap-2">
             <div className="relative flex-1">
