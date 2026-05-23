@@ -8,8 +8,9 @@ import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
+import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
 import heroImg from "@/assets/hero-grocery.jpg";
-import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight } from "lucide-react";
+import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,24 +25,22 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const cats = useServerFn(listCategories);
   const prods = useServerFn(listProducts);
+  const restos = useServerFn(listApprovedRestaurants);
+  const dishes = useServerFn(listAllApprovedDishes);
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
   const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => prods() });
+  const restosQ = useQuery({ queryKey: ["home-restaurants"], queryFn: () => restos() });
+  const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dishes() });
 
   const categories = catsQ.data ?? [];
   const products = prodsQ.data ?? [];
   const trending = products.slice(0, 10);
-  const fruitsAndVeg = [
-    ...products.filter((p) => p.category_slug === "fruits"),
-    ...products.filter((p) => p.category_slug === "vegetables"),
-  ].slice(0, 10);
-  const snacksAndBev = [
-    ...products.filter((p) => p.category_slug === "snacks"),
-    ...products.filter((p) => p.category_slug === "beverages"),
-  ].slice(0, 10);
   const dairyAndBakery = [
     ...products.filter((p) => p.category_slug === "dairy"),
     ...products.filter((p) => p.category_slug === "bakery"),
   ].slice(0, 10);
+  const popularRestos = (restosQ.data ?? []).slice(0, 4);
+  const popularDishes = (dishesQ.data ?? []).slice(0, 5);
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,24 +97,32 @@ function HomePage() {
 
       <BannerCarousel />
 
-      {/* FOOD DELIVERY — slim strip (10%) */}
+      {/* FOOD DELIVERY — equal weight (50%) */}
       <section className="mx-auto max-w-7xl px-4 pt-8">
         <Link
           to="/food"
-          className="group flex items-center justify-between gap-3 overflow-hidden rounded-2xl border bg-discount/10 px-4 py-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-3xl border bg-discount/10 p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft md:p-8"
         >
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-discount text-white shadow-pop">
-              <Utensils className="h-4 w-4" />
-            </span>
-            <div>
-              <div className="text-sm font-bold leading-tight">Also hungry? Order food from nearby restaurants</div>
-              <div className="text-xs text-muted-foreground">Pizzas, biryanis, burgers · 30 min delivery</div>
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-discount px-3 py-1 text-xs font-bold text-white shadow-pop">
+              <Utensils className="h-3.5 w-3.5" /> Food delivery
             </div>
+            <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight md:text-4xl">
+              Hungry? Order from your favourite restaurants.
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground md:text-base">
+              Pizzas, biryanis, burgers, salads — delivered in 30 minutes.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-foreground px-4 py-2 text-xs font-bold text-background">
+              Browse restaurants <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </span>
           </div>
-          <span className="hidden shrink-0 items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-bold text-background sm:inline-flex">
-            Browse <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
-          </span>
+          <img
+            src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=70"
+            alt=""
+            className="hidden aspect-square w-44 rounded-2xl object-cover shadow-pop md:block"
+            loading="lazy"
+          />
         </Link>
       </section>
 
@@ -171,15 +178,60 @@ function HomePage() {
         </div>
       </section>
 
-      {/* FRUITS & VEGETABLES */}
+      {/* POPULAR RESTAURANTS (food) */}
       <section className="mx-auto max-w-7xl px-4 py-6">
-        <SectionHeader title="Fresh fruits & vegetables" subtitle="Hand-picked from the farm, every morning" />
+        <SectionHeader title="Popular restaurants near you" subtitle="Top-rated kitchens, delivered hot" />
         <div className="mt-6">
-          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={fruitsAndVeg} />}
+          {restosQ.isLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border bg-card p-3">
+                  <div className="aspect-[16/10] w-full animate-pulse rounded-xl bg-muted" />
+                  <div className="mt-3 h-4 w-2/3 animate-pulse rounded bg-muted" />
+                  <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {popularRestos.map((r: any) => (
+                <Link
+                  key={r.id}
+                  to="/food/r/$slug"
+                  params={{ slug: r.slug }}
+                  className="group overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+                    {r.offer && (
+                      <div className="absolute left-3 top-3 rounded-md bg-discount px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">
+                        {r.offer}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-display text-sm font-bold leading-tight">{r.name}</h3>
+                      <div className="inline-flex items-center gap-0.5 rounded-md bg-success px-1.5 py-0.5 text-[11px] font-bold text-success-foreground">
+                        <Star className="h-3 w-3 fill-current" /> {r.rating}
+                      </div>
+                    </div>
+                    <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                      {(r.cuisines ?? []).join(" · ")}
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {r.eta_mins} min</span>
+                      <span>₹{r.cost_for_two} for two</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* DAIRY/BAKERY */}
+      {/* DAIRY/BAKERY (grocery) */}
       <section className="mx-auto max-w-7xl px-4 py-6">
         <SectionHeader title="Dairy, bread & eggs" subtitle="Stock up on the fridge basics" />
         <div className="mt-6">
@@ -187,11 +239,40 @@ function HomePage() {
         </div>
       </section>
 
-      {/* SNACKS & BEVERAGES */}
+      {/* POPULAR DISHES (food) */}
       <section className="mx-auto max-w-7xl px-4 py-6">
-        <SectionHeader title="Snacks & beverages" subtitle="Munchies, drinks & late-night treats" />
+        <SectionHeader title="Crave-worthy dishes" subtitle="Loved by foodies in your area" />
         <div className="mt-6">
-          {prodsQ.isLoading ? <ProductGridSkeleton /> : <ProductGrid products={snacksAndBev} />}
+          {dishesQ.isLoading ? (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border bg-card p-3">
+                  <div className="aspect-square w-full animate-pulse rounded-xl bg-muted" />
+                  <div className="mt-2 h-3 w-3/4 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {popularDishes.map((d: any) => (
+                <Link
+                  key={d.id}
+                  to="/food/r/$slug"
+                  params={{ slug: d.restaurant?.slug ?? "" }}
+                  className="group overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+                >
+                  <div className="aspect-square overflow-hidden">
+                    <img src={d.image} alt={d.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="line-clamp-1 text-sm font-bold">{d.name}</h3>
+                    <div className="line-clamp-1 text-[11px] text-muted-foreground">{d.restaurant?.name}</div>
+                    <div className="mt-1 text-sm font-bold text-primary">₹{d.price}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
