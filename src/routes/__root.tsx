@@ -10,6 +10,7 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/site/BottomNav";
+import { NativeInit } from "@/components/native/NativeInit";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/lib/use-is-admin";
 import { useRouterState, useNavigate } from "@tanstack/react-router";
@@ -124,6 +125,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <NativeInit />
       <AuthSync router={router} />
       <AdminGuard isAdmin={!!isAdmin} />
       <div className="pb-16 md:pb-0">
