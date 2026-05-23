@@ -26,10 +26,6 @@ export const Route = createFileRoute("/food/dishes")({
   component: DishesPage,
 });
 
-const SEED_DISHES: DishWithRestaurant[] = RESTAURANTS.flatMap((r) =>
-  r.menu.map((d) => ({ ...d, restaurant: r })),
-);
-
 function mapDbDish(d: any): DishWithRestaurant {
   const r = d.restaurant ?? {};
   const restaurant: Restaurant = {
