@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3, Image as ImageIcon, Users, ReceiptText, AlertTriangle, Bike, LineChart } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3, Image as ImageIcon, Users, ReceiptText, AlertTriangle, Bike, LineChart, ShieldCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +29,7 @@ const items = [
   { to: "/admin/customers", label: "Customers", icon: Users, exact: false, adminOnly: true },
   { to: "/admin/restaurants", label: "Restaurants", icon: UtensilsCrossed, exact: false, adminOnly: true },
   { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse, exact: false, adminOnly: true },
+  { to: "/admin/team", label: "Team & Roles", icon: ShieldCheck, exact: false, adminOnly: true },
   { to: "/admin/coupons", label: "Coupons", icon: TicketPercent, exact: false, adminOnly: true },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon, exact: false, adminOnly: true },
 ] as const;
