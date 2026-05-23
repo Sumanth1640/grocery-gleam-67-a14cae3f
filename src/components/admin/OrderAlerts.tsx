@@ -131,7 +131,9 @@ export function AdminOrderAlerts() {
           { event: "UPDATE", schema: "public", table: "orders", filter: "restaurant_id=is.null" },
           updateHandler as never,
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log("[AdminOrderAlerts] admin channel status:", status);
+        });
       channels.push(ch);
     } else {
       for (const wid of warehouseIds) {
@@ -147,10 +149,13 @@ export function AdminOrderAlerts() {
             { event: "UPDATE", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
             updateHandler as never,
           )
-          .subscribe();
+          .subscribe((status) => {
+            console.log(`[AdminOrderAlerts] wm-${wid} channel status:`, status);
+          });
         channels.push(ch);
       }
     }
+
 
 
     return () => {
