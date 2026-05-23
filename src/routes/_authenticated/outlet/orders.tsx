@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Clock, Search } from "lucide-react";
+import { Loader2, Clock, Search, Printer } from "lucide-react";
 import { myManagedOutlets, listOutletOrders, updateOutletOrderStatus } from "@/lib/outlet-managers.functions";
 
 const searchSchema = z.object({ outlet: z.string().uuid().optional() });
