@@ -90,6 +90,9 @@ export function AdminOrderAlerts() {
 
     const insertHandler = (payload: { new: { id: string; total: number; created_at: string } }) => {
       const row = payload.new;
+      // DEBUG: confirm realtime delivery
+      console.log("[AdminOrderAlerts] INSERT received", payload);
+      toast(`[debug] INSERT ${row.id?.slice(0, 6)} · ₹${row.total}`, { duration: 4000 });
       invalidateAll();
       if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
       if (soundRef.current) playBeep();
@@ -105,10 +108,13 @@ export function AdminOrderAlerts() {
       });
     };
 
-    const updateHandler = () => {
+    const updateHandler = (payload: { new: { id: string; status?: string } }) => {
       // Status / payment updates — silently refresh dashboards & lists.
+      console.log("[AdminOrderAlerts] UPDATE received", payload);
+      toast(`[debug] UPDATE ${payload.new?.id?.slice(0, 6)} → ${payload.new?.status ?? "?"}`, { duration: 3000 });
       invalidateAll();
     };
+
 
     const channels: ReturnType<typeof supabase.channel>[] = [];
 
@@ -125,7 +131,9 @@ export function AdminOrderAlerts() {
           { event: "UPDATE", schema: "public", table: "orders", filter: "restaurant_id=is.null" },
           updateHandler as never,
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log("[AdminOrderAlerts] admin channel status:", status);
+        });
       channels.push(ch);
     } else {
       for (const wid of warehouseIds) {
@@ -141,10 +149,13 @@ export function AdminOrderAlerts() {
             { event: "UPDATE", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
             updateHandler as never,
           )
-          .subscribe();
+          .subscribe((status) => {
+            console.log(`[AdminOrderAlerts] wm-${wid} channel status:`, status);
+          });
         channels.push(ch);
       }
     }
+
 
 
     return () => {
