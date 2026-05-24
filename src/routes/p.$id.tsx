@@ -1,17 +1,12 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Header } from "@/components/site/Header";
-import { Footer } from "@/components/site/Footer";
-import { ProductGrid } from "@/components/site/ProductGrid";
-import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
-import { RecentlyViewed } from "@/components/site/RecentlyViewed";
-import { ReviewsSection } from "@/components/site/ReviewsSection";
-import { getProduct, productsByCategory } from "@/lib/catalog.functions";
-import { cartStore, useCart } from "@/lib/cart-store";
+import { getProduct } from "@/lib/catalog.functions";
+import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
+import { wishlistStore, useWishlist } from "@/lib/wishlist-store";
 import { recentlyViewedStore } from "@/lib/recently-viewed-store";
-import { Clock, Minus, Plus, ShieldCheck, Truck, Leaf } from "lucide-react";
+import { ChevronLeft, ShoppingBasket, Heart, Truck, Leaf, BadgeCheck, Minus, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/p/$id")({
   component: ProductPage,
@@ -24,139 +19,132 @@ export const Route = createFileRoute("/p/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
   const get = useServerFn(getProduct);
-  const byCat = useServerFn(productsByCategory);
   const productQ = useQuery({ queryKey: ["product", id], queryFn: () => get({ data: { slug: id } }) });
-
   const product = productQ.data;
-  const relatedQ = useQuery({
-    queryKey: ["products", "by-cat", product?.category_slug],
-    queryFn: () => byCat({ data: { slug: product!.category_slug } }),
-    enabled: !!product,
-  });
+  const cart = useCart();
+  const wishlist = useWishlist();
+  const { itemsCount } = cartTotals(cart);
 
   if (productQ.isSuccess && !product) throw notFound();
 
-  const cart = useCart();
-
-  useEffect(() => {
-    if (product) recentlyViewedStore.push(product);
-  }, [product]);
+  useEffect(() => { if (product) recentlyViewedStore.push(product); }, [product]);
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="mx-auto max-w-7xl px-4 py-10">
-          <div className="grid gap-8 md:grid-cols-2">
-            <div className="aspect-square animate-pulse rounded-3xl bg-muted" />
-            <div className="space-y-3">
-              <div className="h-6 w-2/3 animate-pulse rounded bg-muted" />
-              <div className="h-4 w-1/3 animate-pulse rounded bg-muted" />
-              <div className="h-10 w-1/2 animate-pulse rounded bg-muted" />
-            </div>
-          </div>
-        </div>
-        <Footer />
+      <div className="min-h-screen bg-background px-5 pt-6">
+        <div className="aspect-[16/10] animate-pulse rounded-2xl bg-muted" />
+        <div className="mt-4 h-6 w-1/2 animate-pulse rounded bg-muted" />
       </div>
     );
   }
 
   const qty = cart[product.id]?.qty ?? 0;
-  const off = Math.round(((product.mrp - product.price) / product.mrp) * 100);
-  const related = (relatedQ.data ?? []).filter((p) => p.id !== product.id).slice(0, 5);
+  const wished = !!wishlist[product.id];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="text-xs text-muted-foreground">
-          <Link to="/">Home</Link> /{" "}
-          <Link to="/c/$slug" params={{ slug: product.category_slug }}>{product.category_slug}</Link> / {product.name}
+    <div className="min-h-screen bg-background pb-28">
+      <div className="px-5 pt-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <button onClick={() => navigate({ to: "/" })} className="grid h-11 w-11 place-items-center rounded-full bg-card ring-1 ring-border">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <h1 className="font-display text-lg font-extrabold">Product Details</h1>
+          <Link to="/cart" className="relative grid h-11 w-11 place-items-center rounded-full bg-card ring-1 ring-border">
+            <ShoppingBasket className="h-[18px] w-[18px]" />
+            {itemsCount > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-5 min-w-[20px] place-items-center rounded-full bg-cta px-1 text-[10px] font-bold text-cta-foreground">
+                {itemsCount}
+              </span>
+            )}
+          </Link>
         </div>
-        <div className="mt-6 grid gap-8 md:grid-cols-2">
-          <div className="overflow-hidden rounded-3xl border bg-secondary/40 p-6">
-            <img src={product.image} alt={product.name} className="aspect-square w-full rounded-2xl object-cover" />
+
+        {/* Image */}
+        <div className="mt-5 rounded-2xl bg-[oklch(0.93_0.08_140)] p-6">
+          <img src={product.image} alt={product.name} className="mx-auto h-56 w-full object-contain" />
+        </div>
+        <div className="mt-3 flex justify-center gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className={`h-1.5 rounded-full ${i === 0 ? "w-5 bg-foreground" : "w-1.5 bg-border"}`} />
+          ))}
+        </div>
+
+        {/* Title card */}
+        <div className="mt-4 rounded-2xl bg-card p-5 ring-1 ring-border">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="font-display text-2xl font-extrabold">{product.name}</h2>
+              <div className="text-sm text-muted-foreground">{product.weight}</div>
+            </div>
+            <button
+              onClick={() => wishlistStore.toggle(product)}
+              aria-label="Wishlist"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted"
+            >
+              <Heart className={`h-4 w-4 ${wished ? "fill-[oklch(0.55_0.22_28)] text-[oklch(0.55_0.22_28)]" : "text-muted-foreground"}`} />
+            </button>
           </div>
-          <div>
-            <div className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold text-brand-foreground">
-              <Clock className="h-3 w-3" /> {product.eta}
-            </div>
-            <h1 className="mt-3 font-display text-3xl font-bold md:text-4xl">{product.name}</h1>
-            <div className="mt-1 text-sm text-muted-foreground">{product.weight}</div>
-
-            <div className="mt-5 flex items-end gap-3">
-              <div className="text-3xl font-extrabold">₹{product.price}</div>
-              {off > 0 && (
-                <>
-                  <div className="text-base text-muted-foreground line-through">₹{product.mrp}</div>
-                  <div className="rounded-md bg-discount/10 px-2 py-0.5 text-xs font-bold text-discount">{off}% OFF</div>
-                </>
-              )}
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">(Inclusive of all taxes)</div>
-
-            <div className="mt-6 flex items-center gap-3">
-              {qty === 0 ? (
-                <button
-                  onClick={() => cartStore.add(product)}
-                  className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-pop transition hover:opacity-95"
-                >
-                  Add to cart
-                </button>
-              ) : (
-                <div className="flex items-center gap-1 rounded-xl bg-primary text-primary-foreground">
-                  <button onClick={() => cartStore.remove(product.id)} className="grid h-11 w-11 place-items-center">
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <span className="min-w-6 text-center text-sm font-bold">{qty}</span>
-                  <button onClick={() => cartStore.add(product)} className="grid h-11 w-11 place-items-center">
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-              <Link to="/cart" className="rounded-xl border bg-background px-5 py-3 text-sm font-bold hover:bg-secondary">
-                Go to cart
-              </Link>
-            </div>
-
-            <div className="mt-8 grid grid-cols-3 gap-3 text-center text-xs">
-              <Perk icon={<Truck className="h-4 w-4" />} label="Fast delivery" />
-              <Perk icon={<Leaf className="h-4 w-4" />} label="Hand-picked" />
-              <Perk icon={<ShieldCheck className="h-4 w-4" />} label="Quality assured" />
-            </div>
-
-            <div className="mt-8 rounded-2xl border bg-card p-5">
-              <h3 className="text-sm font-bold">Why you'll love it</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Sourced fresh and stored in temperature-controlled warehouses. Delivered straight from store to your door, often in under 15 minutes.
-              </p>
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-2xl font-extrabold text-primary">${product.price}</div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-[oklch(0.9_0.06_240)] text-[oklch(0.45_0.15_240)]">
+                <Truck className="h-3.5 w-3.5" />
+              </span>
+              <span className="text-muted-foreground">Available on fast delivery</span>
             </div>
           </div>
         </div>
 
-        <section className="mt-16">
-          <ReviewsSection targetType="product" targetId={product.id} seedRating={product.rating} />
-        </section>
+        {/* Badges */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Badge icon={<BadgeCheck className="h-4 w-4 text-[oklch(0.6_0.15_25)]" />} bg="oklch(0.95_0.05_25)" label="Halal Food" />
+          <Badge icon={<Leaf className="h-4 w-4 text-[oklch(0.5_0.15_150)]" />} bg="oklch(0.93_0.08_140)" label="Fresh Fruit" />
+        </div>
 
-        <section className="mt-16">
-          <h2 className="font-display text-2xl font-bold">You might also like</h2>
-          <div className="mt-5">
-            {relatedQ.isLoading ? <ProductGridSkeleton count={5} /> : related.length > 0 && <ProductGrid products={related} />}
-          </div>
-        </section>
+        {/* Description */}
+        <div className="mt-4 rounded-2xl bg-card p-5 ring-1 ring-border">
+          <div className="font-display text-base font-extrabold">Description</div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            100% satisfaction guarantee. If you experience any of the following issues, missing, poor item, late arrival, unprofessional service…{" "}
+            <span className="font-bold text-foreground">Read more</span>
+          </p>
+        </div>
       </div>
-      <RecentlyViewed excludeId={product.id} />
-      <Footer />
+
+      {/* Sticky bottom add-to-cart */}
+      <div className="fixed inset-x-0 bottom-0 z-30 px-3 pb-3">
+        <div className="mx-auto flex max-w-md items-center gap-3 rounded-[2rem] bg-card p-3 shadow-[0_-8px_30px_-12px_rgba(0,0,0,0.18)] ring-1 ring-border">
+          <div className="flex items-center gap-1 rounded-full bg-muted/60 p-1">
+            <button onClick={() => cartStore.remove(product.id)} className="grid h-9 w-9 place-items-center rounded-full bg-card ring-1 ring-border">
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+            <span className="min-w-6 text-center text-sm font-extrabold">{qty}</span>
+            <button onClick={() => cartStore.add(product)} className="grid h-9 w-9 place-items-center rounded-full bg-card ring-1 ring-border">
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <button
+            onClick={() => cartStore.add(product)}
+            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-cta py-3 text-sm font-extrabold text-cta-foreground shadow-pop"
+          >
+            <ShoppingBasket className="h-4 w-4" /> Add to cart
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
-function Perk({ icon, label }: { icon: React.ReactNode; label: string }) {
+function Badge({ icon, bg, label }: { icon: React.ReactNode; bg: string; label: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border bg-card p-3">
-      <span className="text-primary">{icon}</span>
-      <span className="font-semibold">{label}</span>
+    <div className="flex items-center gap-3 rounded-2xl bg-card p-3 ring-1 ring-border">
+      <span className="grid h-9 w-9 place-items-center rounded-full" style={{ backgroundColor: bg }}>
+        {icon}
+      </span>
+      <span className="text-sm font-extrabold">{label}</span>
     </div>
   );
 }
