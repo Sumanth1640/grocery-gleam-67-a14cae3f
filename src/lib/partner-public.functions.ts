@@ -2,13 +2,18 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+// Display-safe columns only — never expose owner PII, KYC, bank, commission fields publicly
+const PUBLIC_RESTAURANT_COLUMNS =
+  "id, slug, name, cuisines, image, cover, rating, reviews_count, eta_mins, cost_for_two, veg, price_tier, offer, area, distance_km, opens_at, closes_at, is_open, status";
+
 export const listApprovedRestaurants = createServerFn({ method: "GET" })
   .handler(async () => {
     const { data, error } = await supabaseAdmin
       .from("partner_restaurants")
-      .select("*")
+      .select(PUBLIC_RESTAURANT_COLUMNS)
       .eq("status", "approved")
       .not("agreement_accepted_at", "is", null)
+      .eq("is_blocked", false)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -19,9 +24,10 @@ export const getApprovedRestaurant = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { data: r, error } = await supabaseAdmin
       .from("partner_restaurants")
-      .select("*, partner_dishes(*, partner_dish_variants(*), partner_dish_addons(*))")
+      .select(`${PUBLIC_RESTAURANT_COLUMNS}, partner_dishes(*, partner_dish_variants(*), partner_dish_addons(*))`)
       .eq("status", "approved")
       .not("agreement_accepted_at", "is", null)
+      .eq("is_blocked", false)
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw new Error(error.message);
