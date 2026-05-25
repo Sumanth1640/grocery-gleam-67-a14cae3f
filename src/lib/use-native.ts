@@ -28,11 +28,19 @@ export function useIsNative() {
       const q = params.get("native");
       if (q === "1") {
         setIsNative(true);
-        try { localStorage.setItem("force-native", "1"); } catch { /* ignore storage failures */ }
+        try {
+          localStorage.setItem("force-native", "1");
+        } catch {
+          // ignore storage failures
+        }
         return;
       } else if (q === "0") {
         setIsNative(false);
-        try { localStorage.removeItem("force-native"); } catch { /* ignore storage failures */ }
+        try {
+          localStorage.removeItem("force-native");
+        } catch {
+          // ignore storage failures
+        }
         return;
       }
       if (localStorage.getItem("force-native") === "1") {
