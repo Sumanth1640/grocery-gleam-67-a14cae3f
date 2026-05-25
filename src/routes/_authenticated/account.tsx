@@ -260,7 +260,15 @@ function OrdersCard() {
 
   return (
     <div className="rounded-2xl border bg-card p-5 shadow-card">
-      <SectionHeader icon={Package} title="Recent orders" />
+      <SectionHeader
+        icon={Package}
+        title="Recent orders"
+        action={
+          <Link to="/orders" className="text-xs font-semibold text-primary hover:underline">
+            View all →
+          </Link>
+        }
+      />
       {isLoading ? (
         <div className="grid h-24 place-items-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
       ) : !data || data.length === 0 ? (
@@ -270,26 +278,32 @@ function OrdersCard() {
         </div>
       ) : (
         <ul className="mt-3 divide-y">
-          {data.map((o) => {
+          {data.slice(0, 5).map((o) => {
             const items = (o.items as unknown as { product: { id: string; name: string; image?: string }; qty: number }[]) ?? [];
             const first = items[0];
             const moreCount = Math.max(0, items.length - 1);
             return (
-              <li key={o.id} className="flex items-center gap-3 py-3">
-                {first?.product.image && (
-                  <img src={first.product.image} alt="" className="h-12 w-12 rounded-md object-cover" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">{o.status}</span>
-                    <span className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</span>
+              <li key={o.id}>
+                <Link
+                  to="/orders/$id"
+                  params={{ id: o.id }}
+                  className="flex items-center gap-3 py-3 transition hover:bg-secondary/40"
+                >
+                  {first?.product.image && (
+                    <img src={first.product.image} alt="" className="h-12 w-12 rounded-md object-cover" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">{o.status}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</span>
+                    </div>
+                    <div className="line-clamp-1 text-sm font-semibold">
+                      {first?.product.name}
+                      {moreCount > 0 && <span className="text-muted-foreground"> + {moreCount} more</span>}
+                    </div>
                   </div>
-                  <div className="line-clamp-1 text-sm font-semibold">
-                    {first?.product.name}
-                    {moreCount > 0 && <span className="text-muted-foreground"> + {moreCount} more</span>}
-                  </div>
-                </div>
-                <div className="text-sm font-bold">₹{o.total}</div>
+                  <div className="text-sm font-bold">₹{o.total}</div>
+                </Link>
               </li>
             );
           })}
@@ -298,6 +312,7 @@ function OrdersCard() {
     </div>
   );
 }
+
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
