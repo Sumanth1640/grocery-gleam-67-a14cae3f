@@ -5,6 +5,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
+import { MobileFood } from "@/components/native/MobileFood";
+import { useIsNative } from "@/lib/use-native";
 import { CUISINES, type Restaurant } from "@/lib/food-data";
 import { listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
