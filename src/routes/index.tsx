@@ -44,7 +44,14 @@ function HomePage() {
   const popularDishes = (dishesQ.data ?? []).slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {/* Mobile / native app shell — reference-style screen */}
+      <div className="md:hidden">
+        <MobileHome />
+      </div>
+
+      {/* Desktop web — original layout */}
+      <div className="hidden min-h-screen bg-background md:block">
       <Header />
 
       {/* HERO */}
