@@ -5,6 +5,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
+import { MobileFood } from "@/components/native/MobileFood";
+import { useIsNative } from "@/lib/use-native";
 import { CUISINES, type Restaurant } from "@/lib/food-data";
 import { listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/food/")({
 type Sort = "relevance" | "rating" | "eta" | "cost-asc" | "cost-desc";
 
 function FoodHome() {
+  const isNative = useIsNative();
   const [q, setQ] = useState("");
   const [vegOnly, setVegOnly] = useState(false);
   const [cuisine, setCuisine] = useState<string | null>(null);
@@ -79,6 +82,8 @@ function FoodHome() {
     }
     return list;
   }, [allRestaurants, q, vegOnly, cuisine, minRating, maxEta, sort]);
+
+  if (isNative) return <MobileFood />;
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
