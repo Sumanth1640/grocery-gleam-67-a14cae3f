@@ -22,7 +22,7 @@ export const Route = createFileRoute("/login")({
 type Mode = "signin" | "signup";
 
 function LoginPage() {
-  const isNative = useIsNative();
+  
   const { redirect } = useSearch({ from: "/login" });
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("signin");
