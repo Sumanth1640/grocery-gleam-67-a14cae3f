@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { MobileOrderConfirmedDialog } from "@/components/native/MobileOrderConfirmedDialog";
 import { useLastOrder, type Order } from "@/lib/order-store";
 import { getOrder } from "@/lib/account.functions";
 import { CheckCircle2, Clock, MapPin, Package, Receipt } from "lucide-react";
@@ -111,6 +112,7 @@ function SuccessPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <MobileOrderConfirmedDialog orderId={order.id} />
       <Header />
       <div className="mx-auto max-w-3xl px-4 py-10">
         <div className="grid place-items-center text-center">
