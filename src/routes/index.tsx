@@ -10,7 +10,8 @@ import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
 import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
 import heroImg from "@/assets/hero-grocery.jpg";
-import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
+import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star, MapPin, ShoppingBasket, Search, SlidersHorizontal } from "lucide-react";
+import { Link as RouterLink } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,11 +44,101 @@ function HomePage() {
   const popularDishes = (dishesQ.data ?? []).slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-app-surface pb-24 md:bg-background md:pb-0">
+      <div className="hidden md:block">
+        <Header />
+      </div>
 
-      {/* HERO */}
+      {/* MOBILE HERO (reference-style) */}
+      <section className="md:hidden">
+        <div className="px-5 pt-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
+                <MapPin className="h-3 w-3 text-primary" /> Delivery to
+              </div>
+              <div className="mt-0.5 text-[15px] font-extrabold">Bengaluru, India</div>
+            </div>
+            <RouterLink
+              to="/cart"
+              aria-label="Cart"
+              className="grid h-10 w-10 place-items-center rounded-full border bg-card shadow-card"
+            >
+              <ShoppingBasket className="h-5 w-5" />
+            </RouterLink>
+          </div>
+
+          <h1 className="mt-5 font-display text-[28px] font-extrabold leading-[1.15] tracking-tight">
+            Buy <span className="text-primary">Groceries</span> in a most easiest way.
+          </h1>
+
+          <RouterLink to="/search" className="mt-5 flex items-center gap-2">
+            <div className="flex flex-1 items-center gap-2 rounded-2xl border bg-card px-4 py-3 shadow-card">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Search your products</span>
+            </div>
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-orange text-accent-orange-foreground shadow-pop">
+              <SlidersHorizontal className="h-5 w-5" />
+            </div>
+          </RouterLink>
+
+          {/* Category pills */}
+          <div className="scrollbar-hide mt-5 flex gap-3 overflow-x-auto pb-1">
+            {(categories.length ? categories : Array.from({ length: 4 })).slice(0, 8).map((c: any, i: number) => (
+              <RouterLink
+                key={c?.slug ?? i}
+                to={c?.slug ? "/c/$slug" : "/search"}
+                {...(c?.slug ? { params: { slug: c.slug } } : {})}
+                className="flex shrink-0 items-center gap-2 rounded-full border bg-card px-3 py-2 shadow-card"
+              >
+                {c?.image ? (
+                  <img src={c.image} alt="" className="h-7 w-7 rounded-full object-cover" />
+                ) : (
+                  <span className="h-7 w-7 rounded-full bg-muted" />
+                )}
+                <span className="pr-1 text-sm font-extrabold">{c?.name ?? "Category"}</span>
+              </RouterLink>
+            ))}
+          </div>
+
+          {/* Promo banner */}
+          <RouterLink
+            to="/c/$slug"
+            params={{ slug: "fruits" }}
+            className="mt-5 flex items-center justify-between gap-3 overflow-hidden rounded-2xl bg-[oklch(0.55_0.2_25)] p-5 text-white shadow-pop"
+          >
+            <div>
+              <div className="text-[11px] font-semibold opacity-90">Hurry Up! Get 20% Off</div>
+              <div className="mt-1 text-lg font-extrabold leading-tight">
+                Fresh food everyday<br />from hallifresh
+              </div>
+              <div className="mt-3 inline-block rounded-full bg-white px-4 py-1.5 text-xs font-extrabold text-[oklch(0.55_0.2_25)]">
+                Shop Now
+              </div>
+            </div>
+            <img
+              src="https://images.unsplash.com/photo-1546470427-227df1e3a1bf?auto=format&fit=crop&w=400&q=70"
+              alt=""
+              className="h-28 w-28 shrink-0 rounded-xl object-cover"
+              loading="lazy"
+            />
+          </RouterLink>
+
+          {/* Popular section header */}
+          <div className="mt-6 flex items-end justify-between">
+            <h2 className="font-display text-xl font-extrabold">Popular</h2>
+            <RouterLink to="/search" className="text-sm font-semibold text-muted-foreground">View all</RouterLink>
+          </div>
+          <div className="mt-3">
+            {prodsQ.isLoading ? <ProductGridSkeleton count={4} /> : <ProductGrid products={trending.slice(0, 6)} />}
+          </div>
+        </div>
+      </section>
+
+      {/* DESKTOP / TABLET HERO (existing) */}
+      <div className="hidden md:contents">
       <section className="bg-aisle">
+
         <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-16">
           <div>
             <div className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-brand-foreground shadow-pop">
@@ -279,6 +370,7 @@ function HomePage() {
       <RecentlyViewed />
 
       <Footer />
+      </div>
     </div>
   );
 }
