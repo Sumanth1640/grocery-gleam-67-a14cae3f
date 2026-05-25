@@ -2,10 +2,10 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MapPin, Search, ShoppingBag, SlidersHorizontal, Star, Clock, ChevronRight, Heart } from "lucide-react";
+import { MapPin, Search, ShoppingBag, SlidersHorizontal, Star, Clock, ChevronRight, Heart, Plus } from "lucide-react";
 import { CUISINES, type Restaurant } from "@/lib/food-data";
-import { listApprovedRestaurants } from "@/lib/partner-public.functions";
-import { useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
+import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-public.functions";
+import { foodCartStore, useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 
 /**
@@ -17,7 +17,9 @@ export function MobileFood() {
   const [cuisine, setCuisine] = useState<string | null>(null);
 
   const partnerFn = useServerFn(listApprovedRestaurants);
+  const dishesFn = useServerFn(listAllApprovedDishes);
   const partnerQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => partnerFn() });
+  const dishesQ = useQuery({ queryKey: ["public-all-dishes"], queryFn: () => dishesFn() });
   const foodCart = useFoodCart();
   const { itemsCount } = foodCartTotals(foodCart);
 
@@ -55,6 +57,7 @@ export function MobileFood() {
   }, [restaurants, q, cuisine]);
 
   const popular = visible.slice(0, 6);
+  const popularDishes = (dishesQ.data ?? []).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-[oklch(0.985_0.005_145)] pb-32">
@@ -161,6 +164,19 @@ export function MobileFood() {
         </Link>
       </div>
 
+      <div className="mt-3 grid grid-cols-2 gap-4 px-5">
+        {dishesQ.isLoading
+          ? Array.from({ length: 4 }).map((_, i) => <MobileDishSkeleton key={i} />)
+          : popularDishes.map((d: any) => <MobileDishCard key={d.id} dish={d} />)}
+      </div>
+
+      <div className="mt-7 flex items-end justify-between px-5">
+        <h2 className="font-display text-xl font-extrabold">Restaurants</h2>
+        <Link to="/food" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
+          View all <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+
       <div className="mt-3 grid grid-cols-1 gap-4 px-5">
         {partnerQ.isLoading
           ? Array.from({ length: 3 }).map((_, i) => (
@@ -176,6 +192,68 @@ export function MobileFood() {
             No restaurants match your filters.
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function MobileDishSkeleton() {
+  return (
+    <div className="rounded-3xl bg-card p-3 shadow-card">
+      <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted" />
+      <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
+      <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-muted" />
+    </div>
+  );
+}
+
+function MobileDishCard({ dish }: { dish: any }) {
+  const restaurant = dish.restaurant ?? {};
+  const mappedRestaurant: Restaurant = {
+    id: restaurant.id,
+    slug: restaurant.slug,
+    name: restaurant.name,
+    image: restaurant.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+    cover: restaurant.cover || restaurant.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
+    cuisines: restaurant.cuisines ?? [],
+    rating: Number(restaurant.rating ?? 4.5),
+    reviewsCount: restaurant.reviews_count ?? 0,
+    etaMins: restaurant.eta_mins ?? 30,
+    distanceKm: Number(restaurant.distance_km ?? 1),
+    costForTwo: restaurant.cost_for_two ?? 400,
+    priceTier: (restaurant.price_tier ?? 2) as 1 | 2 | 3,
+    veg: !!restaurant.veg,
+    area: restaurant.area ?? "",
+    offer: restaurant.offer ?? undefined,
+    menu: [],
+  };
+  const mappedDish = {
+    id: dish.id,
+    name: dish.name,
+    desc: dish.description ?? "",
+    image: dish.image || mappedRestaurant.image,
+    price: dish.price,
+    mrp: dish.mrp ?? undefined,
+    veg: !!dish.veg,
+    spicy: !!dish.spicy,
+    bestseller: !!dish.bestseller,
+    rating: Number(dish.rating ?? 4.5),
+    section: dish.section,
+    variants: dish.partner_dish_variants ?? [],
+    addons: dish.partner_dish_addons ?? [],
+  };
+  return (
+    <div className="relative flex flex-col rounded-3xl bg-card p-3 shadow-card">
+      <Link to="/food/r/$slug" params={{ slug: mappedRestaurant.slug }} className="block aspect-square overflow-hidden rounded-2xl bg-muted">
+        <img src={mappedDish.image} alt={mappedDish.name} loading="lazy" className="h-full w-full object-cover" />
+      </Link>
+      <div className="mt-3 line-clamp-1 text-sm font-bold">{mappedDish.name}</div>
+      <div className="line-clamp-1 text-[11px] text-muted-foreground">{mappedRestaurant.name} · {mappedDish.section}</div>
+      <div className="mt-2 flex items-end justify-between">
+        <div className="text-base font-extrabold">₹{mappedDish.price}</div>
+        <button onClick={() => foodCartStore.add(mappedRestaurant, mappedDish)} aria-label="Add dish" className="grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95">
+          <Plus className="h-4 w-4" strokeWidth={3} />
+        </button>
       </div>
     </div>
   );
