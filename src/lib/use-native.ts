@@ -8,15 +8,33 @@ import { useEffect, useState } from "react";
  *   - Remove with `?native=0`
  */
 export function useIsNative() {
-  const [isNative, setIsNative] = useState(false);
+  const [isNative, setIsNative] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("native");
+      if (q === "1") return true;
+      if (q === "0") return false;
+      return localStorage.getItem("force-native") === "1";
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     // Dev override via query string / localStorage
     try {
       const params = new URLSearchParams(window.location.search);
       const q = params.get("native");
-      if (q === "1") localStorage.setItem("force-native", "1");
-      else if (q === "0") localStorage.removeItem("force-native");
+      if (q === "1") {
+        setIsNative(true);
+        try { localStorage.setItem("force-native", "1"); } catch { /* ignore storage failures */ }
+        return;
+      } else if (q === "0") {
+        setIsNative(false);
+        try { localStorage.removeItem("force-native"); } catch { /* ignore storage failures */ }
+        return;
+      }
       if (localStorage.getItem("force-native") === "1") {
         setIsNative(true);
         return;
