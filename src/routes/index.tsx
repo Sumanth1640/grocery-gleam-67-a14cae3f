@@ -9,6 +9,7 @@ import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
 import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
+import { MobileHome } from "@/components/native/MobileHome";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
 
@@ -43,7 +44,14 @@ function HomePage() {
   const popularDishes = (dishesQ.data ?? []).slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {/* Mobile / native app shell — reference-style screen */}
+      <div className="md:hidden">
+        <MobileHome />
+      </div>
+
+      {/* Desktop web — original layout */}
+      <div className="hidden min-h-screen bg-background md:block">
       <Header />
 
       {/* HERO */}
@@ -279,7 +287,8 @@ function HomePage() {
       <RecentlyViewed />
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
 
