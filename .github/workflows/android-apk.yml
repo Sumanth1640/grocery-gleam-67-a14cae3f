@@ -44,6 +44,62 @@ jobs:
           fi
           npx cap sync android
 
+      - name: Patch MainActivity to allow UPI / intent:// schemes
+        run: |
+          PKG_DIR="android/app/src/main/java/app/lovable/hallifresh"
+          mkdir -p "$PKG_DIR"
+          cat > "$PKG_DIR/MainActivity.java" <<'JAVA'
+          package app.lovable.hallifresh;
+
+          import android.content.Intent;
+          import android.net.Uri;
+          import android.os.Bundle;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebView;
+          import com.getcapacitor.BridgeActivity;
+          import com.getcapacitor.BridgeWebViewClient;
+
+          public class MainActivity extends BridgeActivity {
+            @Override
+            public void onCreate(Bundle savedInstanceState) {
+              super.onCreate(savedInstanceState);
+              bridge.getWebView().setWebViewClient(new BridgeWebViewClient(bridge) {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                  String url = request.getUrl().toString();
+                  if (handleExternal(url)) return true;
+                  return super.shouldOverrideUrlLoading(view, request);
+                }
+                private boolean handleExternal(String url) {
+                  if (url.startsWith("upi:") || url.startsWith("intent:") ||
+                      url.startsWith("phonepe:") || url.startsWith("tez:") ||
+                      url.startsWith("paytmmp:") || url.startsWith("gpay:") ||
+                      url.startsWith("bhim:") || url.startsWith("credpay:") ||
+                      url.startsWith("mailto:") || url.startsWith("tel:") ||
+                      url.startsWith("sms:") || url.startsWith("whatsapp:")) {
+                    try {
+                      Intent intent;
+                      if (url.startsWith("intent:")) {
+                        intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                      } else {
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                      }
+                      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                      startActivity(intent);
+                      return true;
+                    } catch (Exception e) {
+                      return false;
+                    }
+                  }
+                  return false;
+                }
+              });
+            }
+          }
+          JAVA
+          echo "Patched MainActivity.java:"
+          cat "$PKG_DIR/MainActivity.java"
+
       - name: Build debug APK
         working-directory: android
         run: |
