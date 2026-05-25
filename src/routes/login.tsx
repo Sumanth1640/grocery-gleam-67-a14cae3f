@@ -5,7 +5,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { useIsNative } from "@/lib/use-native";
+
 import { Eye, EyeOff, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
