@@ -129,7 +129,7 @@ function RestaurantPage() {
       </div>
 
       {/* Header card */}
-      <div className="mx-auto -mt-16 max-w-5xl px-4">
+      <div className="relative z-10 mx-auto -mt-10 max-w-5xl px-4 md:-mt-16">
         <div className="rounded-2xl border bg-card p-5 shadow-pop md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
