@@ -116,22 +116,20 @@ function LoginPage() {
             </div>
           </div>
 
-          {!isNative && (
-            <>
-              <button
-                onClick={google}
-                disabled={busy}
-                type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-xl border bg-background px-4 py-3 text-sm font-semibold transition hover:bg-secondary disabled:opacity-60"
-              >
-                <GoogleMark /> Continue with Google
-              </button>
+          <button
+            onClick={google}
+            disabled={busy}
+            type="button"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border bg-background px-4 py-3 text-sm font-semibold transition hover:bg-secondary disabled:opacity-60"
+          >
+            <GoogleMark /> Continue with Google
+          </button>
 
-              <div className="my-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                <div className="h-px flex-1 bg-border" /> or {mode === "signin" ? "sign in with email" : "sign up with email"} <div className="h-px flex-1 bg-border" />
-              </div>
-            </>
-          )}
+          <div className="my-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="h-px flex-1 bg-border" /> or {mode === "signin" ? "sign in with email" : "sign up with email"} <div className="h-px flex-1 bg-border" />
+          </div>
+          {/* isNative is intentionally unused now — kept for future deep-link handling */}
+          {void isNative}
 
           <form onSubmit={submit} className="space-y-3">
             {mode === "signup" && (
