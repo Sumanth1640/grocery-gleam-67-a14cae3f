@@ -84,21 +84,25 @@ function HomePage() {
 
           {/* Category pills */}
           <div className="scrollbar-hide mt-5 flex gap-3 overflow-x-auto pb-1">
-            {(categories.length ? categories : Array.from({ length: 4 })).slice(0, 8).map((c: any, i: number) => (
-              <RouterLink
-                key={c?.slug ?? i}
-                to={c?.slug ? "/c/$slug" : "/search"}
-                {...(c?.slug ? { params: { slug: c.slug } } : {})}
-                className="flex shrink-0 items-center gap-2 rounded-full border bg-card px-3 py-2 shadow-card"
-              >
-                {c?.image ? (
-                  <img src={c.image} alt="" className="h-7 w-7 rounded-full object-cover" />
-                ) : (
-                  <span className="h-7 w-7 rounded-full bg-muted" />
-                )}
-                <span className="pr-1 text-sm font-extrabold">{c?.name ?? "Category"}</span>
-              </RouterLink>
-            ))}
+            {(categories.length ? categories : Array.from({ length: 4 })).slice(0, 8).map((c: any, i: number) => {
+              const linkProps: any = c?.slug
+                ? { to: "/c/$slug", params: { slug: c.slug } }
+                : { to: "/search" };
+              return (
+                <RouterLink
+                  key={c?.slug ?? i}
+                  {...linkProps}
+                  className="flex shrink-0 items-center gap-2 rounded-full border bg-card px-3 py-2 shadow-card"
+                >
+                  {c?.image ? (
+                    <img src={c.image} alt="" className="h-7 w-7 rounded-full object-cover" />
+                  ) : (
+                    <span className="h-7 w-7 rounded-full bg-muted" />
+                  )}
+                  <span className="pr-1 text-sm font-extrabold">{c?.name ?? "Category"}</span>
+                </RouterLink>
+              );
+            })}
           </div>
 
           {/* Promo banner */}
