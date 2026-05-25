@@ -163,7 +163,7 @@ export function MobileProductDetails({ product }: { product: Product }) {
       )}
 
       {/* Bottom bar */}
-      <div className="fixed inset-x-0 bottom-24 z-30 border-t bg-card px-4 py-3 shadow-pop">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-card px-4 py-3 shadow-pop">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-full bg-secondary px-2 py-1.5">
             <button
