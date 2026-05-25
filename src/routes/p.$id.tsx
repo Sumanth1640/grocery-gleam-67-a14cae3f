@@ -26,6 +26,7 @@ export const Route = createFileRoute("/p/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
+  const isNative = useIsNative();
   const get = useServerFn(getProduct);
   const byCat = useServerFn(productsByCategory);
   const productQ = useQuery({ queryKey: ["product", id], queryFn: () => get({ data: { slug: id } }) });
