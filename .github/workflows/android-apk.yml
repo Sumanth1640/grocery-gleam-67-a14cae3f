@@ -100,6 +100,36 @@ jobs:
           echo "Patched MainActivity.java:"
           cat "$PKG_DIR/MainActivity.java"
 
+      - name: Patch AndroidManifest to register hallifresh:// deep link
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path("android/app/src/main/AndroidManifest.xml")
+          x = p.read_text()
+          filter_block = (
+              '\n            <intent-filter android:autoVerify="false">\n'
+              '                <action android:name="android.intent.action.VIEW" />\n'
+              '                <category android:name="android.intent.category.DEFAULT" />\n'
+              '                <category android:name="android.intent.category.BROWSABLE" />\n'
+              '                <data android:scheme="hallifresh" android:host="auth" />\n'
+              '            </intent-filter>\n        '
+          )
+          if "android:scheme=\"hallifresh\"" not in x:
+              # insert right before </activity> of MainActivity
+              x = re.sub(
+                  r'(<activity[^>]*android:name="\.MainActivity"[\s\S]*?)(</activity>)',
+                  lambda m: m.group(1) + filter_block + m.group(2),
+                  x, count=1,
+              )
+              p.write_text(x)
+              print("Injected hallifresh:// intent-filter")
+          else:
+              print("Deep-link filter already present")
+          PY
+          cat "$MANIFEST"
+
+
       - name: Build debug APK
         working-directory: android
         run: |
