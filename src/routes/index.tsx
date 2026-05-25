@@ -10,6 +10,7 @@ import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
 import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
 import { MobileHome } from "@/components/native/MobileHome";
+import { useIsNative } from "@/lib/use-native";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
 
@@ -43,15 +44,12 @@ function HomePage() {
   const popularRestos = (restosQ.data ?? []).slice(0, 4);
   const popularDishes = (dishesQ.data ?? []).slice(0, 5);
 
+  const isNative = useIsNative();
+  if (isNative) return <MobileHome />;
+
   return (
     <>
-      {/* Mobile / native app shell — reference-style screen */}
-      <div className="md:hidden">
-        <MobileHome />
-      </div>
-
-      {/* Desktop web — original layout */}
-      <div className="hidden min-h-screen bg-background md:block">
+      <div className="min-h-screen bg-background">
       <Header />
 
       {/* HERO */}

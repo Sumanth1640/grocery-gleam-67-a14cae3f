@@ -7,6 +7,7 @@ import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { MobileCategory } from "@/components/native/MobileCategory";
+import { useIsNative } from "@/lib/use-native";
 import { listCategories, productsByCategory } from "@/lib/catalog.functions";
 
 type Sort = "popular" | "price-asc" | "price-desc" | "discount";
@@ -71,12 +72,12 @@ function CategoryPage() {
     { id: "discount", label: "Biggest Discount" },
   ];
 
+  const isNative = useIsNative();
+  if (isNative) return <MobileCategory slug={slug} />;
+
   return (
     <div>
-      <div className="md:hidden">
-        <MobileCategory slug={slug} />
-      </div>
-      <div className="hidden min-h-screen bg-background md:block">
+      <div className="min-h-screen bg-background">
       <Header />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="text-xs text-muted-foreground">

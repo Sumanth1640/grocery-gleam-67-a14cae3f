@@ -9,6 +9,7 @@ import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { MobileProductDetails } from "@/components/native/MobileProductDetails";
+import { useIsNative } from "@/lib/use-native";
 import { getProduct, productsByCategory } from "@/lib/catalog.functions";
 import { cartStore, useCart } from "@/lib/cart-store";
 import { recentlyViewedStore } from "@/lib/recently-viewed-store";
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/p/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
+  const isNative = useIsNative();
   const get = useServerFn(getProduct);
   const byCat = useServerFn(productsByCategory);
   const productQ = useQuery({ queryKey: ["product", id], queryFn: () => get({ data: { slug: id } }) });
@@ -67,12 +69,11 @@ function ProductPage() {
   const off = Math.round(((product.mrp - product.price) / product.mrp) * 100);
   const related = (relatedQ.data ?? []).filter((p) => p.id !== product.id).slice(0, 5);
 
+  if (isNative) return <MobileProductDetails product={product} />;
+
   return (
     <div>
-      <div className="md:hidden">
-        <MobileProductDetails product={product} />
-      </div>
-      <div className="hidden min-h-screen bg-background md:block">
+      <div className="min-h-screen bg-background">
       <Header />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="text-xs text-muted-foreground">
