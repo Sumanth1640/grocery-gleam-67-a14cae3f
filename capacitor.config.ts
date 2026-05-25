@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
     // Hot-reload from the Lovable preview during development.
     // For a store-ready build, DELETE the entire `server` block, then run
     // `npm run build && npx cap sync` so the app ships fully offline.
-    url: "https://16b78db9-75c1-4d38-8381-401bfdad3cb0.lovableproject.com?forceHideBadge=true",
+    url: "https://16b78db9-75c1-4d38-8381-401bfdad3cb0.lovableproject.com?forceHideBadge=true&native=1",
     cleartext: true,
   },
   android: { backgroundColor: "#ffffff" },
