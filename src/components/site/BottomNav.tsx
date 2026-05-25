@@ -15,6 +15,10 @@ export function BottomNav() {
   const wishCount = Object.keys(wishlist).length;
   const { user } = useAuth();
 
+  // Hide on product details (has its own sticky Add to cart bar)
+  if (path.startsWith("/p/")) return null;
+
+
   const items = [
     { to: "/", icon: Home, label: "Home", match: (p: string) => p === "/" },
     { to: "/food", icon: Utensils, label: "Food", match: (p: string) => p.startsWith("/food"), badge: foodCount },
