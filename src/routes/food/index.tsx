@@ -25,6 +25,7 @@ export const Route = createFileRoute("/food/")({
 type Sort = "relevance" | "rating" | "eta" | "cost-asc" | "cost-desc";
 
 function FoodHome() {
+  const isNative = useIsNative();
   const [q, setQ] = useState("");
   const [vegOnly, setVegOnly] = useState(false);
   const [cuisine, setCuisine] = useState<string | null>(null);
