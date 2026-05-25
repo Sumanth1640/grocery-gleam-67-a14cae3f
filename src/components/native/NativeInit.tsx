@@ -15,10 +15,11 @@ export function NativeInit() {
         const { Capacitor } = await import("@capacitor/core");
         if (!Capacitor.isNativePlatform()) return;
 
-        const [{ SplashScreen }, { StatusBar, Style }, { App }] = await Promise.all([
+        const [{ SplashScreen }, { StatusBar, Style }, { App }, { Browser }] = await Promise.all([
           import("@capacitor/splash-screen"),
           import("@capacitor/status-bar"),
           import("@capacitor/app"),
+          import("@capacitor/browser"),
         ]);
 
         await StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
@@ -38,6 +39,21 @@ export function NativeInit() {
             // Tokens may be in hash or query string
             const fragment = url.split("#")[1] ?? url.split("?")[1] ?? "";
             const params = new URLSearchParams(fragment);
+            await Browser.close().catch(() => {});
+            const expectedState = localStorage.getItem("native-oauth-state");
+            const incomingState = params.get("state");
+            if (expectedState && incomingState && expectedState !== incomingState) {
+              toast.error("Sign-in failed: security check did not match");
+              return;
+            }
+            localStorage.removeItem("native-oauth-state");
+
+            const error = params.get("error_description") || params.get("error");
+            if (error) {
+              toast.error("Sign-in failed: " + error);
+              return;
+            }
+
             const access_token = params.get("access_token");
             const refresh_token = params.get("refresh_token");
             if (access_token && refresh_token) {
