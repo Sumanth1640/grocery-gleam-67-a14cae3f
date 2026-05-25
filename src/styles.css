@@ -39,14 +39,10 @@
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-discount: var(--discount);
-  --color-accent-orange: var(--accent-orange);
-  --color-accent-orange-foreground: var(--accent-orange-foreground);
-  --color-app-surface: var(--app-surface);
 
   --shadow-soft: 0 4px 16px -4px oklch(0 0 0 / 0.08);
   --shadow-card: 0 2px 8px -2px oklch(0 0 0 / 0.06);
   --shadow-pop: 0 16px 40px -12px oklch(0.25 0.18 90 / 0.25);
-  --shadow-app: 0 8px 24px -8px oklch(0 0 0 / 0.12);
 }
 
 :root {
@@ -80,13 +76,6 @@
   --success: oklch(0.62 0.16 145);
   --success-foreground: oklch(0.99 0 0);
   --discount: oklch(0.6 0.22 25);
-
-  /* Vivid orange CTA (mobile-app style) */
-  --accent-orange: oklch(0.7 0.2 45);
-  --accent-orange-foreground: oklch(0.99 0 0);
-
-  /* Soft gray app background behind cards */
-  --app-surface: oklch(0.97 0.005 250);
 
   --destructive: oklch(0.58 0.24 27);
   --destructive-foreground: oklch(0.99 0 0);
