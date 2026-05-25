@@ -72,7 +72,7 @@ function CategoryPage() {
   ];
 
   return (
-    <>
+    <div>
       <div className="md:hidden">
         <MobileCategory slug={slug} />
       </div>
@@ -224,6 +224,6 @@ function CategoryPage() {
       </div>
       <Footer />
       </div>
-    </>
+    </div>
   );
 }

@@ -68,7 +68,7 @@ function ProductPage() {
   const related = (relatedQ.data ?? []).filter((p) => p.id !== product.id).slice(0, 5);
 
   return (
-    <>
+    <div>
       <div className="md:hidden">
         <MobileProductDetails product={product} />
       </div>
@@ -154,7 +154,7 @@ function ProductPage() {
       <RecentlyViewed excludeId={product.id} />
       <Footer />
       </div>
-    </>
+    </div>
   );
 }
 
