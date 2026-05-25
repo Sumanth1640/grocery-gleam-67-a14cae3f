@@ -6,6 +6,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
+import { MobileCategory } from "@/components/native/MobileCategory";
 import { listCategories, productsByCategory } from "@/lib/catalog.functions";
 
 type Sort = "popular" | "price-asc" | "price-desc" | "discount";
@@ -71,7 +72,11 @@ function CategoryPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <div className="md:hidden">
+        <MobileCategory slug={slug} />
+      </div>
+      <div className="hidden min-h-screen bg-background md:block">
       <Header />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="text-xs text-muted-foreground">
@@ -218,6 +223,7 @@ function CategoryPage() {
         </div>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
