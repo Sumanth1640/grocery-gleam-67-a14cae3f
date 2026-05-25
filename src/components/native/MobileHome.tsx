@@ -2,9 +2,11 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { MapPin, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight } from "lucide-react";
+import { MapPin, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight, Star, Clock } from "lucide-react";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
+import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
+import { foodCartStore } from "@/lib/food-cart-store";
 
 /**
  * Reference-style mobile home — shown on small viewports (and inside the
