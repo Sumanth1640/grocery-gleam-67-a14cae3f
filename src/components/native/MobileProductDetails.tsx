@@ -35,7 +35,7 @@ export function MobileProductDetails({ product }: { product: Product }) {
   };
 
   return (
-    <div className="min-h-screen bg-[oklch(0.985_0.005_145)] pb-48">
+    <div className="min-h-screen bg-[oklch(0.985_0.005_145)] pb-28">">
       {/* Top bar */}
       <header className="flex items-center justify-between px-5 pt-6">
         <button
