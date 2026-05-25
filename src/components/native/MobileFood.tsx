@@ -2,7 +2,17 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MapPin, Search, ShoppingBag, SlidersHorizontal, Star, Clock, ChevronRight, Heart, Plus } from "lucide-react";
+import {
+  MapPin,
+  Search,
+  ShoppingBag,
+  SlidersHorizontal,
+  Star,
+  Clock,
+  ChevronRight,
+  Heart,
+  Plus,
+} from "lucide-react";
 import { CUISINES, type Restaurant } from "@/lib/food-data";
 import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { foodCartStore, useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
@@ -29,7 +39,8 @@ export function MobileFood() {
       slug: r.slug,
       name: r.name,
       image: r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
-      cover: r.cover || r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
+      cover:
+        r.cover || r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
       cuisines: r.cuisines ?? [],
       rating: Number(r.rating ?? 4.5),
       reviewsCount: r.reviews_count ?? 0,
@@ -49,7 +60,9 @@ export function MobileFood() {
     if (q.trim()) {
       const needle = q.toLowerCase();
       list = list.filter(
-        (r) => r.name.toLowerCase().includes(needle) || r.cuisines.some((c) => c.toLowerCase().includes(needle)),
+        (r) =>
+          r.name.toLowerCase().includes(needle) ||
+          r.cuisines.some((c) => c.toLowerCase().includes(needle)),
       );
     }
     if (cuisine) list = list.filter((r) => r.cuisines.includes(cuisine));
@@ -159,7 +172,10 @@ export function MobileFood() {
       {/* Popular */}
       <div className="mt-7 flex items-end justify-between px-5">
         <h2 className="font-display text-xl font-extrabold">Popular near you</h2>
-        <Link to="/food/dishes" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
+        <Link
+          to="/food/dishes"
+          className="inline-flex items-center text-xs font-semibold text-muted-foreground"
+        >
           View all <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
@@ -172,7 +188,10 @@ export function MobileFood() {
 
       <div className="mt-7 flex items-end justify-between px-5">
         <h2 className="font-display text-xl font-extrabold">Restaurants</h2>
-        <Link to="/food" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
+        <Link
+          to="/food"
+          className="inline-flex items-center text-xs font-semibold text-muted-foreground"
+        >
           View all <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
@@ -214,7 +233,10 @@ function MobileDishCard({ dish }: { dish: any }) {
     slug: restaurant.slug,
     name: restaurant.name,
     image: restaurant.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
-    cover: restaurant.cover || restaurant.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
+    cover:
+      restaurant.cover ||
+      restaurant.image ||
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600",
     cuisines: restaurant.cuisines ?? [],
     rating: Number(restaurant.rating ?? 4.5),
     reviewsCount: restaurant.reviews_count ?? 0,
@@ -244,14 +266,29 @@ function MobileDishCard({ dish }: { dish: any }) {
   };
   return (
     <div className="relative flex flex-col rounded-3xl bg-card p-3 shadow-card">
-      <Link to="/food/r/$slug" params={{ slug: mappedRestaurant.slug }} className="block aspect-square overflow-hidden rounded-2xl bg-muted">
-        <img src={mappedDish.image} alt={mappedDish.name} loading="lazy" className="h-full w-full object-cover" />
+      <Link
+        to="/food/r/$slug"
+        params={{ slug: mappedRestaurant.slug }}
+        className="block aspect-square overflow-hidden rounded-2xl bg-muted"
+      >
+        <img
+          src={mappedDish.image}
+          alt={mappedDish.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
       </Link>
       <div className="mt-3 line-clamp-1 text-sm font-bold">{mappedDish.name}</div>
-      <div className="line-clamp-1 text-[11px] text-muted-foreground">{mappedRestaurant.name} · {mappedDish.section}</div>
+      <div className="line-clamp-1 text-[11px] text-muted-foreground">
+        {mappedRestaurant.name} · {mappedDish.section}
+      </div>
       <div className="mt-2 flex items-end justify-between">
         <div className="text-base font-extrabold">₹{mappedDish.price}</div>
-        <button onClick={() => foodCartStore.add(mappedRestaurant, mappedDish)} aria-label="Add dish" className="grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95">
+        <button
+          onClick={() => foodCartStore.add(mappedRestaurant, mappedDish)}
+          aria-label="Add dish"
+          className="grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95"
+        >
           <Plus className="h-4 w-4" strokeWidth={3} />
         </button>
       </div>
@@ -273,7 +310,9 @@ function MobileRestaurantCard({ r }: { r: Restaurant }) {
         aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
         className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-background/90 shadow-card backdrop-blur"
       >
-        <Heart className={`h-4 w-4 ${isFav ? "fill-[oklch(0.6_0.22_25)] text-[oklch(0.6_0.22_25)]" : "text-muted-foreground"}`} />
+        <Heart
+          className={`h-4 w-4 ${isFav ? "fill-[oklch(0.6_0.22_25)] text-[oklch(0.6_0.22_25)]" : "text-muted-foreground"}`}
+        />
       </button>
       <Link to="/food/r/$slug" params={{ slug: r.slug }} className="block">
         <div className="relative aspect-[16/10] overflow-hidden">
@@ -291,9 +330,13 @@ function MobileRestaurantCard({ r }: { r: Restaurant }) {
               <Star className="h-3 w-3 fill-current" /> {r.rating}
             </div>
           </div>
-          <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">{r.cuisines.join(" · ")}</div>
+          <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+            {r.cuisines.join(" · ")}
+          </div>
           <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {r.etaMins} min</span>
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" /> {r.etaMins} min
+            </span>
             <span>₹{r.costForTwo} for two</span>
           </div>
         </div>
