@@ -9,6 +9,7 @@ import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
 import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
+import { MobileHome } from "@/components/native/MobileHome";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
 
