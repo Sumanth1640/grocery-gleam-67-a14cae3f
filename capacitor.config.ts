@@ -3,7 +3,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "app.lovable.hallifresh",
   appName: "HalliFresh",
-  webDir: "dist",
+  webDir: "dist/client",
   server: {
     // Hot-reload from the Lovable preview during development.
     // For a store-ready build, DELETE the entire `server` block, then run
