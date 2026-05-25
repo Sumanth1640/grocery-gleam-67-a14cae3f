@@ -2,9 +2,11 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { MapPin, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight } from "lucide-react";
+import { MapPin, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight, Star, Clock } from "lucide-react";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
+import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
+import { foodCartStore } from "@/lib/food-cart-store";
 
 /**
  * Reference-style mobile home — shown on small viewports (and inside the
@@ -14,14 +16,20 @@ export function MobileHome() {
   const navigate = useNavigate();
   const cats = useServerFn(listCategories);
   const prods = useServerFn(listProducts);
+  const restosFn = useServerFn(listApprovedRestaurants);
+  const dishesFn = useServerFn(listAllApprovedDishes);
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
   const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => prods() });
+  const restosQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => restosFn() });
+  const dishesQ = useQuery({ queryKey: ["public-all-dishes"], queryFn: () => dishesFn() });
   const cart = useCart();
   const { itemsCount } = cartTotals(cart);
   const [q, setQ] = useState("");
 
   const categories = (catsQ.data ?? []).slice(0, 8);
   const products = (prodsQ.data ?? []).slice(0, 8);
+  const restaurants = (restosQ.data ?? []).slice(0, 6);
+  const popularDishes = (dishesQ.data ?? []).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-[oklch(0.985_0.005_145)] pb-32">
@@ -140,6 +148,48 @@ export function MobileHome() {
         ))}
       </div>
 
+      {/* Popular dishes */}
+      <div className="mt-7 flex items-end justify-between px-5">
+        <h2 className="font-display text-xl font-extrabold">Popular dishes</h2>
+        <Link to="/food/dishes" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
+          View all <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {dishesQ.isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="w-40 shrink-0 rounded-3xl bg-card p-3 shadow-card">
+                <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted" />
+                <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
+              </div>
+            ))
+          : popularDishes.map((d: any) => <MobileDishMiniCard key={d.id} dish={d} />)}
+      </div>
+
+      {/* Restaurants */}
+      <div className="mt-7 flex items-end justify-between px-5">
+        <h2 className="font-display text-xl font-extrabold">Restaurants</h2>
+        <Link to="/food" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
+          View all <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="mt-3 grid grid-cols-1 gap-4 px-5">
+        {restosQ.isLoading
+          ? Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="rounded-3xl bg-card p-3 shadow-card">
+                <div className="aspect-[16/10] w-full animate-pulse rounded-2xl bg-muted" />
+                <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
+              </div>
+            ))
+          : restaurants.map((r: any) => <MobileRestaurantRow key={r.id} r={r} />)}
+        {!restosQ.isLoading && restaurants.length === 0 && (
+          <div className="rounded-3xl bg-card p-6 text-center text-sm text-muted-foreground shadow-card">
+            No restaurants available yet.
+          </div>
+        )}
+      </div>
+
+
       {/* Voucher banner */}
       <div className="mt-7 px-5">
         <div className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-[oklch(0.92_0.08_145)] p-5">
@@ -232,3 +282,105 @@ function ShieldBadge({ color, label, sub }: { color: string; label: string; sub:
     </div>
   );
 }
+
+function MobileDishMiniCard({ dish }: { dish: any }) {
+  const restaurant = dish.restaurant ?? {};
+  const mappedRestaurant = {
+    id: restaurant.id,
+    slug: restaurant.slug,
+    name: restaurant.name,
+    image: restaurant.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+    cover: restaurant.cover || restaurant.image || "",
+    cuisines: restaurant.cuisines ?? [],
+    rating: Number(restaurant.rating ?? 4.5),
+    reviewsCount: restaurant.reviews_count ?? 0,
+    etaMins: restaurant.eta_mins ?? 30,
+    distanceKm: Number(restaurant.distance_km ?? 1),
+    costForTwo: restaurant.cost_for_two ?? 400,
+    priceTier: (restaurant.price_tier ?? 2) as 1 | 2 | 3,
+    veg: !!restaurant.veg,
+    area: restaurant.area ?? "",
+    offer: restaurant.offer ?? undefined,
+    menu: [],
+  };
+  const mappedDish = {
+    id: dish.id,
+    name: dish.name,
+    desc: dish.description ?? "",
+    image: dish.image || mappedRestaurant.image,
+    price: dish.price,
+    mrp: dish.mrp ?? undefined,
+    veg: !!dish.veg,
+    spicy: !!dish.spicy,
+    bestseller: !!dish.bestseller,
+    rating: Number(dish.rating ?? 4.5),
+    section: dish.section,
+    variants: dish.partner_dish_variants ?? [],
+    addons: dish.partner_dish_addons ?? [],
+  };
+  return (
+    <div className="w-40 shrink-0 rounded-3xl bg-card p-3 shadow-card">
+      <Link
+        to="/food/r/$slug"
+        params={{ slug: mappedRestaurant.slug }}
+        className="block aspect-square overflow-hidden rounded-2xl bg-muted"
+      >
+        <img src={mappedDish.image} alt={mappedDish.name} loading="lazy" className="h-full w-full object-cover" />
+      </Link>
+      <div className="mt-2 line-clamp-1 text-sm font-bold">{mappedDish.name}</div>
+      <div className="line-clamp-1 text-[10px] text-muted-foreground">{mappedRestaurant.name}</div>
+      <div className="mt-2 flex items-end justify-between">
+        <div className="text-sm font-extrabold">₹{mappedDish.price}</div>
+        <button
+          onClick={() => foodCartStore.add(mappedRestaurant as any, mappedDish as any)}
+          aria-label="Add dish"
+          className="grid h-8 w-8 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95"
+        >
+          <Plus className="h-4 w-4" strokeWidth={3} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MobileRestaurantRow({ r }: { r: any }) {
+  return (
+    <Link
+      to="/food/r/$slug"
+      params={{ slug: r.slug }}
+      className="block overflow-hidden rounded-3xl bg-card shadow-card"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden">
+        <img
+          src={r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800"}
+          alt={r.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+        {r.offer && (
+          <div className="absolute left-3 top-3 rounded-md bg-[oklch(0.6_0.22_25)] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">
+            {r.offer}
+          </div>
+        )}
+      </div>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-display text-base font-extrabold">{r.name}</h3>
+          <div className="inline-flex items-center gap-0.5 rounded-md bg-[oklch(0.55_0.16_145)] px-1.5 py-0.5 text-[11px] font-bold text-white">
+            <Star className="h-3 w-3 fill-current" /> {Number(r.rating ?? 4.5)}
+          </div>
+        </div>
+        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+          {(r.cuisines ?? []).join(" · ")}
+        </div>
+        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" /> {r.eta_mins} min
+          </span>
+          <span>₹{r.cost_for_two} for two</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
