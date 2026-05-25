@@ -80,23 +80,26 @@ export function MobileHome() {
 
       {/* Category chips */}
       <div className="mt-5 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {(catsQ.isLoading ? Array.from({ length: 5 }) : categories).map((c: any, i) => (
-          <Link
-            key={c?.slug ?? i}
-            to={c ? "/c/$slug" : "/"}
-            params={c ? { slug: c.slug } : undefined as any}
-            className="flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4 py-2.5 shadow-card"
-          >
-            {c ? (
-              <>
+        {catsQ.isLoading
+          ? Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4 py-2.5 shadow-card"
+              >
+                <span className="h-7 w-24 animate-pulse rounded bg-muted" />
+              </div>
+            ))
+          : categories.map((c: any) => (
+              <Link
+                key={c.slug}
+                to="/c/$slug"
+                params={{ slug: c.slug }}
+                className="flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4 py-2.5 shadow-card"
+              >
                 <img src={c.image} alt="" className="h-7 w-7 rounded-full object-cover" />
                 <span className="text-sm font-bold">{c.name}</span>
-              </>
-            ) : (
-              <span className="h-7 w-24 animate-pulse rounded bg-muted" />
-            )}
-          </Link>
-        ))}
+              </Link>
+            ))}
       </div>
 
       {/* Promo banner */}
