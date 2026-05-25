@@ -18,6 +18,8 @@ import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-pu
 import { foodCartStore, useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 
+type DbDish = Awaited<ReturnType<typeof listAllApprovedDishes>>[number];
+
 /**
  * Native-shell Food home — mirrors the MobileHome aesthetic.
  */
@@ -183,7 +185,7 @@ export function MobileFood() {
       <div className="mt-3 grid grid-cols-2 gap-4 px-5">
         {dishesQ.isLoading
           ? Array.from({ length: 4 }).map((_, i) => <MobileDishSkeleton key={i} />)
-          : popularDishes.map((d: any) => <MobileDishCard key={d.id} dish={d} />)}
+          : popularDishes.map((d) => <MobileDishCard key={d.id} dish={d} />)}
       </div>
 
       <div className="mt-7 flex items-end justify-between px-5">
@@ -226,7 +228,7 @@ function MobileDishSkeleton() {
   );
 }
 
-function MobileDishCard({ dish }: { dish: any }) {
+function MobileDishCard({ dish }: { dish: DbDish }) {
   const restaurant = dish.restaurant ?? {};
   const mappedRestaurant: Restaurant = {
     id: restaurant.id,
