@@ -39,10 +39,14 @@
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-discount: var(--discount);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-orange-foreground: var(--accent-orange-foreground);
+  --color-app-surface: var(--app-surface);
 
   --shadow-soft: 0 4px 16px -4px oklch(0 0 0 / 0.08);
   --shadow-card: 0 2px 8px -2px oklch(0 0 0 / 0.06);
   --shadow-pop: 0 16px 40px -12px oklch(0.25 0.18 90 / 0.25);
+  --shadow-app: 0 8px 24px -8px oklch(0 0 0 / 0.12);
 }
 
 :root {
