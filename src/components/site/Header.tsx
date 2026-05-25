@@ -31,6 +31,8 @@ export function Header() {
   });
   const unread = unreadQ.data?.count ?? 0;
 
+  if (isNative) return null;
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 md:gap-6">
