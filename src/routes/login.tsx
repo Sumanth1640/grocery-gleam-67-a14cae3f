@@ -5,7 +5,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { useIsNative } from "@/lib/use-native";
+
 import { Eye, EyeOff, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/login")({
 type Mode = "signin" | "signup";
 
 function LoginPage() {
-  const isNative = useIsNative();
+  
   const { redirect } = useSearch({ from: "/login" });
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("signin");
@@ -116,22 +116,18 @@ function LoginPage() {
             </div>
           </div>
 
-          {!isNative && (
-            <>
-              <button
-                onClick={google}
-                disabled={busy}
-                type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-xl border bg-background px-4 py-3 text-sm font-semibold transition hover:bg-secondary disabled:opacity-60"
-              >
-                <GoogleMark /> Continue with Google
-              </button>
+          <button
+            onClick={google}
+            disabled={busy}
+            type="button"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border bg-background px-4 py-3 text-sm font-semibold transition hover:bg-secondary disabled:opacity-60"
+          >
+            <GoogleMark /> Continue with Google
+          </button>
 
-              <div className="my-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                <div className="h-px flex-1 bg-border" /> or {mode === "signin" ? "sign in with email" : "sign up with email"} <div className="h-px flex-1 bg-border" />
-              </div>
-            </>
-          )}
+          <div className="my-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="h-px flex-1 bg-border" /> or {mode === "signin" ? "sign in with email" : "sign up with email"} <div className="h-px flex-1 bg-border" />
+          </div>
 
           <form onSubmit={submit} className="space-y-3">
             {mode === "signup" && (
