@@ -148,6 +148,48 @@ export function MobileHome() {
         ))}
       </div>
 
+      {/* Popular dishes */}
+      <div className="mt-7 flex items-end justify-between px-5">
+        <h2 className="font-display text-xl font-extrabold">Popular dishes</h2>
+        <Link to="/food/dishes" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
+          View all <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {dishesQ.isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="w-40 shrink-0 rounded-3xl bg-card p-3 shadow-card">
+                <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted" />
+                <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
+              </div>
+            ))
+          : popularDishes.map((d: any) => <MobileDishMiniCard key={d.id} dish={d} />)}
+      </div>
+
+      {/* Restaurants */}
+      <div className="mt-7 flex items-end justify-between px-5">
+        <h2 className="font-display text-xl font-extrabold">Restaurants</h2>
+        <Link to="/food" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
+          View all <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="mt-3 grid grid-cols-1 gap-4 px-5">
+        {restosQ.isLoading
+          ? Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="rounded-3xl bg-card p-3 shadow-card">
+                <div className="aspect-[16/10] w-full animate-pulse rounded-2xl bg-muted" />
+                <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
+              </div>
+            ))
+          : restaurants.map((r: any) => <MobileRestaurantRow key={r.id} r={r} />)}
+        {!restosQ.isLoading && restaurants.length === 0 && (
+          <div className="rounded-3xl bg-card p-6 text-center text-sm text-muted-foreground shadow-card">
+            No restaurants available yet.
+          </div>
+        )}
+      </div>
+
+
       {/* Voucher banner */}
       <div className="mt-7 px-5">
         <div className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-[oklch(0.92_0.08_145)] p-5">
