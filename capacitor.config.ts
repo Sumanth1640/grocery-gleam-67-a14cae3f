@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   server: {
     // WebView wrapper: the APK loads the live Lovable app over HTTPS.
     // Requires internet. Publish the app in Lovable for this URL to serve content.
-    url: "https://project--16b78db9-75c1-4d38-8381-401bfdad3cb0.lovable.app?native=1",
+    url: "https://grocery-gleam-67.lovable.app?native=1",
     cleartext: false,
     androidScheme: "https",
   },
