@@ -10,7 +10,8 @@ import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
 import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
 import heroImg from "@/assets/hero-grocery.jpg";
-import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
+import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star, MapPin, ShoppingBasket, Search, SlidersHorizontal } from "lucide-react";
+import { Link as RouterLink } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
