@@ -118,7 +118,7 @@ export function MobileHome() {
           <img
             src="https://images.unsplash.com/photo-1546470427-227dbb7c1d2c?auto=format&fit=crop&w=400&q=70"
             alt=""
-            className="pointer-events-none absolute right-[-20px] top-1/2 h-[140%] w-44 -translate-y-1/2 object-cover opacity-95"
+            className="pointer-events-none absolute -right-4 bottom-0 top-0 my-auto h-32 w-32 rounded-full object-cover opacity-95"
           />
         </Link>
       </div>
