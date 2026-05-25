@@ -81,9 +81,13 @@ function LoginPage() {
     if (busy) return;
     setBusy(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
+      // On native (Capacitor), use a custom-scheme deep link so the OAuth
+      // browser tab can hand control back to the installed app.
+      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+      const isNative = !!cap?.isNativePlatform?.();
+      const redirect_uri = isNative ? "hallifresh://auth" : window.location.origin;
+
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri });
       if (result.error) {
         toast.error("Google sign-in failed");
         setBusy(false);
@@ -96,6 +100,7 @@ function LoginPage() {
       setBusy(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-background">

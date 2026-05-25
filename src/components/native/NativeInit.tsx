@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 /**
  * Initialises native-only behaviour when running inside Capacitor.
@@ -6,7 +8,7 @@ import { useEffect } from "react";
  */
 export function NativeInit() {
   useEffect(() => {
-    let cleanup: (() => void) | undefined;
+    const cleanups: Array<() => void> = [];
 
     (async () => {
       try {
@@ -23,17 +25,54 @@ export function NativeInit() {
         await StatusBar.setBackgroundColor({ color: "#16a34a" }).catch(() => {});
         await SplashScreen.hide().catch(() => {});
 
-        const handle = await App.addListener("backButton", ({ canGoBack }) => {
+        const backHandle = await App.addListener("backButton", ({ canGoBack }) => {
           if (canGoBack) window.history.back();
           else App.exitApp();
         });
-        cleanup = () => handle.remove();
+        cleanups.push(() => backHandle.remove());
+
+        // Handle deep links: hallifresh://auth#access_token=...&refresh_token=...
+        const urlHandle = await App.addListener("appUrlOpen", async ({ url }) => {
+          try {
+            if (!url.startsWith("hallifresh://auth")) return;
+            // Tokens may be in hash or query string
+            const fragment = url.split("#")[1] ?? url.split("?")[1] ?? "";
+            const params = new URLSearchParams(fragment);
+            const access_token = params.get("access_token");
+            const refresh_token = params.get("refresh_token");
+            if (access_token && refresh_token) {
+              const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+              if (error) {
+                toast.error("Sign-in failed: " + error.message);
+                return;
+              }
+              toast.success("Signed in!");
+              window.location.replace("/");
+              return;
+            }
+            // PKCE code flow
+            const code = params.get("code");
+            if (code) {
+              const { error } = await supabase.auth.exchangeCodeForSession(code);
+              if (error) {
+                toast.error("Sign-in failed: " + error.message);
+                return;
+              }
+              toast.success("Signed in!");
+              window.location.replace("/");
+            }
+          } catch (e) {
+            toast.error("Could not complete sign-in");
+            console.error("appUrlOpen handler:", e);
+          }
+        });
+        cleanups.push(() => urlHandle.remove());
       } catch {
         // not a native shell — ignore
       }
     })();
 
-    return () => cleanup?.();
+    return () => cleanups.forEach((fn) => fn());
   }, []);
 
   return null;
