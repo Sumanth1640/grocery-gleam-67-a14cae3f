@@ -153,7 +153,8 @@ function ProductPage() {
       </div>
       <RecentlyViewed excludeId={product.id} />
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
 
