@@ -16,14 +16,20 @@ export function MobileHome() {
   const navigate = useNavigate();
   const cats = useServerFn(listCategories);
   const prods = useServerFn(listProducts);
+  const restosFn = useServerFn(listApprovedRestaurants);
+  const dishesFn = useServerFn(listAllApprovedDishes);
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
   const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => prods() });
+  const restosQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => restosFn() });
+  const dishesQ = useQuery({ queryKey: ["public-all-dishes"], queryFn: () => dishesFn() });
   const cart = useCart();
   const { itemsCount } = cartTotals(cart);
   const [q, setQ] = useState("");
 
   const categories = (catsQ.data ?? []).slice(0, 8);
   const products = (prodsQ.data ?? []).slice(0, 8);
+  const restaurants = (restosQ.data ?? []).slice(0, 6);
+  const popularDishes = (dishesQ.data ?? []).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-[oklch(0.985_0.005_145)] pb-32">
