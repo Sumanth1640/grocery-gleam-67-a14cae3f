@@ -1,8 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Facebook, Mail } from "lucide-react";
 import logo from "@/assets/hallifresh-logo.jpeg";
+import { useIsNative } from "@/lib/use-native";
 
 export function Footer() {
+  const isNative = useIsNative();
+  if (isNative) return null;
   return (
     <footer className="mt-16 border-t bg-secondary/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-4">
