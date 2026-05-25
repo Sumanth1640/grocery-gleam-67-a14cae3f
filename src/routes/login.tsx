@@ -128,8 +128,6 @@ function LoginPage() {
           <div className="my-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             <div className="h-px flex-1 bg-border" /> or {mode === "signin" ? "sign in with email" : "sign up with email"} <div className="h-px flex-1 bg-border" />
           </div>
-          {/* isNative is intentionally unused now — kept for future deep-link handling */}
-          {void isNative}
 
           <form onSubmit={submit} className="space-y-3">
             {mode === "signup" && (
