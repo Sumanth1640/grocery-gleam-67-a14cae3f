@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck, Download, X, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog-types";
-import { downloadInvoice } from "@/lib/invoice";
+
 import { upsertReview } from "@/lib/reviews.functions";
 import { createRefundRequest, myRefundForOrder } from "@/lib/admin-extra.functions";
 
@@ -191,12 +191,13 @@ function OrderDetailPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => downloadInvoice(order as any)}
+                <Link
+                  to="/orders/$id/invoice"
+                  params={{ id: order.id }}
                   className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold hover:bg-secondary"
                 >
                   <Download className="h-3.5 w-3.5" /> Invoice
-                </button>
+                </Link>
                 {order.status === "placed" && (
                   <button
                     onClick={() => { if (confirm("Cancel this order?")) cancelM.mutate(); }}
