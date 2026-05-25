@@ -282,3 +282,105 @@ function ShieldBadge({ color, label, sub }: { color: string; label: string; sub:
     </div>
   );
 }
+
+function MobileDishMiniCard({ dish }: { dish: any }) {
+  const restaurant = dish.restaurant ?? {};
+  const mappedRestaurant = {
+    id: restaurant.id,
+    slug: restaurant.slug,
+    name: restaurant.name,
+    image: restaurant.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+    cover: restaurant.cover || restaurant.image || "",
+    cuisines: restaurant.cuisines ?? [],
+    rating: Number(restaurant.rating ?? 4.5),
+    reviewsCount: restaurant.reviews_count ?? 0,
+    etaMins: restaurant.eta_mins ?? 30,
+    distanceKm: Number(restaurant.distance_km ?? 1),
+    costForTwo: restaurant.cost_for_two ?? 400,
+    priceTier: (restaurant.price_tier ?? 2) as 1 | 2 | 3,
+    veg: !!restaurant.veg,
+    area: restaurant.area ?? "",
+    offer: restaurant.offer ?? undefined,
+    menu: [],
+  };
+  const mappedDish = {
+    id: dish.id,
+    name: dish.name,
+    desc: dish.description ?? "",
+    image: dish.image || mappedRestaurant.image,
+    price: dish.price,
+    mrp: dish.mrp ?? undefined,
+    veg: !!dish.veg,
+    spicy: !!dish.spicy,
+    bestseller: !!dish.bestseller,
+    rating: Number(dish.rating ?? 4.5),
+    section: dish.section,
+    variants: dish.partner_dish_variants ?? [],
+    addons: dish.partner_dish_addons ?? [],
+  };
+  return (
+    <div className="w-40 shrink-0 rounded-3xl bg-card p-3 shadow-card">
+      <Link
+        to="/food/r/$slug"
+        params={{ slug: mappedRestaurant.slug }}
+        className="block aspect-square overflow-hidden rounded-2xl bg-muted"
+      >
+        <img src={mappedDish.image} alt={mappedDish.name} loading="lazy" className="h-full w-full object-cover" />
+      </Link>
+      <div className="mt-2 line-clamp-1 text-sm font-bold">{mappedDish.name}</div>
+      <div className="line-clamp-1 text-[10px] text-muted-foreground">{mappedRestaurant.name}</div>
+      <div className="mt-2 flex items-end justify-between">
+        <div className="text-sm font-extrabold">₹{mappedDish.price}</div>
+        <button
+          onClick={() => foodCartStore.add(mappedRestaurant as any, mappedDish as any)}
+          aria-label="Add dish"
+          className="grid h-8 w-8 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95"
+        >
+          <Plus className="h-4 w-4" strokeWidth={3} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MobileRestaurantRow({ r }: { r: any }) {
+  return (
+    <Link
+      to="/food/r/$slug"
+      params={{ slug: r.slug }}
+      className="block overflow-hidden rounded-3xl bg-card shadow-card"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden">
+        <img
+          src={r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800"}
+          alt={r.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+        {r.offer && (
+          <div className="absolute left-3 top-3 rounded-md bg-[oklch(0.6_0.22_25)] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">
+            {r.offer}
+          </div>
+        )}
+      </div>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-display text-base font-extrabold">{r.name}</h3>
+          <div className="inline-flex items-center gap-0.5 rounded-md bg-[oklch(0.55_0.16_145)] px-1.5 py-0.5 text-[11px] font-bold text-white">
+            <Star className="h-3 w-3 fill-current" /> {Number(r.rating ?? 4.5)}
+          </div>
+        </div>
+        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+          {(r.cuisines ?? []).join(" · ")}
+        </div>
+        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" /> {r.eta_mins} min
+          </span>
+          <span>₹{r.cost_for_two} for two</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
