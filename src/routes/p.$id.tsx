@@ -8,6 +8,7 @@ import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
+import { MobileProductDetails } from "@/components/native/MobileProductDetails";
 import { getProduct, productsByCategory } from "@/lib/catalog.functions";
 import { cartStore, useCart } from "@/lib/cart-store";
 import { recentlyViewedStore } from "@/lib/recently-viewed-store";
@@ -67,7 +68,11 @@ function ProductPage() {
   const related = (relatedQ.data ?? []).filter((p) => p.id !== product.id).slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <div className="md:hidden">
+        <MobileProductDetails product={product} />
+      </div>
+      <div className="hidden min-h-screen bg-background md:block">
       <Header />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="text-xs text-muted-foreground">
