@@ -136,7 +136,8 @@ function HomePage() {
       </section>
 
       {/* DESKTOP / TABLET HERO (existing) */}
-      <section className="hidden md:block bg-aisle">
+      <div className="hidden md:contents">
+      <section className="bg-aisle">
 
         <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-16">
           <div>
