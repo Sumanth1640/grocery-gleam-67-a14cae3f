@@ -21,7 +21,7 @@ export function BottomNav() {
     {
       to: "/wishlist",
       icon: Heart,
-      label: "Wishlist",
+      label: "Favorites",
       match: (p: string) => p.startsWith("/wishlist"),
       badge: wishCount,
     },
@@ -35,34 +35,36 @@ export function BottomNav() {
     {
       to: user ? "/account" : "/login",
       icon: User,
-      label: user ? "Account" : "Sign in",
+      label: "Profile",
       match: (p: string) => p.startsWith("/account") || p.startsWith("/login"),
     },
   ] as const;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur-md md:hidden">
-      <ul className="mx-auto grid max-w-md grid-cols-5">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-4 md:hidden">
+      <ul className="pointer-events-auto mx-auto flex max-w-md items-center justify-between rounded-[28px] border border-border/40 bg-card/95 px-2 py-2 shadow-pop backdrop-blur-xl">
         {items.map((it) => {
           const active = it.match(path);
           const Icon = it.icon;
           return (
-            <li key={it.label}>
+            <li key={it.label} className="flex-1">
               <Link
                 to={it.to as string}
-                className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold transition ${
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                className={`relative mx-auto flex h-12 items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-bold transition ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-pop"
+                    : "text-muted-foreground"
                 }`}
               >
                 <span className="relative">
-                  <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.6 : 2.2} />
                   {"badge" in it && (it.badge ?? 0) > 0 && (
-                    <span className="absolute -right-2 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+                    <span className="absolute -right-2 -top-1.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-[oklch(0.6_0.22_25)] px-1 text-[9px] font-bold text-white">
                       {it.badge}
                     </span>
                   )}
                 </span>
-                {it.label}
+                {active && <span className="leading-none">{it.label}</span>}
               </Link>
             </li>
           );
