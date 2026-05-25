@@ -83,6 +83,8 @@ function FoodHome() {
     return list;
   }, [allRestaurants, q, vegOnly, cuisine, minRating, maxEta, sort]);
 
+  if (isNative) return <MobileFood />;
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Header />
