@@ -83,13 +83,27 @@ function LoginPage() {
     try {
       // On native (Capacitor), use a custom-scheme deep link so the OAuth
       // browser tab can hand control back to the installed app.
-      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
-      const isNative = !!cap?.isNativePlatform?.();
-      const redirect_uri = isNative ? "hallifresh://auth" : window.location.origin;
+      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean; getPlatform?: () => string } }).Capacitor;
+      const platform = cap?.getPlatform?.();
+      const isNative = !!cap?.isNativePlatform?.() || (platform ? platform !== "web" : false) || localStorage.getItem("force-native") === "1";
 
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri });
+      if (isNative) {
+        const state = crypto.getRandomValues(new Uint8Array(16)).reduce((value, byte) => value + byte.toString(16).padStart(2, "0"), "");
+        localStorage.setItem("native-oauth-state", state);
+        const params = new URLSearchParams({
+          provider: "google",
+          redirect_uri: "hallifresh://auth",
+          state,
+        });
+        const { Browser } = await import("@capacitor/browser");
+        await Browser.open({ url: `${window.location.origin}/~oauth/initiate?${params.toString()}` });
+        setBusy(false);
+        return;
+      }
+
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
       if (result.error) {
-        toast.error("Google sign-in failed");
+        toast.error(result.error.message || "Google sign-in failed");
         setBusy(false);
         return;
       }
