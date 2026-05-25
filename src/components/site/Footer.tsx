@@ -7,7 +7,7 @@ export function Footer() {
   const isNative = useIsNative();
   if (isNative) return null;
   return (
-    <footer className="mt-16 border-t bg-secondary/40">
+    <footer className="mt-16 hidden border-t bg-secondary/40 md:block">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2">
