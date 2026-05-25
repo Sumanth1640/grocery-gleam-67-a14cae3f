@@ -8,9 +8,11 @@ import { DeliveryAddressChip } from "@/components/site/DeliveryAddressChip";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
+import { useIsNative } from "@/lib/use-native";
 import { unreadCount } from "@/lib/notifications.functions";
 
 export function Header() {
+  const isNative = useIsNative();
   const cart = useCart();
   const wishlist = useWishlist();
   const wishCount = Object.keys(wishlist).length;
@@ -28,6 +30,8 @@ export function Header() {
     refetchInterval: 60_000,
   });
   const unread = unreadQ.data?.count ?? 0;
+
+  if (isNative) return null;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
