@@ -15,7 +15,13 @@ export function useIsNative() {
       const q = params.get("native");
       if (q === "1") return true;
       if (q === "0") return false;
-      return localStorage.getItem("force-native") === "1";
+      if (localStorage.getItem("force-native") === "1") return true;
+      // Capacitor injects window.Capacitor synchronously inside the native WebView
+      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean; getPlatform?: () => string } }).Capacitor;
+      if (cap?.isNativePlatform?.()) return true;
+      const platform = cap?.getPlatform?.();
+      if (platform && platform !== "web") return true;
+      return false;
     } catch {
       return false;
     }
