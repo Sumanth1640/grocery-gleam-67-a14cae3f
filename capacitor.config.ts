@@ -5,11 +5,11 @@ const config: CapacitorConfig = {
   appName: "HalliFresh",
   webDir: "dist/client",
   server: {
-    // Hot-reload from the Lovable preview during development.
-    // For a store-ready build, DELETE the entire `server` block, then run
-    // `npm run build && npx cap sync` so the app ships fully offline.
-    url: "https://16b78db9-75c1-4d38-8381-401bfdad3cb0.lovableproject.com?forceHideBadge=true&native=1",
-    cleartext: true,
+    // WebView wrapper: the APK loads the live Lovable app over HTTPS.
+    // Requires internet. Publish the app in Lovable for this URL to serve content.
+    url: "https://project--16b78db9-75c1-4d38-8381-401bfdad3cb0.lovable.app?native=1",
+    cleartext: false,
+    androidScheme: "https",
   },
   android: { backgroundColor: "#ffffff" },
   ios: { contentInset: "always" },

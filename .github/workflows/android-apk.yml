@@ -23,18 +23,14 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps --no-audit --no-fund
 
-      - name: Build web bundle
-        run: npm run build
-
-      - name: Strip dev server from capacitor.config (offline build)
+      - name: Create web assets shim
         run: |
-          node -e "
-          const fs = require('fs');
-          let c = fs.readFileSync('capacitor.config.ts', 'utf8');
-          c = c.replace(/server:\s*{[\s\S]*?},\n/, '');
-          fs.writeFileSync('capacitor.config.ts', c);
-          console.log('Stripped server block');
-          "
+          mkdir -p dist/client
+          cat > dist/client/index.html <<'HTML'
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>HalliFresh</title></head>
+          <body>Loading…</body></html>
+          HTML
 
       - name: Add Android platform
         run: |
