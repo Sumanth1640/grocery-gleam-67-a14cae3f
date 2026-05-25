@@ -370,6 +370,7 @@ function HomePage() {
       <RecentlyViewed />
 
       <Footer />
+      </div>
     </div>
   );
 }
