@@ -28,8 +28,10 @@ function CategoryPage() {
     queryFn: () => dualApi.productsByCategory(slug),
   });
 
+  const categories = catsQ.data ?? [];
   const items = itemsQ.data ?? [];
   const category = categories.find((c) => c.slug === slug);
+
 
   const [sort, setSort] = useState<Sort>("popular");
   const [onlyDeals, setOnlyDeals] = useState(false);
