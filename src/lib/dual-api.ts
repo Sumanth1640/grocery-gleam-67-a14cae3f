@@ -100,10 +100,22 @@ export const dualApi = {
     return listCategories();
   },
 
+  async productsByCategory(slug: string) {
+    if (USE_PHP) return php.productsByCategory(slug);
+    const { productsByCategory } = (await lc()).catalog;
+    return productsByCategory({ data: { slug } });
+  },
+
   async getProduct(slug: string) {
     if (USE_PHP) return php.product(slug);
     const { getProduct } = (await lc()).catalog;
     return getProduct({ data: { slug } });
+  },
+
+  async searchProducts(q: string) {
+    if (USE_PHP) return php.searchProducts(q);
+    const { searchProducts } = (await lc()).catalog;
+    return searchProducts({ data: { q } });
   },
 
   async search(q: string) {
@@ -112,6 +124,7 @@ export const dualApi = {
     const products = await searchProducts({ data: { q } });
     return { products, restaurants: [], dishes: [] };
   },
+
 
   // ============ COUPONS ============
   async listCoupons() {

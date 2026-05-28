@@ -1,14 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { MobileCategory } from "@/components/native/MobileCategory";
 import { useIsNative } from "@/lib/use-native";
-import { listCategories, productsByCategory } from "@/lib/catalog.functions";
+import { dualApi } from "@/lib/dual-api";
 
 type Sort = "popular" | "price-asc" | "price-desc" | "discount";
 
@@ -23,17 +22,16 @@ export const Route = createFileRoute("/c/$slug")({
 
 function CategoryPage() {
   const { slug } = Route.useParams();
-  const cats = useServerFn(listCategories);
-  const byCat = useServerFn(productsByCategory);
-  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
   const itemsQ = useQuery({
     queryKey: ["products", "by-cat", slug],
-    queryFn: () => byCat({ data: { slug } }),
+    queryFn: () => dualApi.productsByCategory(slug),
   });
 
   const categories = catsQ.data ?? [];
   const items = itemsQ.data ?? [];
   const category = categories.find((c) => c.slug === slug);
+
 
   const [sort, setSort] = useState<Sort>("popular");
   const [onlyDeals, setOnlyDeals] = useState(false);

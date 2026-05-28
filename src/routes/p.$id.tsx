@@ -1,7 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
@@ -10,7 +9,7 @@ import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { MobileProductDetails } from "@/components/native/MobileProductDetails";
 import { useIsNative } from "@/lib/use-native";
-import { getProduct, productsByCategory } from "@/lib/catalog.functions";
+import { dualApi } from "@/lib/dual-api";
 import { cartStore, useCart } from "@/lib/cart-store";
 import { recentlyViewedStore } from "@/lib/recently-viewed-store";
 import { Clock, Minus, Plus, ShieldCheck, Truck, Leaf } from "lucide-react";
@@ -27,16 +26,15 @@ export const Route = createFileRoute("/p/$id")({
 function ProductPage() {
   const { id } = Route.useParams();
   const isNative = useIsNative();
-  const get = useServerFn(getProduct);
-  const byCat = useServerFn(productsByCategory);
-  const productQ = useQuery({ queryKey: ["product", id], queryFn: () => get({ data: { slug: id } }) });
+  const productQ = useQuery({ queryKey: ["product", id], queryFn: () => dualApi.getProduct(id) });
 
   const product = productQ.data;
   const relatedQ = useQuery({
     queryKey: ["products", "by-cat", product?.category_slug],
-    queryFn: () => byCat({ data: { slug: product!.category_slug } }),
+    queryFn: () => dualApi.productsByCategory(product!.category_slug),
     enabled: !!product,
   });
+
 
   if (productQ.isSuccess && !product) throw notFound();
 

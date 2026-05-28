@@ -2,12 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
-import { listCategories, searchProducts } from "@/lib/catalog.functions";
+import { dualApi } from "@/lib/dual-api";
 import { RESTAURANTS } from "@/lib/food-data";
 import { Search as SearchIcon, SlidersHorizontal, Utensils, Star, Clock } from "lucide-react";
 
@@ -28,14 +27,13 @@ function SearchPage() {
   const navigate = Route.useNavigate();
   const query = q.trim();
 
-  const cats = useServerFn(listCategories);
-  const search = useServerFn(searchProducts);
-  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
   const resultsQ = useQuery({
     queryKey: ["search", query],
-    queryFn: () => search({ data: { q: query } }),
+    queryFn: () => dualApi.searchProducts(query),
     enabled: query.length > 0,
   });
+
 
   const lower = query.toLowerCase();
   const matchedCats = (catsQ.data ?? []).filter(
