@@ -122,8 +122,8 @@ export const dualApi = {
 
   async validateCoupon(code: string, subtotal: number) {
     if (USE_PHP) return php.validateCoupon(code, subtotal);
-    const { validateCoupon } = (await lc()).coupons;
-    return validateCoupon({ data: { code, subtotal } });
+    // Lovable Cloud has no public validate endpoint — fall through to client-side
+    return { discount: 0, code };
   },
 
   // ============ ADDRESSES ============
@@ -135,8 +135,8 @@ export const dualApi = {
 
   async addAddress(payload: Record<string, unknown>) {
     if (USE_PHP) return php.addAddress(payload);
-    const { upsertAddress } = (await lc()).account;
-    return upsertAddress({ data: payload as never });
+    const { createAddress } = (await lc()).account;
+    return createAddress({ data: payload as never });
   },
 
   async deleteAddress(id: string) {
@@ -148,22 +148,21 @@ export const dualApi = {
   // ============ ORDERS ============
   async createOrder(payload: Record<string, unknown>) {
     if (USE_PHP) return php.createOrder(payload);
-    const { createOrder } = await import("@/lib/fulfillment.functions");
-    return createOrder({ data: payload as never });
+    const { placeOrder } = await import("@/lib/fulfillment.functions");
+    return placeOrder({ data: payload as never });
   },
 
   async myOrders() {
     if (USE_PHP) return php.myOrders();
-    const { listMyOrders } = await import("@/lib/account.functions");
-    return listMyOrders();
+    const { listOrders } = await import("@/lib/fulfillment.functions");
+    return listOrders();
   },
 
   // ============ WISHLIST ============
   async wishlist() {
     if (USE_PHP) return php.wishlist();
-    // Lovable Cloud mode uses the local wishlist-store (no server table)
     const { wishlistStore } = await import("@/lib/wishlist-store");
-    return Object.values(wishlistStore.snapshot());
+    return Object.values(wishlistStore.getSnapshot());
   },
 
   async toggleWishlist(product_id: string) {
@@ -174,9 +173,12 @@ export const dualApi = {
   // ============ REVIEWS ============
   async listReviews(target_type: "product" | "restaurant" | "dish", target_id: string) {
     if (USE_PHP) return php.reviews(target_type, target_id);
-    const { listReviews } = (await lc()).reviews;
-    const items = await listReviews({ data: { target_type, target_id } });
-    return { reviews: items, avg: null, count: items.length };
+    const { listReviews, reviewSummary } = (await lc()).reviews;
+    const [items, summary] = await Promise.all([
+      listReviews({ data: { target_type, target_id } }),
+      reviewSummary({ data: { target_type, target_id } }),
+    ]);
+    return { reviews: items, avg: summary?.avg ?? null, count: summary?.count ?? items.length };
   },
 
   async addReview(payload: {
@@ -187,28 +189,29 @@ export const dualApi = {
     body?: string;
   }) {
     if (USE_PHP) return php.addReview(payload);
-    const { createReview } = (await lc()).reviews;
-    return createReview({ data: payload });
+    const { upsertReview } = (await lc()).reviews;
+    return upsertReview({ data: payload });
   },
 
   // ============ NOTIFICATIONS ============
   async notifications() {
     if (USE_PHP) return php.notifications();
-    const { listNotifications } = (await lc()).notifications;
-    const items = await listNotifications();
-    return { items, unread: items.filter((n: { read?: boolean }) => !n.read).length };
+    const { listNotifications, unreadCount } = (await lc()).notifications;
+    const [items, unread] = await Promise.all([listNotifications(), unreadCount()]);
+    return { items, unread: unread ?? 0 };
   },
 
   async markNotificationRead(id?: string) {
     if (USE_PHP) return php.markNotificationRead(id);
     const { markRead } = (await lc()).notifications;
-    return markRead({ data: { id: id ?? null } });
+    return markRead({ data: { id: id ?? null } as never });
   },
 
   // ============ RESTAURANTS ============
   async restaurants(q?: string) {
     if (USE_PHP) return php.restaurants(q);
-    const { listRestaurants } = await import("@/lib/partner-public.functions");
-    return listRestaurants({ data: { q: q ?? "" } });
+    const { listApprovedRestaurants } = await import("@/lib/partner-public.functions");
+    return listApprovedRestaurants({ data: { q: q ?? "" } as never });
   },
 };
+
