@@ -7,6 +7,8 @@ import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
 import { orderStore, type Address, type PaymentMethod } from "@/lib/order-store";
 import { placeOrder as placeOrderFn, createAddress } from "@/lib/account.functions";
+import { dualApi } from "@/lib/dual-api";
+
 import { createRazorpayOrder, verifyAndPlaceOrder } from "@/lib/razorpay.functions";
 import { openRazorpayCheckout } from "@/lib/razorpay-client";
 import { resolveWarehouseForPincode } from "@/lib/fulfillment.functions";
@@ -180,8 +182,14 @@ function CheckoutPage() {
       };
 
       if (payment === "cod") {
-        const row = await placeOrderRpc({ data: payload });
-        finalize(row);
+      if (payment === "cod") {
+        if (dualApi.mode === "php") {
+          const r = await dualApi.createOrder(payload);
+          finalize({ id: r.id, created_at: new Date().toISOString() });
+        } else {
+          const row = await placeOrderRpc({ data: payload });
+          finalize(row);
+        }
         return;
       }
 
