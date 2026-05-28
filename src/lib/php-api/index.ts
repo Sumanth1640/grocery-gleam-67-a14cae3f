@@ -40,6 +40,8 @@ async function request<T>(path: string, method: Method = "GET", body?: unknown):
   return data as T;
 }
 
+import type { Product, Category } from "@/lib/catalog-types";
+
 export const php = {
   // Auth
   signup: (email: string, password: string) =>
@@ -57,9 +59,13 @@ export const php = {
   me: () => request<{ id: string; email: string }>("/auth/me.php"),
 
   // Catalog
-  products: () => request<unknown[]>("/products/list.php"),
-  product: (slug: string) => request<unknown>(`/products/get.php?slug=${encodeURIComponent(slug)}`),
-  categories: () => request<unknown[]>("/categories/list.php"),
+  products: () => request<Product[]>("/products/list.php"),
+  productsByCategory: (category: string) =>
+    request<Product[]>(`/products/list.php?category=${encodeURIComponent(category)}`),
+  searchProducts: (q: string) =>
+    request<Product[]>(`/products/list.php?q=${encodeURIComponent(q)}`),
+  product: (slug: string) => request<Product | null>(`/products/get.php?slug=${encodeURIComponent(slug)}`),
+  categories: () => request<Category[]>("/categories/list.php"),
 
   // Cart / Orders
   createOrder: (payload: unknown) => request<{ id: string }>("/orders/create.php", "POST", payload),
