@@ -182,7 +182,7 @@ function CheckoutPage() {
       };
 
       if (payment === "cod") {
-      if (payment === "cod") {
+
         if (dualApi.mode === "php") {
           const r = await dualApi.createOrder(payload);
           finalize({ id: r.id, created_at: new Date().toISOString() });
