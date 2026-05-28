@@ -5,6 +5,8 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { dualApi, USE_PHP } from "@/lib/dual-api";
+import { phpAuth } from "@/lib/php-api";
 
 import { Eye, EyeOff, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -34,6 +36,10 @@ function LoginPage() {
 
   // If already logged in, bounce out
   useEffect(() => {
+    if (USE_PHP) {
+      if (phpAuth.get()) navigate({ to: redirect || "/" });
+      return;
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: redirect || "/" });
     });
@@ -50,21 +56,16 @@ function LoginPage() {
           setBusy(false);
           return;
         }
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { full_name: name.trim() },
-          },
-        });
+        const { error } = await dualApi.signup(email.trim(), password, name.trim());
         if (error) throw error;
-        toast.success("Account created. Check your email to confirm.");
+        if (USE_PHP) {
+          toast.success("Account created!");
+          navigate({ to: redirect || "/" });
+        } else {
+          toast.success("Account created. Check your email to confirm.");
+        }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
+        const { error } = await dualApi.signin(email.trim(), password);
         if (error) throw error;
         toast.success("Welcome back!");
         navigate({ to: redirect || "/" });
