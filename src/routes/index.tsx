@@ -7,7 +7,7 @@ import { ProductGrid } from "@/components/site/ProductGrid";
 import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
-import { listCategories, listProducts } from "@/lib/catalog.functions";
+import { dualApi } from "@/lib/dual-api";
 import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
 import { MobileHome } from "@/components/native/MobileHome";
 import { useIsNative } from "@/lib/use-native";
@@ -25,14 +25,13 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const cats = useServerFn(listCategories);
-  const prods = useServerFn(listProducts);
   const restos = useServerFn(listApprovedRestaurants);
   const dishes = useServerFn(listAllApprovedDishes);
-  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
-  const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => prods() });
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
+  const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => dualApi.listProducts() });
   const restosQ = useQuery({ queryKey: ["home-restaurants"], queryFn: () => restos() });
   const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dishes() });
+
 
   const categories = catsQ.data ?? [];
   const products = prodsQ.data ?? [];
