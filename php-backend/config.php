@@ -103,8 +103,18 @@ function jwt_verify(string $token): ?array {
   return $payload;
 }
 
+if (!function_exists('str_starts_with')) {
+  function str_starts_with(string $haystack, string $needle): bool {
+    return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
+  }
+}
+
 function current_user_id(): string {
   $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+  if (empty($hdr) && function_exists('getallheaders')) {
+    $all = getallheaders();
+    $hdr = $all['Authorization'] ?? $all['authorization'] ?? '';
+  }
   if (!str_starts_with($hdr, 'Bearer ')) json_error('Unauthorized', 401);
   $token = substr($hdr, 7);
   $payload = jwt_verify($token);
