@@ -148,15 +148,16 @@ export const dualApi = {
   // ============ ORDERS ============
   async createOrder(payload: Record<string, unknown>) {
     if (USE_PHP) return php.createOrder(payload);
-    const { placeOrder } = await import("@/lib/fulfillment.functions");
+    const { placeOrder } = (await lc()).account;
     return placeOrder({ data: payload as never });
   },
 
   async myOrders() {
     if (USE_PHP) return php.myOrders();
-    const { listOrders } = await import("@/lib/fulfillment.functions");
+    const { listOrders } = (await lc()).account;
     return listOrders();
   },
+
 
   // ============ WISHLIST ============
   async wishlist() {
