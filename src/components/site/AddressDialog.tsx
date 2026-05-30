@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { createAddress, updateAddress } from "@/lib/account.functions";
 import { toast } from "sonner";
@@ -39,8 +40,8 @@ export function AddressDialog({
   address?: AddressRow | null;
 }) {
   const qc = useQueryClient();
-  const createFn = useServerFn(createAddress);
-  const updateFn = useServerFn(updateAddress);
+  const createFn = useDualFn(createAddress, (d) => php.addAddress(d));
+  const updateFn = useDualFn(updateAddress, (d) => php.updateAddress(d as never));
   const [form, setForm] = useState<AddressRow>(empty);
 
   useEffect(() => {

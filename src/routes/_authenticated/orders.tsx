@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Header } from "@/components/site/Header";
@@ -78,7 +79,7 @@ export const Route = createFileRoute("/_authenticated/orders")({
 
 function OrdersPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const fetchOrders = useServerFn(listOrders);
+  const fetchOrders = useDualFn(listOrders, () => php.myOrders());
   const { session } = useAuth();
   const qc = useQueryClient();
   const userId = session?.user.id;

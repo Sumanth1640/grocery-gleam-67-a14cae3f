@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
@@ -34,7 +35,7 @@ function FoodHome() {
   const [sort, setSort] = useState<Sort>("relevance");
   const [showFilters, setShowFilters] = useState(false);
 
-  const partnerFn = useServerFn(listApprovedRestaurants);
+  const partnerFn = useDualFn(listApprovedRestaurants, (d: any) => php.restaurants(d?.q));
   const partnerQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => partnerFn() });
 
   const allRestaurants = useMemo<Restaurant[]>(() => {

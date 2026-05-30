@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -72,7 +73,7 @@ function FoodCheckoutPage() {
     queryKey: ["active-coupons"],
     queryFn: listActiveCoupons,
   });
-  const myUsageRpc = useServerFn(listMyCouponUsage);
+  const myUsageRpc = useDualFn(listMyCouponUsage, () => php.myCouponUsage());
   const { data: myUsage = {} } = useQuery({
     queryKey: ["my-coupon-usage"],
     queryFn: () => myUsageRpc(),
@@ -88,11 +89,11 @@ function FoodCheckoutPage() {
         .discount
     : 0;
   const totals = foodCartTotals(cart, discount);
-  const placeOrderRpc = useServerFn(placeOrderFn);
-  const saveAddressRpc = useServerFn(createAddress);
-  const createRpOrderRpc = useServerFn(createRazorpayOrder);
-  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
-  const resolveOutletRpc = useServerFn(resolveOutletForRestaurant);
+  const placeOrderRpc = useDualFn(placeOrderFn, (d) => php.createOrder(d));
+  const saveAddressRpc = useDualFn(createAddress, (d) => php.addAddress(d));
+  const createRpOrderRpc = useDualFn(createRazorpayOrder, (d: any) => php.createRazorpayOrder(d.amount));
+  const verifyAndPlaceRpc = useDualFn(verifyAndPlaceOrder, (d: any) => php.verifyAndPlaceOrder(d));
+  const resolveOutletRpc = useDualFn(resolveOutletForRestaurant, (d: any) => php.resolveOutlet(d.restaurant_id, d.lat, d.lng));
 
   const restaurantId = totals.items[0]?.restaurantId;
   const outletQ = useQuery({
