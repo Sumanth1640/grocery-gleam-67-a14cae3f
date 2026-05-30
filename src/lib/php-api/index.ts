@@ -291,6 +291,30 @@ export const php = {
     revokeAdmin:     (p: { user_id: string }) => request<{ ok: true }>("/admin/team/revoke_admin.php", "POST", p),
     setUserWarehouses: (p: { user_id: string; warehouse_ids: string[] }) =>
       request<{ ok: true; added: number; removed: number }>("/admin/team/set_warehouses.php", "POST", p),
+
+    // coupons
+    listCoupons:  (_p?: unknown) => request<any[]>("/admin/coupons/list.php"),
+    saveCoupon:   (p: any)       => request<any>("/admin/coupons/save.php", "POST", p),
+    deleteCoupon: (p: { id: string }) => request<{ ok: true }>("/admin/coupons/delete.php", "POST", p),
+
+    // warehouses
+    listWarehouses:  (_p?: unknown) => request<any[]>("/admin/warehouses/list.php"),
+    saveWarehouse:   (p: any) => request<any>("/admin/warehouses/save.php", "POST", p),
+    deleteWarehouse: (p: { id: string }) => request<{ ok: true }>("/admin/warehouses/delete.php", "POST", p),
+    listWarehousePincodes: (p: { warehouse_id: string }) =>
+      request<any[]>("/admin/warehouses/pincodes_list.php", "POST", p),
+    setWarehousePincodes:  (p: { warehouse_id: string; pincodes: string[] }) =>
+      request<{ ok: true }>("/admin/warehouses/pincodes_set.php", "POST", p),
+    listWarehouseStock: (p: { warehouse_id: string }) =>
+      request<any[]>("/admin/warehouses/stock_list.php", "POST", p),
+    setProductStock:    (p: { warehouse_id: string; product_id: string; qty: number; low_stock_threshold?: number }) =>
+      request<{ ok: true }>("/admin/warehouses/stock_set.php", "POST", p),
+    listWarehouseManagers: (p: { warehouse_id: string }) =>
+      request<any[]>("/admin/warehouses/managers_list.php", "POST", p),
+    addWarehouseManager:    (p: { warehouse_id: string; email: string }) =>
+      request<{ ok: true }>("/admin/warehouses/managers_add.php", "POST", p),
+    removeWarehouseManager: (p: { id: string }) =>
+      request<{ ok: true }>("/admin/warehouses/managers_remove.php", "POST", p),
   },
 };
 
