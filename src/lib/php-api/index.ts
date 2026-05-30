@@ -9,9 +9,20 @@
  * Falls back to "/api" for same-domain deployments.
  */
 
-const BASE =
-  (import.meta.env.VITE_PHP_API_BASE as string | undefined)?.replace(/\/$/, "") ??
-  "/api";
+const configuredBase = (import.meta.env.VITE_PHP_API_BASE as string | undefined)?.replace(/\/$/, "");
+const LOCAL_XAMPP_BASE =
+  "http://localhost/HalliFresh/Phase_1/grocery-gleam-67/php-backend/api";
+
+function baseCandidates(): string[] {
+  if (configuredBase) return [configuredBase];
+
+  const isLocalVite =
+    typeof window !== "undefined" &&
+    ["localhost", "127.0.0.1"].includes(window.location.hostname) &&
+    window.location.port !== "";
+
+  return isLocalVite ? [LOCAL_XAMPP_BASE, "/php-backend/api", "/api"] : ["/api"];
+}
 
 const TOKEN_KEY = "php_jwt";
 
@@ -28,16 +39,39 @@ async function request<T>(path: string, method: Method = "GET", body?: unknown):
   const token = phpAuth.get();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  const tried: string[] = [];
+  let lastError: unknown;
 
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
-  return data as T;
+  for (const base of baseCandidates()) {
+    const url = `${base}${path}`;
+    tried.push(url);
+    try {
+      const res = await fetch(url, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+
+      const text = await res.text();
+      let data: unknown = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        throw new Error(`Invalid JSON from ${url}: ${text.slice(0, 120)}`);
+      }
+
+      if (!res.ok) throw new Error((data as { error?: string })?.error ?? `HTTP ${res.status}`);
+      return data as T;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw new Error(
+    `PHP API request failed for ${path}. Tried: ${tried.join(", ")}. ${
+      lastError instanceof Error ? lastError.message : String(lastError)
+    }`,
+  );
 }
 
 import type { Product, Category } from "@/lib/catalog-types";
