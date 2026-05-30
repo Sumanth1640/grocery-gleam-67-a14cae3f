@@ -16,11 +16,12 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminLayout() {
   const check = useDualFn(isAdmin, (_d?: unknown) => php.checkRole());
-  const { session, loading: authLoading } = useAuth();
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
   const { data, isLoading } = useQuery({
-    queryKey: ["is-admin", session?.user.id],
+    queryKey: ["is-admin", userId],
     queryFn: () => check(),
-    enabled: !authLoading && !!session,
+    enabled: !authLoading && !!session && !!user,
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
