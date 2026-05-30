@@ -1,9 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ChevronLeft, ShoppingBag, Heart, Minus, Plus, Truck, Leaf, ShieldCheck } from "lucide-react";
-import { productsByCategory } from "@/lib/catalog.functions";
+import { dualApi } from "@/lib/dual-api";
 import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
 import { wishlistStore, useWishlist } from "@/lib/wishlist-store";
 import type { Product } from "@/lib/catalog-types";
@@ -18,10 +17,9 @@ export function MobileProductDetails({ product }: { product: Product }) {
   const wished = !!wishlist[product.id];
   const [localQty, setLocalQty] = useState(Math.max(qty, 0));
 
-  const byCat = useServerFn(productsByCategory);
   const relatedQ = useQuery({
     queryKey: ["products", "by-cat", product.category_slug],
-    queryFn: () => byCat({ data: { slug: product.category_slug } }),
+    queryFn: () => dualApi.productsByCategory(product.category_slug),
   });
   const related = (relatedQ.data ?? []).filter((p) => p.id !== product.id).slice(0, 4);
 

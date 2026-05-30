@@ -1,20 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ChevronLeft, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight } from "lucide-react";
-import { listCategories, productsByCategory } from "@/lib/catalog.functions";
+import { dualApi } from "@/lib/dual-api";
 import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
 
 /** Reference-style mobile Product List screen for /c/$slug. */
 export function MobileCategory({ slug }: { slug: string }) {
   const navigate = useNavigate();
-  const cats = useServerFn(listCategories);
-  const byCat = useServerFn(productsByCategory);
-  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
   const itemsQ = useQuery({
     queryKey: ["products", "by-cat", slug],
-    queryFn: () => byCat({ data: { slug } }),
+    queryFn: () => dualApi.productsByCategory(slug),
   });
   const cart = useCart();
   const { itemsCount } = cartTotals(cart);

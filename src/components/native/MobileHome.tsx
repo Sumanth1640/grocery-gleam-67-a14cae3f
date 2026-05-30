@@ -1,10 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { MapPin, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight, Star, Clock } from "lucide-react";
-import { listCategories, listProducts } from "@/lib/catalog.functions";
-import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-public.functions";
+import { dualApi } from "@/lib/dual-api";
 import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
 import { foodCartStore } from "@/lib/food-cart-store";
 
@@ -14,14 +12,10 @@ import { foodCartStore } from "@/lib/food-cart-store";
  */
 export function MobileHome() {
   const navigate = useNavigate();
-  const cats = useServerFn(listCategories);
-  const prods = useServerFn(listProducts);
-  const restosFn = useServerFn(listApprovedRestaurants);
-  const dishesFn = useServerFn(listAllApprovedDishes);
-  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => cats() });
-  const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => prods() });
-  const restosQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => restosFn() });
-  const dishesQ = useQuery({ queryKey: ["public-all-dishes"], queryFn: () => dishesFn() });
+  const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
+  const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => dualApi.listProducts() });
+  const restosQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => dualApi.restaurants() });
+  const dishesQ = useQuery({ queryKey: ["public-all-dishes"], queryFn: () => dualApi.allDishes() });
   const cart = useCart();
   const { itemsCount } = cartTotals(cart);
   const [q, setQ] = useState("");
