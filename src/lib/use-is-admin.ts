@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
+import { USE_PHP } from "@/lib/dual-api";
+import { php } from "@/lib/php-api";
 
 export function useIsAdmin() {
   const { user, loading: authLoading } = useAuth();
@@ -13,6 +15,18 @@ export function useIsAdmin() {
       return;
     }
     let cancelled = false;
+    if (USE_PHP) {
+      php.checkRole()
+        .then((role) => {
+          if (!cancelled) setIsAdmin(!!role.isAdmin || !!role.isWarehouseManager);
+        })
+        .catch(() => {
+          if (!cancelled) setIsAdmin(false);
+        });
+      return () => {
+        cancelled = true;
+      };
+    }
     supabase
       .from("user_roles")
       .select("role")
