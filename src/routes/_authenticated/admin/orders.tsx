@@ -14,6 +14,18 @@ export const Route = createFileRoute("/_authenticated/admin/orders")({
 
 const STATUSES = ["placed", "packed", "out_for_delivery", "delivered", "cancelled"] as const;
 type Status = (typeof STATUSES)[number];
+type OrderItem = {
+  product: { name: string; image?: string };
+  qty: number;
+};
+type OrderAddress = {
+  full_name?: string;
+  phone?: string;
+  pincode?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+};
 
 type OrderRow = {
   id: string;
@@ -23,8 +35,8 @@ type OrderRow = {
   subtotal: number;
   delivery: number;
   total: number;
-  items: any;
-  address: any;
+  items: OrderItem[] | null;
+  address: OrderAddress | null;
   created_at: string;
   warehouse_id?: string | null;
   warehouse?: { name: string; code: string } | null;
