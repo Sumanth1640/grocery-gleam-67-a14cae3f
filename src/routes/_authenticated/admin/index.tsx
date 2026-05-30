@@ -24,14 +24,38 @@ function AdminDashboard() {
   });
 
   if (authLoading || isLoading) {
-    return <div className="grid h-40 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+    return (
+      <div className="grid h-40 place-items-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   const cards = [
-    { label: "Revenue", value: `₹${(data?.revenue ?? 0).toLocaleString("en-IN")}`, icon: IndianRupee, tint: "bg-primary/10 text-primary" },
-    { label: "Orders", value: data?.orders ?? 0, icon: ShoppingBag, tint: "bg-brand/15 text-brand" },
-    { label: "Products", value: data?.products ?? 0, icon: Package, tint: "bg-secondary text-foreground" },
-    { label: "Categories", value: data?.categories ?? 0, icon: FolderTree, tint: "bg-accent text-foreground" },
+    {
+      label: "Revenue",
+      value: `₹${(data?.revenue ?? 0).toLocaleString("en-IN")}`,
+      icon: IndianRupee,
+      tint: "bg-primary/10 text-primary",
+    },
+    {
+      label: "Orders",
+      value: data?.orders ?? 0,
+      icon: ShoppingBag,
+      tint: "bg-brand/15 text-brand",
+    },
+    {
+      label: "Products",
+      value: data?.products ?? 0,
+      icon: Package,
+      tint: "bg-secondary text-foreground",
+    },
+    {
+      label: "Categories",
+      value: data?.categories ?? 0,
+      icon: FolderTree,
+      tint: "bg-accent text-foreground",
+    },
   ];
 
   return (
@@ -43,7 +67,9 @@ function AdminDashboard() {
             <div className={`grid h-10 w-10 place-items-center rounded-xl ${c.tint}`}>
               <Icon className="h-5 w-5" />
             </div>
-            <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{c.label}</div>
+            <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {c.label}
+            </div>
             <div className="mt-1 font-display text-2xl font-extrabold">{c.value}</div>
           </div>
         );

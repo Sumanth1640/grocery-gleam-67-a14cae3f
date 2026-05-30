@@ -23,7 +23,8 @@ export function useAuth(): AuthState {
           if (!cancelled) setState({ user: null, session: null, loading: false });
           return;
         }
-        php.me()
+        php
+          .me()
           .then((u) => {
             if (cancelled) return;
             // Cast to satisfy the Supabase User shape consumers rely on (id, email).
