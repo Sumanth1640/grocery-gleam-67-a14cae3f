@@ -65,11 +65,10 @@ export const Route = createFileRoute("/order-success")({
 function SuccessPage() {
   const localOrder = useLastOrder();
   const search = Route.useSearch();
-  const getOrderRpc = useServerFn(getOrder);
   const shouldLoadOrder = !!search.order && localOrder?.id !== search.order;
   const orderQ = useQuery({
     queryKey: ["order-success", search.order],
-    queryFn: () => getOrderRpc({ data: { id: search.order! } }),
+    queryFn: () => dualApi.getOrder(search.order!),
     enabled: shouldLoadOrder,
     retry: false,
   });
