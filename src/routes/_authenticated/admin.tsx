@@ -46,7 +46,10 @@ function AdminLayout() {
           <p className="mt-2 text-sm text-muted-foreground">
             You don't have admin permissions. Ask an existing admin to grant you the role.
           </p>
-          <Link to="/login" className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-pop">
+          <Link
+            to="/login"
+            className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-pop"
+          >
             Sign in as another user
           </Link>
         </div>
@@ -58,12 +61,12 @@ function AdminLayout() {
     path === "/admin"
       ? "Dashboard"
       : path.startsWith("/admin/products")
-      ? "Products"
-      : path.startsWith("/admin/categories")
-      ? "Categories"
-      : path.startsWith("/admin/orders")
-      ? "Orders"
-      : "Admin";
+        ? "Products"
+        : path.startsWith("/admin/categories")
+          ? "Categories"
+          : path.startsWith("/admin/orders")
+            ? "Orders"
+            : "Admin";
 
   return (
     <SidebarProvider>
@@ -73,7 +76,9 @@ function AdminLayout() {
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-3 backdrop-blur">
             <SidebarTrigger />
             <div className="flex-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Admin</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                Admin
+              </div>
               <h1 className="font-display text-base font-bold leading-tight">{title}</h1>
             </div>
             <AdminOrderAlertsControl />
