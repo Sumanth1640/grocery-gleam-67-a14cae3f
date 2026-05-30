@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { getApprovedRestaurant } from "@/lib/partner-public.functions";
 import { listOutletsForRestaurant } from "@/lib/outlets.functions";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/food/r/$slug")({
@@ -323,7 +323,7 @@ function FavHeart({ restaurant }: { restaurant: Restaurant }) {
 }
 
 function OutletsSection({ restaurantId }: { restaurantId: string }) {
-  const listFn = useServerFn(listOutletsForRestaurant);
+  const listFn = useDualFn(listOutletsForRestaurant, async () => []);
   const q = useQuery({
     queryKey: ["public-outlets", restaurantId],
     queryFn: () => listFn({ data: { restaurant_id: restaurantId } }),

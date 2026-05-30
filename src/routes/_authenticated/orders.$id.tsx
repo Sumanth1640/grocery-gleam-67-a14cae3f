@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/orders/$id")({
 function OrderDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const fetchOrder = useServerFn(getOrder);
+  const fetchOrder = useDualFn(getOrder, (d: any) => php.getOrder(d.id));
   const qc = useQueryClient();
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", id],
@@ -103,7 +104,7 @@ function OrderDetailPage() {
     navigate({ to: "/cart" });
   };
 
-  const cancelRpc = useServerFn(cancelOrder);
+  const cancelRpc = useDualFn(cancelOrder, async () => { throw new Error("Cancel not available on PHP backend yet"); });
   const cancelM = useMutation({
     mutationFn: () => cancelRpc({ data: { id } }),
     onSuccess: () => {
@@ -114,7 +115,7 @@ function OrderDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const reviewRpc = useServerFn(upsertReview);
+  const reviewRpc = useDualFn(upsertReview, (d: any) => php.addReview(d));
   const [showReview, setShowReview] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewBody, setReviewBody] = useState("");
@@ -133,8 +134,8 @@ function OrderDetailPage() {
   });
 
   // ----- Refund request -----
-  const refundFetchRpc = useServerFn(myRefundForOrder);
-  const refundCreateRpc = useServerFn(createRefundRequest);
+  const refundFetchRpc = useDualFn(myRefundForOrder, async () => null);
+  const refundCreateRpc = useDualFn(createRefundRequest, async () => { throw new Error("Refund not available on PHP backend yet"); });
   const refundQ = useQuery({
     queryKey: ["refund", id],
     queryFn: () => refundFetchRpc({ data: { order_id: id } }),

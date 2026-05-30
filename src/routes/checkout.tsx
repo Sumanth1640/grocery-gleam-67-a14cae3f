@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -72,7 +73,7 @@ function CheckoutPage() {
     queryKey: ["active-coupons"],
     queryFn: listActiveCoupons,
   });
-  const myUsageRpc = useServerFn(listMyCouponUsage);
+  const myUsageRpc = useDualFn(listMyCouponUsage, () => php.myCouponUsage());
   const { data: myUsage = {} } = useQuery({
     queryKey: ["my-coupon-usage"],
     queryFn: () => myUsageRpc(),
@@ -87,11 +88,11 @@ function CheckoutPage() {
     ? applyCoupon(availableCoupons, couponData.code, baseTotals.subtotal, myUsage).discount
     : 0;
   const totals = { ...baseTotals, total: baseTotals.subtotal + baseTotals.delivery - discount };
-  const placeOrderRpc = useServerFn(placeOrderFn);
-  const saveAddressRpc = useServerFn(createAddress);
-  const resolveWhRpc = useServerFn(resolveWarehouseForPincode);
-  const createRpOrderRpc = useServerFn(createRazorpayOrder);
-  const verifyAndPlaceRpc = useServerFn(verifyAndPlaceOrder);
+  const placeOrderRpc = useDualFn(placeOrderFn, (d) => php.createOrder(d));
+  const saveAddressRpc = useDualFn(createAddress, (d) => php.addAddress(d));
+  const resolveWhRpc = useDualFn(resolveWarehouseForPincode, (d: any) => php.resolveWarehouse(d.pincode));
+  const createRpOrderRpc = useDualFn(createRazorpayOrder, (d: any) => php.createRazorpayOrder(d.amount));
+  const verifyAndPlaceRpc = useDualFn(verifyAndPlaceOrder, (d: any) => php.verifyAndPlaceOrder(d));
   const [saveAddr, setSaveAddr] = useState(true);
 
   const whQ = useQuery({
