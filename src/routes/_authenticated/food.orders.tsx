@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -81,7 +82,7 @@ function reorder(order: StoredOrder, navigate: ReturnType<typeof useNavigate>) {
 }
 
 function FoodOrdersPage() {
-  const fetchOrders = useServerFn(listOrders);
+  const fetchOrders = useDualFn(listOrders, () => php.myOrders());
   const navigate = useNavigate();
   const { data, isLoading } = useQuery({
     queryKey: ["orders", "food"],

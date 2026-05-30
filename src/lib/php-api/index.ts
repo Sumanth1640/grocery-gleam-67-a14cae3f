@@ -92,6 +92,16 @@ export const php = {
     ),
   me: () => request<{ id: string; email: string }>("/auth/me.php"),
 
+  // Profile
+  getProfile: () =>
+    request<{ id: string; email: string; full_name: string | null; phone: string | null; avatar_url: string | null }>(
+      "/profile/get.php",
+    ),
+  updateProfile: (payload: { full_name?: string; phone?: string }) =>
+    request<{ updated: number }>("/profile/update.php", "POST", payload),
+  setDefaultAddress: (id: string) =>
+    request<{ updated: number }>("/addresses/set_default.php", "POST", { id }),
+
   // Catalog
   products: () => request<Product[]>("/products/list.php"),
   productsByCategory: (category: string) =>
@@ -148,9 +158,17 @@ export const php = {
 
   // Notifications
   notifications: () =>
-    request<{ items: unknown[]; unread: number }>("/notifications/list.php"),
-  markNotificationRead: (id?: string) =>
-    request<{ updated: number }>("/notifications/mark_read.php", "POST", { id: id ?? null }),
+    request<{ items: Array<Record<string, unknown>>; unread: number }>("/notifications/list.php"),
+  notificationsList: async () => {
+    const r = await request<{ items: Array<Record<string, unknown> & { is_read?: boolean }>; unread: number }>(
+      "/notifications/list.php",
+    );
+    return r.items.map((n) => ({ ...n, read: n.is_read ?? false }));
+  },
+  markNotificationRead: (payload?: { id?: string | null; all?: boolean }) =>
+    request<{ updated: number }>("/notifications/mark_read.php", "POST", {
+      id: payload?.all ? null : payload?.id ?? null,
+    }),
   deleteNotification: (id: string) =>
     request<{ deleted: number }>("/notifications/delete.php", "POST", { id }),
 

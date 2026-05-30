@@ -271,7 +271,7 @@ export const dualApi = {
   },
 
   async markNotificationRead(id?: string) {
-    if (USE_PHP) return php.markNotificationRead(id);
+    if (USE_PHP) return php.markNotificationRead({ id });
     const { markRead } = (await lc()).notifications;
     return markRead({ data: { id: id ?? null } as never });
   },

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
 import { getOrder } from "@/lib/account.functions";
 import { ArrowLeft, Download, Loader2, Printer } from "lucide-react";
@@ -16,7 +17,7 @@ type OrderItem = { product: Product; qty: number };
 function InvoicePage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const fetchOrder = useServerFn(getOrder);
+  const fetchOrder = useDualFn(getOrder, (d: any) => php.getOrder(d.id));
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", id],
     queryFn: () => fetchOrder({ data: { id } }),
