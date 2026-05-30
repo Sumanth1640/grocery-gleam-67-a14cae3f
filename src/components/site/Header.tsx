@@ -1,14 +1,13 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Search, ShoppingCart, User as UserIcon, LogIn, Heart, Utensils, Bell } from "lucide-react";
 import logo from "@/assets/hallifresh-logo.jpeg";
 import { DeliveryAddressChip } from "@/components/site/DeliveryAddressChip";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
-import { unreadCount } from "@/lib/notifications.functions";
+import { dualApi } from "@/lib/dual-api";
 
 export function Header() {
   const cart = useCart();
@@ -20,10 +19,12 @@ export function Header() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
-  const unreadFn = useServerFn(unreadCount);
   const unreadQ = useQuery({
     queryKey: ["notifications", "unread"],
-    queryFn: () => unreadFn(),
+    queryFn: async () => {
+      const n: any = await dualApi.notifications();
+      return { count: n?.unread ?? 0 };
+    },
     enabled: !!user,
     refetchInterval: 60_000,
   });

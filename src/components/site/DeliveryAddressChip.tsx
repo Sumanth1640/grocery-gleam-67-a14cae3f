@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, ChevronDown, Plus, Check, Home as HomeIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { listAddresses } from "@/lib/account.functions";
+import { dualApi } from "@/lib/dual-api";
 import { useAuth } from "@/lib/use-auth";
 import { useDeliveryAddress, setDeliveryAddress, type DeliveryAddress } from "@/lib/delivery-address-store";
 import { AddressDialog } from "@/components/site/AddressDialog";
@@ -15,10 +14,9 @@ export function DeliveryAddressChip({ className = "" }: { className?: string }) 
   const [open, setOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
-  const listFn = useServerFn(listAddresses);
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery<any[]>({
     queryKey: ["addresses"],
-    queryFn: () => listFn(),
+    queryFn: () => dualApi.listAddresses() as Promise<any[]>,
     enabled: !!user && open,
   });
 

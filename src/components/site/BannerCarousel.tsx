@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { listBanners } from "@/lib/admin-extra.functions";
+import { USE_PHP } from "@/lib/dual-api";
 
 type Banner = {
   id: string;
@@ -16,10 +15,13 @@ type Banner = {
 };
 
 export function BannerCarousel() {
-  const fetchBanners = useServerFn(listBanners);
   const { data } = useQuery({
     queryKey: ["banners"],
-    queryFn: () => fetchBanners(),
+    queryFn: async () => {
+      if (USE_PHP) return [] as Banner[];
+      const { listBanners } = await import("@/lib/admin-extra.functions");
+      return listBanners();
+    },
     staleTime: 60_000,
   });
   const banners: Banner[] = ((data ?? []) as any);
