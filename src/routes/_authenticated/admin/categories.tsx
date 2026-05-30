@@ -29,6 +29,7 @@ type Form = {
   tint: string;
   sort_order: string;
 };
+type CategorySavePayload = Omit<Form, "sort_order"> & { sort_order: number };
 const empty: Form = {
   slug: "",
   name: "",
@@ -55,7 +56,7 @@ function CategoriesAdmin() {
   const [form, setForm] = useState<Form | null>(null);
 
   const saveMut = useMutation({
-    mutationFn: (v: any) => save({ data: v }),
+    mutationFn: (v: CategorySavePayload) => save({ data: v }),
     onSuccess: () => {
       toast.success("Category saved");
       qc.invalidateQueries({ queryKey: ["admin", "categories"] });
