@@ -245,49 +245,52 @@ export const php = {
     deleteBanner:(id: string) => request<{ ok: true }>("/admin/banners/delete.php", "POST", { id }),
     // orders
     listOrders: () => request<any[]>("/admin/orders/list.php"),
-    updateOrderStatus: (id: string, status: string) =>
-      request<{ ok: true; status: string }>("/admin/orders/update_status.php", "POST", { id, status }),
+    updateOrderStatus: (p: { id: string; status: string }) =>
+      request<{ ok: true; status: string }>("/admin/orders/update_status.php", "POST", p),
     // customers
-    listCustomers:   (q = "") => request<any[]>("/admin/customers/list.php", "POST", { q }),
-    setCustomerBlocked: (user_id: string, blocked: boolean) =>
-      request<{ ok: true; blocked: boolean }>("/admin/customers/set_blocked.php", "POST", { user_id, blocked }),
-    setUserRole: (user_id: string, role: "admin" | "moderator" | "user", grant: boolean) =>
-      request<{ ok: true }>("/admin/customers/set_role.php", "POST", { user_id, role, grant }),
+    listCustomers:   (p?: { q?: string }) => request<any[]>("/admin/customers/list.php", "POST", { q: p?.q ?? "" }),
+    setCustomerBlocked: (p: { id: string; is_blocked: boolean }) =>
+      request<{ ok: true }>("/admin/customers/set_blocked.php", "POST", { user_id: p.id, blocked: p.is_blocked }),
+    setUserRole: (p: { user_id: string; role: "admin" | "moderator" | "user" | "customer" | "restaurant"; grant: boolean }) =>
+      request<{ ok: true }>("/admin/customers/set_role.php", "POST", p),
     // refunds
-    listRefunds:   (status = "") => request<any[]>("/admin/refunds/list.php", "POST", { status }),
+    listRefunds:   (p?: { status?: string }) => request<any[]>("/admin/refunds/list.php", "POST", { status: p?.status ?? "" }),
     resolveRefund: (p: { id: string; status: string; admin_note?: string }) =>
       request<{ ok: true }>("/admin/refunds/resolve.php", "POST", p),
     // inventory
     lowStock:    () => request<any[]>("/admin/inventory/low_stock.php"),
-    reorderStock:(p: { product_id: string; warehouse_id: string; qty: number }) =>
-      request<{ ok: true }>("/admin/inventory/reorder.php", "POST", p),
+    reorderStock:(p: { product_id: string; warehouse_id: string; add_qty: number }) =>
+      request<{ ok: true; qty: number }>("/admin/inventory/reorder.php", "POST", p),
     // riders
     listRiders:  () => request<any[]>("/admin/riders/list.php"),
     saveRider:   (p: any) => request<any>("/admin/riders/save.php", "POST", p),
-    deleteRider: (id: string) => request<{ ok: true }>("/admin/riders/delete.php", "POST", { id }),
+    deleteRider: (p: { id: string }) => request<{ ok: true }>("/admin/riders/delete.php", "POST", p),
     // assignments
     assignableOrders: () => request<any[]>("/admin/assignments/assignable.php"),
-    assignRider:      (order_id: string, rider_id: string) =>
-      request<{ ok: true }>("/admin/assignments/assign.php", "POST", { order_id, rider_id }),
-    updateAssignment: (id: string, status: string) =>
-      request<{ ok: true }>("/admin/assignments/update.php", "POST", { id, status }),
+    assignRider:      (p: { order_id: string; rider_id: string }) =>
+      request<{ ok: true }>("/admin/assignments/assign.php", "POST", p),
+    updateAssignment: (p: { order_id: string; status: string }) =>
+      request<{ ok: true }>("/admin/assignments/update.php", "POST", p),
     // restaurants
-    listRestaurants:   () => request<any[]>("/admin/restaurants/list.php"),
-    setRestaurantStatus:  (p: { id: string; status: string; rejection_reason?: string }) =>
+    listRestaurants:   (p?: { status?: string }) => request<any[]>("/admin/restaurants/list.php", "POST", { status: p?.status ?? "" }),
+    setRestaurantStatus:  (p: { id: string; status: string; commission_rate?: number; rejection_reason?: string | null }) =>
       request<{ ok: true }>("/admin/restaurants/set_status.php", "POST", p),
-    setRestaurantBlocked: (id: string, blocked: boolean) =>
-      request<{ ok: true; blocked: boolean }>("/admin/restaurants/set_blocked.php", "POST", { id, blocked }),
+    setRestaurantBlocked: (p: { id: string; is_blocked: boolean }) =>
+      request<{ ok: true }>("/admin/restaurants/set_blocked.php", "POST", p),
+    getDocSignedUrl: (p: { path: string }) =>
+      // PHP backend serves uploaded docs publicly; just return the URL as-is.
+      Promise.resolve({ url: p.path }),
     // analytics / settlements / reports
-    analytics:   (days = 30) => request<any>("/admin/analytics.php",   "POST", { days }),
-    settlements: (days = 30) => request<any[]>("/admin/settlements.php","POST", { days }),
-    reports:     (days = 30) => request<any>("/admin/reports.php",     "POST", { days }),
+    analytics:   (p?: { days?: number }) => request<any>("/admin/analytics.php",   "POST", { days: p?.days ?? 30 }),
+    settlements: (p?: { days?: number }) => request<any[]>("/admin/settlements.php","POST", { days: p?.days ?? 30 }),
+    reports:     (p?: { days?: number }) => request<any>("/admin/reports.php",     "POST", { days: p?.days ?? 90 }),
     // team
-    listTeam:        () => request<any[]>("/admin/team/list.php"),
-    findUserByEmail: (email: string) => request<any>("/admin/team/find_user.php",   "POST", { email }),
-    grantAdmin:      (user_id: string) => request<{ ok: true }>("/admin/team/grant_admin.php",  "POST", { user_id }),
-    revokeAdmin:     (user_id: string) => request<{ ok: true }>("/admin/team/revoke_admin.php", "POST", { user_id }),
-    setUserWarehouses: (user_id: string, warehouse_ids: string[]) =>
-      request<{ ok: true }>("/admin/team/set_warehouses.php", "POST", { user_id, warehouse_ids }),
+    listTeam:        () => request<{ users: any[]; warehouses: any[] }>("/admin/team/list.php"),
+    findUserByEmail: (p: { email: string }) => request<{ id: string; email: string }>("/admin/team/find_user.php", "POST", p),
+    grantAdmin:      (p: { user_id: string }) => request<{ ok: true }>("/admin/team/grant_admin.php",  "POST", p),
+    revokeAdmin:     (p: { user_id: string }) => request<{ ok: true }>("/admin/team/revoke_admin.php", "POST", p),
+    setUserWarehouses: (p: { user_id: string; warehouse_ids: string[] }) =>
+      request<{ ok: true; added: number; removed: number }>("/admin/team/set_warehouses.php", "POST", p),
   },
 };
 
