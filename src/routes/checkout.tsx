@@ -39,6 +39,14 @@ export const Route = createFileRoute("/checkout")({
   validateSearch: (s) => searchSchema.parse(s),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
+    const { USE_PHP } = await import("@/lib/dual-api");
+    if (USE_PHP) {
+      const { phpAuth } = await import("@/lib/php-api");
+      if (!phpAuth.get()) {
+        throw redirect({ to: "/login", search: { redirect: location.href } });
+      }
+      return;
+    }
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
       throw redirect({ to: "/login", search: { redirect: location.href } });
