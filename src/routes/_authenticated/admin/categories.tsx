@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListCategories, adminSaveCategory, adminDeleteCategory } from "@/lib/admin.functions";
@@ -17,9 +18,9 @@ type Form = { id?: string; slug: string; name: string; image: string; tint: stri
 const empty: Form = { slug: "", name: "", image: "", tint: "oklch(0.95 0.05 145)", sort_order: "0" };
 
 function CategoriesAdmin() {
-  const list = useServerFn(adminListCategories);
-  const save = useServerFn(adminSaveCategory);
-  const remove = useServerFn(adminDeleteCategory);
+  const list = useDualFn(adminListCategories, (d) => php.admin.listCategories(d));
+  const save = useDualFn(adminSaveCategory, (d) => php.admin.saveCategory(d));
+  const remove = useDualFn(adminDeleteCategory, (d) => php.admin.deleteCategory(d));
   const qc = useQueryClient();
   const { session, loading: authLoading } = useAuth();
   const cats = useQuery({ queryKey: ["admin", "categories", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });

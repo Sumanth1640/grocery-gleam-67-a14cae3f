@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminLowStock, adminReorderStock } from "@/lib/admin-extra.functions";
@@ -12,8 +13,8 @@ export const Route = createFileRoute("/_authenticated/admin/inventory")({
 });
 
 function InventoryPage() {
-  const listFn = useServerFn(adminLowStock);
-  const reFn = useServerFn(adminReorderStock);
+  const listFn = useDualFn(adminLowStock, (d) => php.admin.lowStock(d));
+  const reFn = useDualFn(adminReorderStock, (d) => php.admin.reorderStock(d));
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["admin-low-stock"], queryFn: () => listFn() });
   const reorderM = useMutation({

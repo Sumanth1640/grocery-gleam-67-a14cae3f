@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListProducts, adminSaveProduct, adminDeleteProduct, adminListCategories } from "@/lib/admin.functions";
@@ -46,10 +47,10 @@ const empty: FormState = {
 };
 
 function ProductsAdmin() {
-  const list = useServerFn(adminListProducts);
-  const cats = useServerFn(adminListCategories);
-  const save = useServerFn(adminSaveProduct);
-  const remove = useServerFn(adminDeleteProduct);
+  const list = useDualFn(adminListProducts, (d) => php.admin.listProducts(d));
+  const cats = useDualFn(adminListCategories, (d) => php.admin.listCategories(d));
+  const save = useDualFn(adminSaveProduct, (d) => php.admin.saveProduct(d));
+  const remove = useDualFn(adminDeleteProduct, (d) => php.admin.deleteProduct(d));
   const qc = useQueryClient();
   const { session, loading: authLoading } = useAuth();
 

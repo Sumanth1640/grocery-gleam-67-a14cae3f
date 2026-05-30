@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListBanners, adminSaveBanner, adminDeleteBanner } from "@/lib/admin-extra.functions";
@@ -32,9 +33,9 @@ const empty: Banner = {
 };
 
 function BannersPage() {
-  const listFn = useServerFn(adminListBanners);
-  const saveFn = useServerFn(adminSaveBanner);
-  const delFn = useServerFn(adminDeleteBanner);
+  const listFn = useDualFn(adminListBanners, (d) => php.admin.listBanners(d));
+  const saveFn = useDualFn(adminSaveBanner, (d) => php.admin.saveBanner(d));
+  const delFn = useDualFn(adminDeleteBanner, (d) => php.admin.deleteBanner(d));
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["admin-banners"], queryFn: () => listFn() });
   const [editing, setEditing] = useState<Banner | null>(null);

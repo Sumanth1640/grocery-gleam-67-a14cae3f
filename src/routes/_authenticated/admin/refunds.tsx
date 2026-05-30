@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListRefunds, adminResolveRefund } from "@/lib/admin-extra.functions";
@@ -12,8 +13,8 @@ export const Route = createFileRoute("/_authenticated/admin/refunds")({
 });
 
 function RefundsPage() {
-  const listFn = useServerFn(adminListRefunds);
-  const resolveFn = useServerFn(adminResolveRefund);
+  const listFn = useDualFn(adminListRefunds, (d) => php.admin.listRefunds(d));
+  const resolveFn = useDualFn(adminResolveRefund, (d) => php.admin.resolveRefund(d));
   const qc = useQueryClient();
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const q = useQuery({ queryKey: ["admin-refunds", status], queryFn: () => listFn({ data: { status } }) });

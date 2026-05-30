@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useState } from "react";
 import { adminListRestaurants, adminSetRestaurantStatus, adminGetDocSignedUrl, adminSetRestaurantBlocked } from "@/lib/admin.functions";
 import { toast } from "sonner";
@@ -14,9 +15,9 @@ type Status = "pending" | "approved" | "rejected" | "all";
 
 function AdminRestaurantsPage() {
   const qc = useQueryClient();
-  const listFn = useServerFn(adminListRestaurants);
-  const setFn = useServerFn(adminSetRestaurantStatus);
-  const blockFn = useServerFn(adminSetRestaurantBlocked);
+  const listFn = useDualFn(adminListRestaurants, (d) => php.admin.listRestaurants(d));
+  const setFn = useDualFn(adminSetRestaurantStatus, (d) => php.admin.setRestaurantStatus(d));
+  const blockFn = useDualFn(adminSetRestaurantBlocked, (d) => php.admin.setRestaurantBlocked(d));
   const [filter, setFilter] = useState<Status>("pending");
 
   const q = useQuery({
@@ -176,7 +177,7 @@ function RestaurantRow({ r, onAction, onToggleBlock, pending }: {
 }
 
 function DocLine({ label, number, expiry, path }: { label: string; number?: string | null; expiry?: string | null; path?: string | null }) {
-  const fn = useServerFn(adminGetDocSignedUrl);
+  const fn = useDualFn(adminGetDocSignedUrl, (d) => php.admin.getDocSignedUrl(d));
   const [loading, setLoading] = useState(false);
   const open = async () => {
     if (!path) return;
