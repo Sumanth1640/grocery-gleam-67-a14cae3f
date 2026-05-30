@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +18,7 @@ const SEEN_KEY = "admin-alert-seen";
 export function AdminOrderAlerts() {
   const qc = useQueryClient();
   const { session } = useAuth();
-  const check = useServerFn(isAdminFn);
+  const check = useDualFn(isAdminFn, (_d?: unknown) => php.checkRole());
   const { data: role } = useQuery({
     queryKey: ["is-admin", session?.user.id],
     queryFn: () => check(),

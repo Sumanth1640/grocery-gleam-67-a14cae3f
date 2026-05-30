@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
@@ -36,7 +37,7 @@ function showBrowserNotification(title: string, body: string, orderId: string) {
 
 export function OrderAlerts() {
   const qc = useQueryClient();
-  const myFn = useServerFn(myRestaurant);
+  const myFn = useDualFn(myRestaurant, (_d?: unknown) => php.partner.myRestaurant());
   const r = useQuery({ queryKey: ["my-restaurant"], queryFn: () => myFn() });
 
   const [sound, setSound] = useState<boolean>(() => {

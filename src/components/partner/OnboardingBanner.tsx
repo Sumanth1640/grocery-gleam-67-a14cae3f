@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { myRestaurant } from "@/lib/partner.functions";
 import { AlertCircle, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 
 const STEPS = ["Basics", "Documents", "Menu", "Agreement", "Submit"];
 
 export function OnboardingBanner() {
-  const fn = useServerFn(myRestaurant);
+  const fn = useDualFn(myRestaurant, (_d?: unknown) => php.partner.myRestaurant());
   const q = useQuery({ queryKey: ["my-restaurant"], queryFn: () => fn() });
   const r = q.data;
   if (!r) return null;
