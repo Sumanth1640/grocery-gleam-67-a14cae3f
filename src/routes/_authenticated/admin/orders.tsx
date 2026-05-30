@@ -42,8 +42,9 @@ function OrdersAdmin() {
   const list = useDualFn(adminListOrders, (d) => php.admin.listOrders(d));
   const update = useDualFn(adminUpdateOrderStatus, (d) => php.admin.updateOrderStatus(d));
   const qc = useQueryClient();
-  const { session, loading: authLoading } = useAuth();
-  const orders = useQuery({ queryKey: ["admin", "orders", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
+  const orders = useQuery({ queryKey: ["admin", "orders", userId], queryFn: () => list(), enabled: !authLoading && !!session && !!user, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | Status>("all");
   const [search, setSearch] = useState("");
