@@ -22,8 +22,9 @@ function CategoriesAdmin() {
   const save = useDualFn(adminSaveCategory, (d) => php.admin.saveCategory(d));
   const remove = useDualFn(adminDeleteCategory, (d) => php.admin.deleteCategory(d));
   const qc = useQueryClient();
-  const { session, loading: authLoading } = useAuth();
-  const cats = useQuery({ queryKey: ["admin", "categories", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
+  const cats = useQuery({ queryKey: ["admin", "categories", userId], queryFn: () => list(), enabled: !authLoading && !!session && !!user, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   const [form, setForm] = useState<Form | null>(null);
 
   const saveMut = useMutation({
