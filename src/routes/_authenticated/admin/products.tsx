@@ -45,6 +45,11 @@ type FormState = {
   rating: string;
   in_stock: boolean;
 };
+type ProductSavePayload = Omit<FormState, "price" | "mrp" | "rating"> & {
+  price: number;
+  mrp: number;
+  rating: number;
+};
 
 const empty: FormState = {
   slug: "",
@@ -90,7 +95,7 @@ function ProductsAdmin() {
   const [q, setQ] = useState("");
 
   const saveMut = useMutation({
-    mutationFn: (v: any) => save({ data: v }),
+    mutationFn: (v: ProductSavePayload) => save({ data: v }),
     onSuccess: () => {
       toast.success("Product saved");
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
