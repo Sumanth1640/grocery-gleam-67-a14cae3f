@@ -174,8 +174,16 @@ export function AdminOrderAlertsControl() {
       </button>
       <AlertSoundSettingsButton
         rows={[
-          { channel: "admin_order", label: "New order", description: "Plays when a new product order arrives." },
-          { channel: "notification", label: "Other notifications", description: "Status updates, low-stock and general alerts." },
+          {
+            channel: "admin_order",
+            label: "New order",
+            description: "Plays when a new product order arrives.",
+          },
+          {
+            channel: "notification",
+            label: "Other notifications",
+            description: "Status updates, low-stock and general alerts.",
+          },
         ]}
       />
       <span
@@ -184,7 +192,6 @@ export function AdminOrderAlertsControl() {
       >
         {sound ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
       </span>
-
     </div>
   );
 }
