@@ -218,5 +218,77 @@ export const php = {
     razorpay_signature: string;
     order: unknown;
   }) => request<{ id: string; created_at: string }>("/payments/razorpay_verify.php", "POST", payload),
+
+  // Public banners
+  banners: () => request<unknown[]>("/banners/list.php"),
+
+  // Refunds (user)
+  createRefund: (payload: { order_id: string; reason: string; details?: string; amount?: number }) =>
+    request<{ id: string }>("/refunds/create.php", "POST", payload),
+  myRefundForOrder: (order_id: string) =>
+    request<Record<string, unknown> | null>("/refunds/my_for_order.php", "POST", { order_id }),
+
+  // ---------- Admin ----------
+  admin: {
+    stats: () => request<{ products: number; categories: number; orders: number; revenue: number }>("/admin/stats.php"),
+    // products
+    listProducts: () => request<any[]>("/admin/products/list.php"),
+    saveProduct:  (p: any) => request<any>("/admin/products/save.php", "POST", p),
+    deleteProduct:(id: string) => request<{ ok: true }>("/admin/products/delete.php", "POST", { id }),
+    // categories
+    listCategories: () => request<any[]>("/admin/categories/list.php"),
+    saveCategory:   (p: any) => request<any>("/admin/categories/save.php", "POST", p),
+    deleteCategory: (id: string) => request<{ ok: true }>("/admin/categories/delete.php", "POST", { id }),
+    // banners
+    listBanners: () => request<any[]>("/admin/banners/list.php"),
+    saveBanner:  (p: any) => request<any>("/admin/banners/save.php", "POST", p),
+    deleteBanner:(id: string) => request<{ ok: true }>("/admin/banners/delete.php", "POST", { id }),
+    // orders
+    listOrders: () => request<any[]>("/admin/orders/list.php"),
+    updateOrderStatus: (id: string, status: string) =>
+      request<{ ok: true; status: string }>("/admin/orders/update_status.php", "POST", { id, status }),
+    // customers
+    listCustomers:   (q = "") => request<any[]>("/admin/customers/list.php", "POST", { q }),
+    setCustomerBlocked: (user_id: string, blocked: boolean) =>
+      request<{ ok: true; blocked: boolean }>("/admin/customers/set_blocked.php", "POST", { user_id, blocked }),
+    setUserRole: (user_id: string, role: "admin" | "moderator" | "user", grant: boolean) =>
+      request<{ ok: true }>("/admin/customers/set_role.php", "POST", { user_id, role, grant }),
+    // refunds
+    listRefunds:   (status = "") => request<any[]>("/admin/refunds/list.php", "POST", { status }),
+    resolveRefund: (p: { id: string; status: string; admin_note?: string }) =>
+      request<{ ok: true }>("/admin/refunds/resolve.php", "POST", p),
+    // inventory
+    lowStock:    () => request<any[]>("/admin/inventory/low_stock.php"),
+    reorderStock:(p: { product_id: string; warehouse_id: string; qty: number }) =>
+      request<{ ok: true }>("/admin/inventory/reorder.php", "POST", p),
+    // riders
+    listRiders:  () => request<any[]>("/admin/riders/list.php"),
+    saveRider:   (p: any) => request<any>("/admin/riders/save.php", "POST", p),
+    deleteRider: (id: string) => request<{ ok: true }>("/admin/riders/delete.php", "POST", { id }),
+    // assignments
+    assignableOrders: () => request<any[]>("/admin/assignments/assignable.php"),
+    assignRider:      (order_id: string, rider_id: string) =>
+      request<{ ok: true }>("/admin/assignments/assign.php", "POST", { order_id, rider_id }),
+    updateAssignment: (id: string, status: string) =>
+      request<{ ok: true }>("/admin/assignments/update.php", "POST", { id, status }),
+    // restaurants
+    listRestaurants:   () => request<any[]>("/admin/restaurants/list.php"),
+    setRestaurantStatus:  (p: { id: string; status: string; rejection_reason?: string }) =>
+      request<{ ok: true }>("/admin/restaurants/set_status.php", "POST", p),
+    setRestaurantBlocked: (id: string, blocked: boolean) =>
+      request<{ ok: true; blocked: boolean }>("/admin/restaurants/set_blocked.php", "POST", { id, blocked }),
+    // analytics / settlements / reports
+    analytics:   (days = 30) => request<any>("/admin/analytics.php",   "POST", { days }),
+    settlements: (days = 30) => request<any[]>("/admin/settlements.php","POST", { days }),
+    reports:     (days = 30) => request<any>("/admin/reports.php",     "POST", { days }),
+    // team
+    listTeam:        () => request<any[]>("/admin/team/list.php"),
+    findUserByEmail: (email: string) => request<any>("/admin/team/find_user.php",   "POST", { email }),
+    grantAdmin:      (user_id: string) => request<{ ok: true }>("/admin/team/grant_admin.php",  "POST", { user_id }),
+    revokeAdmin:     (user_id: string) => request<{ ok: true }>("/admin/team/revoke_admin.php", "POST", { user_id }),
+    setUserWarehouses: (user_id: string, warehouse_ids: string[]) =>
+      request<{ ok: true }>("/admin/team/set_warehouses.php", "POST", { user_id, warehouse_ids }),
+  },
 };
+
 
