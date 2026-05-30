@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
@@ -13,16 +13,16 @@ import { AlertSoundSettingsButton } from "./AlertSoundSettings";
 const SOUND_KEY = "admin-alert-sound";
 const SEEN_KEY = "admin-alert-seen";
 
-
 /** Subscribes to all product (grocery) orders for admins, or only warehouse-scoped orders for managers. */
 export function AdminOrderAlerts() {
   const qc = useQueryClient();
-  const { session } = useAuth();
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
   const check = useDualFn(isAdminFn, (_d?: unknown) => php.checkRole());
   const { data: role } = useQuery({
-    queryKey: ["is-admin", session?.user.id],
+    queryKey: ["is-admin", userId],
     queryFn: () => check(),
-    enabled: !!session,
+    enabled: !authLoading && !!session && !!user,
     refetchOnWindowFocus: false,
   });
 
@@ -37,7 +37,7 @@ export function AdminOrderAlerts() {
   }, [sound]);
 
   const isAdminUser = !!role?.isAdmin;
-  const warehouseIds = role?.warehouseIds ?? [];
+  const warehouseIds = useMemo(() => role?.warehouseIds ?? [], [role?.warehouseIds]);
   // Serialize for stable effect deps
   const whKey = warehouseIds.slice().sort().join(",");
   const token = session?.access_token;
@@ -83,11 +83,10 @@ export function AdminOrderAlerts() {
       });
     };
 
-    const updateHandler = (payload: { new: { id: string; status?: string } }) => {
+    const updateHandler = (_payload: { new: { id: string; status?: string } }) => {
       // Status / payment updates — silently refresh dashboards & lists.
       invalidateAll();
     };
-
 
     const channels: ReturnType<typeof supabase.channel>[] = [];
 
@@ -114,12 +113,22 @@ export function AdminOrderAlerts() {
           .channel(`wm-orders-${wid}`)
           .on(
             "postgres_changes",
-            { event: "INSERT", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "orders",
+              filter: `warehouse_id=eq.${wid}`,
+            },
             insertHandler as never,
           )
           .on(
             "postgres_changes",
-            { event: "UPDATE", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "orders",
+              filter: `warehouse_id=eq.${wid}`,
+            },
             updateHandler as never,
           )
           .subscribe((status) => {
@@ -128,8 +137,6 @@ export function AdminOrderAlerts() {
         channels.push(ch);
       }
     }
-
-
 
     return () => {
       for (const ch of channels) void supabase.removeChannel(ch);
@@ -167,8 +174,16 @@ export function AdminOrderAlertsControl() {
       </button>
       <AlertSoundSettingsButton
         rows={[
-          { channel: "admin_order", label: "New order", description: "Plays when a new product order arrives." },
-          { channel: "notification", label: "Other notifications", description: "Status updates, low-stock and general alerts." },
+          {
+            channel: "admin_order",
+            label: "New order",
+            description: "Plays when a new product order arrives.",
+          },
+          {
+            channel: "notification",
+            label: "Other notifications",
+            description: "Status updates, low-stock and general alerts.",
+          },
         ]}
       />
       <span
@@ -177,7 +192,6 @@ export function AdminOrderAlertsControl() {
       >
         {sound ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
       </span>
-
     </div>
   );
 }
