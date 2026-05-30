@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { listMyDishes, createDish, updateDish, deleteDish, toggleDishStock, bulkImportDishes } from "@/lib/partner.functions";
 import { listMyOutlets } from "@/lib/outlets.functions";
 import { toast } from "sonner";
@@ -53,12 +54,12 @@ const DAY_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] as const;
 
 function MenuPage() {
   const qc = useQueryClient();
-  const listFn = useServerFn(listMyDishes);
-  const outletsFn = useServerFn(listMyOutlets);
-  const createFn = useServerFn(createDish);
-  const updateFn = useServerFn(updateDish);
-  const delFn = useServerFn(deleteDish);
-  const stockFn = useServerFn(toggleDishStock);
+  const listFn = useDualFn(listMyDishes, (d) => php.partner.listMyDishes(d));
+  const outletsFn = useDualFn(listMyOutlets, (d) => php.partner.listMyOutlets(d));
+  const createFn = useDualFn(createDish, (d) => php.partner.createDish(d));
+  const updateFn = useDualFn(updateDish, (d) => php.partner.updateDish(d));
+  const delFn = useDualFn(deleteDish, (d) => php.partner.deleteDish(d));
+  const stockFn = useDualFn(toggleDishStock, (d) => php.partner.toggleDishStock(d));
   const q = useQuery({ queryKey: ["my-dishes"], queryFn: () => listFn() });
   const outletsQ = useQuery({ queryKey: ["partner", "outlets"], queryFn: () => outletsFn() });
   const outlets = (outletsQ.data?.outlets ?? []) as Array<{ id: string; name: string; restaurant_id: string }>;
@@ -83,7 +84,7 @@ function MenuPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["my-dishes"] }),
   });
 
-  const bulkFn = useServerFn(bulkImportDishes);
+  const bulkFn = useDualFn(bulkImportDishes, (d) => php.partner.bulkImportDishes(d));
   const fileRef = useRef<HTMLInputElement>(null);
   const bulk = useMutation({
     mutationFn: (dishes: any[]) => bulkFn({ data: { dishes } }),

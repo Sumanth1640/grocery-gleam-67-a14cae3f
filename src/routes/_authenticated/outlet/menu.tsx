@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -17,9 +18,9 @@ function OutletMenuPage() {
   const qc = useQueryClient();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const outletsFn = useServerFn(myManagedOutlets);
-  const dishesFn = useServerFn(listOutletDishes);
-  const toggleFn = useServerFn(toggleOutletDishStock);
+  const outletsFn = useDualFn(myManagedOutlets, (d) => php.outletMgr.myManagedOutlets(d));
+  const dishesFn = useDualFn(listOutletDishes, (d) => php.outletMgr.listOutletDishes(d));
+  const toggleFn = useDualFn(toggleOutletDishStock, (d) => php.outletMgr.toggleOutletDishStock(d));
 
   const o = useQuery({ queryKey: ["my-managed-outlets"], queryFn: () => outletsFn() });
   const outlets = o.data ?? [];

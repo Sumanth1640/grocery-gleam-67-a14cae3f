@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { toast } from "sonner";
 import { Loader2, MapPin, ShoppingBag, UtensilsCrossed, Power } from "lucide-react";
 import { myManagedOutlets, listOutletOrders, toggleOutletOpen } from "@/lib/outlet-managers.functions";
@@ -11,9 +12,9 @@ export const Route = createFileRoute("/_authenticated/outlet/")({
 
 function OutletIndex() {
   const qc = useQueryClient();
-  const outletsFn = useServerFn(myManagedOutlets);
-  const ordersFn = useServerFn(listOutletOrders);
-  const toggleFn = useServerFn(toggleOutletOpen);
+  const outletsFn = useDualFn(myManagedOutlets, (d) => php.outletMgr.myManagedOutlets(d));
+  const ordersFn = useDualFn(listOutletOrders, (d) => php.outletMgr.listOutletOrders(d));
+  const toggleFn = useDualFn(toggleOutletOpen, (d) => php.outletMgr.toggleOutletOpen(d));
   const o = useQuery({ queryKey: ["my-managed-outlets"], queryFn: () => outletsFn() });
   const ord = useQuery({ queryKey: ["outlet-orders", "all"], queryFn: () => ordersFn({ data: {} }), refetchInterval: 15_000 });
 

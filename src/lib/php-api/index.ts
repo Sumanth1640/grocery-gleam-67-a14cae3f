@@ -196,7 +196,7 @@ export const php = {
       { restaurant_id, lat: lat ?? null, lng: lng ?? null },
     ),
 
-  // Partner
+  // Partner (legacy raw helpers — used by older code paths)
   partnerOrders: () => request<unknown[]>("/partner/orders.php"),
   updateOrderStatus: (order_id: string, status: string) =>
     request<{ updated: number; status: string }>(
@@ -204,6 +204,68 @@ export const php = {
       "POST",
       { order_id, status },
     ),
+
+  // ---------- Partner (restaurant owner) ----------
+  partner: {
+    myRestaurant: (_p?: unknown) => request<any | null>("/partner/me.php"),
+    checkSlugAvailable: (p: { slug: string }) =>
+      request<{ available: boolean }>("/partner/check_slug.php", "POST", p),
+    saveBasics:    (p: any) => request<{ ok: true; id: string }>("/partner/save_basics.php", "POST", p),
+    saveDocuments: (p: any) => request<{ ok: true }>("/partner/save_documents.php", "POST", p),
+    advanceAfterMenu: (_p?: unknown) => request<{ ok: true }>("/partner/advance_after_menu.php", "POST", {}),
+    acceptAgreement:  (p: any) => request<{ ok: true }>("/partner/accept_agreement.php", "POST", p),
+    submitForReview:  (_p?: unknown) => request<{ ok: true }>("/partner/submit_for_review.php", "POST", {}),
+    getMyDocSignedUrl: (p: { path: string }) =>
+      Promise.resolve({ url: p.path }), // PHP serves uploaded docs publicly
+    toggleRestaurantOpen: (p: { is_open: boolean }) =>
+      request<{ ok: true }>("/partner/toggle_open.php", "POST", p),
+    dashboard: (_p?: unknown) => request<any | null>("/partner/dashboard.php"),
+    payouts:   (p?: { days?: number }) =>
+      request<any | null>("/partner/payouts.php", "POST", { days: p?.days ?? 30 }),
+
+    // dishes
+    listMyDishes: (_p?: unknown) => request<any[]>("/partner/dishes_list.php"),
+    createDish:   (p: any) => request<{ id: string }>("/partner/dishes_create.php", "POST", p),
+    updateDish:   (p: any) => request<{ ok: true }>("/partner/dishes_update.php", "POST", p),
+    deleteDish:   (p: { id: string }) => request<{ ok: true }>("/partner/dishes_delete.php", "POST", p),
+    toggleDishStock: (p: { id: string; in_stock: boolean }) =>
+      request<{ ok: true }>("/partner/dishes_toggle_stock.php", "POST", p),
+    bulkImportDishes: (p: { dishes: any[] }) =>
+      request<{ inserted: number }>("/partner/dishes_bulk_import.php", "POST", p),
+
+    // outlets (owner)
+    listMyOutlets: (_p?: unknown) => request<{ restaurants: any[]; outlets: any[] }>("/partner/outlets_list.php"),
+    saveOutlet:    (p: any) => request<any>("/partner/outlets_save.php", "POST", p),
+    deleteOutlet:  (p: { id: string }) => request<{ ok: true }>("/partner/outlets_delete.php", "POST", p),
+
+    // outlet managers (owner)
+    listOutletManagers: (p: { restaurant_id: string }) =>
+      request<{ outlets: any[]; managers: any[] }>("/partner/managers_list.php", "POST", p),
+    addOutletManager:    (p: { outlet_id: string; email: string; role?: "manager" | "cashier" }) =>
+      request<{ ok: true }>("/partner/managers_add.php", "POST", p),
+    removeOutletManager: (p: { id: string }) =>
+      request<{ ok: true }>("/partner/managers_remove.php", "POST", p),
+
+    // orders
+    listMyRestaurantOrders: (_p?: unknown) => request<any[]>("/partner/orders.php"),
+    updateOrderStatus: (p: { id: string; status: string }) =>
+      request<{ ok: true }>("/partner/order_update_status.php", "POST", p),
+  },
+
+  // ---------- Outlet manager (restaurant outlet staff) ----------
+  outletMgr: {
+    myManagedOutlets: (_p?: unknown) => request<any[]>("/outlet_mgr/my_outlets.php"),
+    listOutletOrders: (p?: { outlet_id?: string }) =>
+      request<any[]>("/outlet_mgr/orders_list.php", "POST", { outlet_id: p?.outlet_id ?? "" }),
+    updateOutletOrderStatus: (p: { id: string; status: string }) =>
+      request<{ ok: true }>("/outlet_mgr/order_update_status.php", "POST", p),
+    listOutletDishes: (p: { outlet_id: string }) =>
+      request<any[]>("/outlet_mgr/dishes_list.php", "POST", p),
+    toggleOutletDishStock: (p: { id: string; in_stock: boolean }) =>
+      request<{ ok: true }>("/outlet_mgr/dish_toggle_stock.php", "POST", p),
+    toggleOutletOpen: (p: { outlet_id: string; is_open: boolean }) =>
+      request<{ ok: true }>("/outlet_mgr/toggle_open.php", "POST", p),
+  },
 
   // Payments
   createRazorpayOrder: (amount: number) =>

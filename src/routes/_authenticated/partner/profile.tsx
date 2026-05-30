@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import {
   myRestaurant,
   saveBasics,
@@ -34,7 +35,7 @@ const inputCls = "w-full rounded-xl border bg-background px-3 py-2 text-sm outli
 function ProfileWizard() {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const fetchFn = useServerFn(myRestaurant);
+  const fetchFn = useDualFn(myRestaurant, (d) => php.partner.myRestaurant(d));
   const q = useQuery({ queryKey: ["my-restaurant"], queryFn: () => fetchFn() });
   const r = q.data;
   const [step, setStep] = useState<number>(1);
@@ -99,8 +100,8 @@ function Stepper({ current, onJump, maxReached }: { current: number; onJump: (n:
 
 // ---------------- Step 1: Basics ----------------
 function StepBasics({ r, onSaved }: { r: Awaited<ReturnType<typeof myRestaurant>> | undefined; onSaved: () => void }) {
-  const saveFn = useServerFn(saveBasics);
-  const slugFn = useServerFn(checkSlugAvailable);
+  const saveFn = useDualFn(saveBasics, (d) => php.partner.saveBasics(d));
+  const slugFn = useDualFn(checkSlugAvailable, (d) => php.partner.checkSlugAvailable(d));
   const [form, setForm] = useState({
     name: r?.name ?? "", slug: r?.slug ?? "",
     cuisines: (r?.cuisines ?? []).join(", "),
@@ -181,7 +182,7 @@ function StepBasics({ r, onSaved }: { r: Awaited<ReturnType<typeof myRestaurant>
 
 // ---------------- Step 2: Documents ----------------
 function StepDocuments({ r, userId, onSaved, onBack }: { r: Awaited<ReturnType<typeof myRestaurant>> | undefined; userId: string; onSaved: () => void; onBack: () => void }) {
-  const saveFn = useServerFn(saveDocuments);
+  const saveFn = useDualFn(saveDocuments, (d) => php.partner.saveDocuments(d));
   const [form, setForm] = useState({
     fssai_number: r?.fssai_number ?? "", fssai_doc_url: r?.fssai_doc_url ?? "", fssai_expiry: r?.fssai_expiry ?? "",
     pan_number: r?.pan_number ?? "", pan_doc_url: r?.pan_doc_url ?? "",
@@ -246,7 +247,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 // ---------------- Step 3: Menu ----------------
 function StepMenu({ onAdvance, onBack }: { onAdvance: () => void; onBack: () => void }) {
-  const advanceFn = useServerFn(advanceAfterMenu);
+  const advanceFn = useDualFn(advanceAfterMenu, (d) => php.partner.advanceAfterMenu(d));
   const m = useMutation({
     mutationFn: async () => { await advanceFn(); },
     onSuccess: onAdvance,
@@ -274,7 +275,7 @@ function StepMenu({ onAdvance, onBack }: { onAdvance: () => void; onBack: () => 
 
 // ---------------- Step 4: Agreement ----------------
 function StepAgreement({ r, onSaved, onBack }: { r: Awaited<ReturnType<typeof myRestaurant>> | undefined; onSaved: () => void; onBack: () => void }) {
-  const fn = useServerFn(acceptAgreement);
+  const fn = useDualFn(acceptAgreement, (d) => php.partner.acceptAgreement(d));
   const [agreed, setAgreed] = useState(!!r?.agreement_accepted_at);
   const [sig, setSig] = useState(r?.agreement_signature ?? "");
   const m = useMutation({
@@ -317,7 +318,7 @@ function StepAgreement({ r, onSaved, onBack }: { r: Awaited<ReturnType<typeof my
 
 // ---------------- Step 5: Submit ----------------
 function StepSubmit({ r, onSubmitted, onBack }: { r: Awaited<ReturnType<typeof myRestaurant>> | undefined; onSubmitted: () => void; onBack: () => void }) {
-  const fn = useServerFn(submitForReview);
+  const fn = useDualFn(submitForReview, (d) => php.partner.submitForReview(d));
   const m = useMutation({
     mutationFn: async () => { await fn(); },
     onSuccess: () => { toast.success("Submitted for review"); onSubmitted(); },

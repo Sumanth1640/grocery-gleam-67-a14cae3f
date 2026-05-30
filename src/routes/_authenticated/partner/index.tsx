@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import {
   partnerDashboard,
   toggleRestaurantOpen,
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/partner/")({
 });
 
 function Dashboard() {
-  const fn = useServerFn(partnerDashboard);
+  const fn = useDualFn(partnerDashboard, (d) => php.partner.dashboard(d));
   const q = useQuery({ queryKey: ["partner-dashboard"], queryFn: () => fn(), refetchInterval: 30_000 });
 
   if (q.isLoading) {
@@ -62,7 +63,7 @@ function Dashboard() {
 function HeroCard({ data }: { data: NonNullable<Awaited<ReturnType<typeof partnerDashboard>>> }) {
   const r = data.restaurant;
   const qc = useQueryClient();
-  const toggleFn = useServerFn(toggleRestaurantOpen);
+  const toggleFn = useDualFn(toggleRestaurantOpen, (d) => php.partner.toggleRestaurantOpen(d));
   const m = useMutation({
     mutationFn: (is_open: boolean) => toggleFn({ data: { is_open } }),
     onSuccess: (_d, is_open) => {
@@ -246,7 +247,7 @@ const STATUS_TONE: Record<string, string> = {
 
 function RecentOrders({ orders }: { orders: NonNullable<Awaited<ReturnType<typeof partnerDashboard>>>["recentOrders"] }) {
   const qc = useQueryClient();
-  const updateFn = useServerFn(updateOrderStatus);
+  const updateFn = useDualFn(updateOrderStatus, (d) => php.partner.updateOrderStatus(d));
   const m = useMutation({
     mutationFn: (v: { id: string; status: "placed" | "preparing" | "ready" | "out_for_delivery" | "delivered" | "cancelled" }) =>
       updateFn({ data: v }),

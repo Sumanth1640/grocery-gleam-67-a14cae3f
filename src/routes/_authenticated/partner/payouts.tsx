@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { partnerPayouts } from "@/lib/partner.functions";
@@ -14,7 +15,7 @@ const inr = (n: number) => `₹${(n ?? 0).toLocaleString("en-IN")}`;
 
 function PayoutsPage() {
   const [days, setDays] = useState(30);
-  const fn = useServerFn(partnerPayouts);
+  const fn = useDualFn(partnerPayouts, (d) => php.partner.payouts(d));
   const q = useQuery({ queryKey: ["partner-payouts", days], queryFn: () => fn({ data: { days } }) });
 
   if (q.isLoading) return <div className="grid h-40 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;

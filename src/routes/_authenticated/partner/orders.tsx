@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMemo, useState } from "react";
 import { listMyRestaurantOrders, updateOrderStatus } from "@/lib/partner.functions";
 import { Loader2, Clock, Search } from "lucide-react";
@@ -33,8 +34,8 @@ const STATUS_TINT: Record<Status, string> = {
 
 function PartnerOrdersPage() {
   const qc = useQueryClient();
-  const listFn = useServerFn(listMyRestaurantOrders);
-  const updateFn = useServerFn(updateOrderStatus);
+  const listFn = useDualFn(listMyRestaurantOrders, (d) => php.partner.listMyRestaurantOrders(d));
+  const updateFn = useDualFn(updateOrderStatus, (d) => php.partner.updateOrderStatus(d));
   const q = useQuery({
     queryKey: ["partner-orders"],
     queryFn: () => listFn(),

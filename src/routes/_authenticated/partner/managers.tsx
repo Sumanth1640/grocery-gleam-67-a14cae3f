@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/partner/managers")({
 const inputCls = "w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-focus";
 
 function ManagersPage() {
-  const listOutletsFn = useServerFn(listMyOutlets);
+  const listOutletsFn = useDualFn(listMyOutlets, (d) => php.partner.listMyOutlets(d));
   const q = useQuery({ queryKey: ["partner", "outlets"], queryFn: () => listOutletsFn() });
 
   if (q.isLoading) return <div className="grid h-32 place-items-center"><Loader2 className="h-5 w-5 animate-spin" /></div>;
@@ -52,9 +53,9 @@ function ManagersPage() {
 
 function RestaurantBlock({ restaurantId, restaurantName }: { restaurantId: string; restaurantName: string }) {
   const qc = useQueryClient();
-  const listFn = useServerFn(listOutletManagers);
-  const addFn = useServerFn(addOutletManager);
-  const delFn = useServerFn(removeOutletManager);
+  const listFn = useDualFn(listOutletManagers, (d) => php.partner.listOutletManagers(d));
+  const addFn = useDualFn(addOutletManager, (d) => php.partner.addOutletManager(d));
+  const delFn = useDualFn(removeOutletManager, (d) => php.partner.removeOutletManager(d));
 
   const q = useQuery({
     queryKey: ["outlet-managers", restaurantId],
