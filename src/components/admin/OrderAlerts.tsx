@@ -17,12 +17,13 @@ const SEEN_KEY = "admin-alert-seen";
 /** Subscribes to all product (grocery) orders for admins, or only warehouse-scoped orders for managers. */
 export function AdminOrderAlerts() {
   const qc = useQueryClient();
-  const { session } = useAuth();
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
   const check = useDualFn(isAdminFn, (_d?: unknown) => php.checkRole());
   const { data: role } = useQuery({
-    queryKey: ["is-admin", session?.user.id],
+    queryKey: ["is-admin", userId],
     queryFn: () => check(),
-    enabled: !!session,
+    enabled: !authLoading && !!session && !!user,
     refetchOnWindowFocus: false,
   });
 
