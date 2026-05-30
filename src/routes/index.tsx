@@ -23,12 +23,10 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const restos = useServerFn(listApprovedRestaurants);
-  const dishes = useServerFn(listAllApprovedDishes);
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
   const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => dualApi.listProducts() });
-  const restosQ = useQuery({ queryKey: ["home-restaurants"], queryFn: () => restos() });
-  const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dishes() });
+  const restosQ = useQuery({ queryKey: ["home-restaurants"], queryFn: () => dualApi.restaurants() });
+  const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dualApi.allDishes() });
 
 
   const categories = catsQ.data ?? [];
