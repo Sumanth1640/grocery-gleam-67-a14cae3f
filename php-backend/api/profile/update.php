@@ -2,7 +2,7 @@
 require __DIR__ . '/../../config.php';
 require_method('POST');
 $uid = current_user_id();
-$in = json_input();
+$in = json_body();
 $full_name = isset($in['full_name']) ? trim((string)$in['full_name']) : null;
 $phone     = isset($in['phone']) ? trim((string)$in['phone']) : null;
 
