@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { listAddresses } from "@/lib/account.functions";
 import { MapPin, Home as HomeIcon, Check, Plus } from "lucide-react";
 
@@ -24,7 +25,7 @@ export function SavedAddressPicker({
   /** A serializable signature of the currently-selected address (e.g. "<line1>|<pincode>") to highlight which one is picked. */
   activeSignature?: string;
 }) {
-  const list = useServerFn(listAddresses);
+  const list = useDualFn(listAddresses, () => php.addresses());
   const { data, isLoading } = useQuery({ queryKey: ["addresses"], queryFn: () => list() });
   const [autoPicked, setAutoPicked] = useState(false);
 

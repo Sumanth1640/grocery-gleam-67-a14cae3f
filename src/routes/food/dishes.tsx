@@ -9,7 +9,8 @@ import { DishCustomizeDialog, VegBadge } from "@/components/site/DishCustomizeDi
 import { Search, Star, Flame, Plus, ShoppingBag, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 import { listAllApprovedDishes } from "@/lib/partner-public.functions";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { dualApi } from "@/lib/dual-api";
 import { useQuery } from "@tanstack/react-query";
 
 type DishWithRestaurant = Dish & { restaurant: Restaurant };
@@ -53,7 +54,7 @@ function DishesPage() {
   const totals = foodCartTotals(cart);
   const [openDish, setOpenDish] = useState<DishWithRestaurant | null>(null);
 
-  const fetchDishes = useServerFn(listAllApprovedDishes);
+  const fetchDishes = useDualFn(listAllApprovedDishes, () => dualApi.allDishes());
   const { data: dbDishes } = useQuery({
     queryKey: ["public-all-dishes"],
     queryFn: () => fetchDishes(),
