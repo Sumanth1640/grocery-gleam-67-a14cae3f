@@ -234,15 +234,15 @@ export const php = {
     // products
     listProducts: () => request<any[]>("/admin/products/list.php"),
     saveProduct:  (p: any) => request<any>("/admin/products/save.php", "POST", p),
-    deleteProduct:(id: string) => request<{ ok: true }>("/admin/products/delete.php", "POST", { id }),
+    deleteProduct:(p: { id: string }) => request<{ ok: true }>("/admin/products/delete.php", "POST", p),
     // categories
     listCategories: () => request<any[]>("/admin/categories/list.php"),
     saveCategory:   (p: any) => request<any>("/admin/categories/save.php", "POST", p),
-    deleteCategory: (id: string) => request<{ ok: true }>("/admin/categories/delete.php", "POST", { id }),
+    deleteCategory: (p: { id: string }) => request<{ ok: true }>("/admin/categories/delete.php", "POST", p),
     // banners
     listBanners: () => request<any[]>("/admin/banners/list.php"),
     saveBanner:  (p: any) => request<any>("/admin/banners/save.php", "POST", p),
-    deleteBanner:(id: string) => request<{ ok: true }>("/admin/banners/delete.php", "POST", { id }),
+    deleteBanner:(p: { id: string }) => request<{ ok: true }>("/admin/banners/delete.php", "POST", p),
     // orders
     listOrders: () => request<any[]>("/admin/orders/list.php"),
     updateOrderStatus: (p: { id: string; status: string }) =>
