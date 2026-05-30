@@ -104,16 +104,19 @@ export const php = {
   // Cart / Orders
   createOrder: (payload: unknown) => request<{ id: string }>("/orders/create.php", "POST", payload),
   myOrders: () => request<unknown[]>("/orders/list.php"),
+  getOrder: (id: string) => request<Record<string, unknown>>(`/orders/get.php?id=${encodeURIComponent(id)}`),
 
   // Addresses
-  addresses: () => request<unknown[]>("/addresses/list.php"),
+  addresses: () => request<Array<Record<string, unknown> & { id: string }>>("/addresses/list.php"),
   addAddress: (payload: unknown) => request<{ id: string }>("/addresses/create.php", "POST", payload),
+  updateAddress: (payload: unknown) => request<{ id: string; updated: number }>("/addresses/update.php", "POST", payload),
   deleteAddress: (id: string) => request<{ deleted: number }>("/addresses/delete.php", "POST", { id }),
 
   // Coupons
   coupons: () => request<unknown[]>("/coupons/list.php"),
   validateCoupon: (code: string, subtotal: number) =>
     request<{ discount: number; code: string }>("/coupons/validate.php", "POST", { code, subtotal }),
+  myCouponUsage: () => request<Record<string, number>>("/coupons/my_usage.php"),
 
   // Restaurants
   restaurants: (q?: string) =>
@@ -135,10 +138,13 @@ export const php = {
     target_type: "product" | "restaurant" | "dish";
     target_id: string;
     rating: number;
-    title?: string;
-    body?: string;
+    title?: string | null;
+    body?: string | null;
   }) => request<{ id: string }>("/reviews/create.php", "POST", payload),
-  deleteReview: (id: string) => request<{ deleted: number }>("/reviews/delete.php", "POST", { id }),
+  deleteReview: (payload: {
+    target_type: "product" | "restaurant" | "dish";
+    target_id: string;
+  }) => request<{ deleted: number }>("/reviews/delete.php", "POST", payload),
 
   // Notifications
   notifications: () =>
@@ -158,6 +164,20 @@ export const php = {
   outlets: (pincode?: string) =>
     request<unknown[]>(`/outlets/list.php${pincode ? `?pincode=${pincode}` : ""}`),
 
+  // Fulfillment
+  resolveWarehouse: (pincode: string) =>
+    request<{ serviceable: boolean; warehouse: { id: string; name: string; code: string; city: string; pincode: string } | null }>(
+      "/fulfillment/resolve_warehouse.php",
+      "POST",
+      { pincode },
+    ),
+  resolveOutlet: (restaurant_id: string, lat?: number | null, lng?: number | null) =>
+    request<{ outlet: { id: string; name: string; area: string | null; pincode: string | null; eta_mins: number | null } | null }>(
+      "/fulfillment/resolve_outlet.php",
+      "POST",
+      { restaurant_id, lat: lat ?? null, lng: lng ?? null },
+    ),
+
   // Partner
   partnerOrders: () => request<unknown[]>("/partner/orders.php"),
   updateOrderStatus: (order_id: string, status: string) =>
@@ -169,9 +189,16 @@ export const php = {
 
   // Payments
   createRazorpayOrder: (amount: number) =>
-    request<{ id: string; amount: number; currency: string }>(
+    request<{ order_id: string; amount: number; currency: string; key_id: string }>(
       "/payments/razorpay_create_order.php",
       "POST",
       { amount },
     ),
+  verifyAndPlaceOrder: (payload: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+    order: unknown;
+  }) => request<{ id: string; created_at: string }>("/payments/razorpay_verify.php", "POST", payload),
 };
+

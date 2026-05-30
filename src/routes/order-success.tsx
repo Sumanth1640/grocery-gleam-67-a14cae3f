@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { MobileOrderConfirmedDialog } from "@/components/native/MobileOrderConfirmedDialog";
 import { useLastOrder, type Order } from "@/lib/order-store";
-import { getOrder } from "@/lib/account.functions";
+import { dualApi } from "@/lib/dual-api";
 import { CheckCircle2, Clock, MapPin, Package, Receipt } from "lucide-react";
 
 const searchSchema = z.object({ order: z.string().uuid().optional() });
@@ -66,11 +65,10 @@ export const Route = createFileRoute("/order-success")({
 function SuccessPage() {
   const localOrder = useLastOrder();
   const search = Route.useSearch();
-  const getOrderRpc = useServerFn(getOrder);
   const shouldLoadOrder = !!search.order && localOrder?.id !== search.order;
   const orderQ = useQuery({
     queryKey: ["order-success", search.order],
-    queryFn: () => getOrderRpc({ data: { id: search.order! } }),
+    queryFn: () => dualApi.getOrder(search.order!),
     enabled: shouldLoadOrder,
     retry: false,
   });

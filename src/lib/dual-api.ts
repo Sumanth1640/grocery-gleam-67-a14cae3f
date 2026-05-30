@@ -152,6 +152,12 @@ export const dualApi = {
     return createAddress({ data: payload as never });
   },
 
+  async updateAddress(payload: Record<string, unknown> & { id: string }) {
+    if (USE_PHP) return php.updateAddress(payload);
+    const { updateAddress } = await import("@/lib/account.functions");
+    return updateAddress({ data: payload as never });
+  },
+
   async deleteAddress(id: string) {
     if (USE_PHP) return php.deleteAddress(id);
     const { deleteAddress } = (await lc()).account;
@@ -171,6 +177,49 @@ export const dualApi = {
     return listOrders();
   },
 
+  async getOrder(id: string) {
+    if (USE_PHP) return php.getOrder(id);
+    const { getOrder } = await import("@/lib/account.functions");
+    return getOrder({ data: { id } });
+  },
+
+  // ============ COUPONS (cont.) ============
+  async myCouponUsage() {
+    if (USE_PHP) return php.myCouponUsage();
+    const { listMyCouponUsage } = await import("@/lib/coupons.functions");
+    return listMyCouponUsage();
+  },
+
+  // ============ FULFILLMENT ============
+  async resolveWarehouse(pincode: string) {
+    if (USE_PHP) return php.resolveWarehouse(pincode);
+    const { resolveWarehouseForPincode } = await import("@/lib/fulfillment.functions");
+    return resolveWarehouseForPincode({ data: { pincode } });
+  },
+
+  async resolveOutlet(restaurant_id: string, lat?: number | null, lng?: number | null) {
+    if (USE_PHP) return php.resolveOutlet(restaurant_id, lat, lng);
+    const { resolveOutletForRestaurant } = await import("@/lib/fulfillment.functions");
+    return resolveOutletForRestaurant({ data: { restaurant_id, lat: lat ?? null, lng: lng ?? null } });
+  },
+
+  // ============ PAYMENTS ============
+  async createRazorpayOrder(amount: number) {
+    if (USE_PHP) return php.createRazorpayOrder(amount);
+    const { createRazorpayOrder } = await import("@/lib/razorpay.functions");
+    return createRazorpayOrder({ data: { amount } });
+  },
+
+  async verifyAndPlaceOrder(payload: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+    order: unknown;
+  }) {
+    if (USE_PHP) return php.verifyAndPlaceOrder(payload);
+    const { verifyAndPlaceOrder } = await import("@/lib/razorpay.functions");
+    return verifyAndPlaceOrder({ data: payload as never });
+  },
 
   // ============ WISHLIST ============
   async wishlist() {
@@ -199,12 +248,18 @@ export const dualApi = {
     target_type: "product" | "restaurant" | "dish";
     target_id: string;
     rating: number;
-    title?: string;
-    body?: string;
+    title?: string | null;
+    body?: string | null;
   }) {
     if (USE_PHP) return php.addReview(payload);
     const { upsertReview } = (await lc()).reviews;
-    return upsertReview({ data: payload });
+    return upsertReview({ data: payload as never });
+  },
+
+  async deleteReview(target_type: "product" | "restaurant" | "dish", target_id: string) {
+    if (USE_PHP) return php.deleteReview({ target_type, target_id });
+    const { deleteReview } = (await lc()).reviews;
+    return deleteReview({ data: { target_type, target_id } });
   },
 
   // ============ NOTIFICATIONS ============
@@ -230,11 +285,27 @@ export const dualApi = {
 
   async allDishes() {
     if (USE_PHP) {
-      // No PHP endpoint yet — return empty so the homepage section stays empty
-      return [] as unknown[];
+      const list = (await php.restaurants()) as Array<{ slug: string }>;
+      const all = await Promise.all(
+        list.map((r) => php.restaurantDishes(r.slug).catch(() => null)),
+      );
+      const flat: unknown[] = [];
+      for (const r of all) {
+        if (!r) continue;
+        for (const d of r.dishes as Array<Record<string, unknown>>) {
+          flat.push({ ...d, restaurant: r.restaurant });
+        }
+      }
+      return flat;
     }
     const { listAllApprovedDishes } = await import("@/lib/partner-public.functions");
     return listAllApprovedDishes();
+  },
+
+  async getRestaurant(slug: string) {
+    if (USE_PHP) return php.restaurantDishes(slug);
+    const { getApprovedRestaurant } = await import("@/lib/partner-public.functions");
+    return getApprovedRestaurant({ data: { slug } });
   },
 };
 
