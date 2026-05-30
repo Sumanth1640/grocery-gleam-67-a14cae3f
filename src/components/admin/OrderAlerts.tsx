@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
@@ -12,7 +12,6 @@ import { AlertSoundSettingsButton } from "./AlertSoundSettings";
 
 const SOUND_KEY = "admin-alert-sound";
 const SEEN_KEY = "admin-alert-seen";
-
 
 /** Subscribes to all product (grocery) orders for admins, or only warehouse-scoped orders for managers. */
 export function AdminOrderAlerts() {
@@ -38,7 +37,7 @@ export function AdminOrderAlerts() {
   }, [sound]);
 
   const isAdminUser = !!role?.isAdmin;
-  const warehouseIds = role?.warehouseIds ?? [];
+  const warehouseIds = useMemo(() => role?.warehouseIds ?? [], [role?.warehouseIds]);
   // Serialize for stable effect deps
   const whKey = warehouseIds.slice().sort().join(",");
   const token = session?.access_token;
@@ -84,11 +83,10 @@ export function AdminOrderAlerts() {
       });
     };
 
-    const updateHandler = (payload: { new: { id: string; status?: string } }) => {
+    const updateHandler = (_payload: { new: { id: string; status?: string } }) => {
       // Status / payment updates — silently refresh dashboards & lists.
       invalidateAll();
     };
-
 
     const channels: ReturnType<typeof supabase.channel>[] = [];
 
@@ -115,12 +113,22 @@ export function AdminOrderAlerts() {
           .channel(`wm-orders-${wid}`)
           .on(
             "postgres_changes",
-            { event: "INSERT", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "orders",
+              filter: `warehouse_id=eq.${wid}`,
+            },
             insertHandler as never,
           )
           .on(
             "postgres_changes",
-            { event: "UPDATE", schema: "public", table: "orders", filter: `warehouse_id=eq.${wid}` },
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "orders",
+              filter: `warehouse_id=eq.${wid}`,
+            },
             updateHandler as never,
           )
           .subscribe((status) => {
@@ -129,8 +137,6 @@ export function AdminOrderAlerts() {
         channels.push(ch);
       }
     }
-
-
 
     return () => {
       for (const ch of channels) void supabase.removeChannel(ch);
