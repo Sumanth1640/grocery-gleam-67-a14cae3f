@@ -158,9 +158,17 @@ export const php = {
 
   // Notifications
   notifications: () =>
-    request<{ items: unknown[]; unread: number }>("/notifications/list.php"),
-  markNotificationRead: (id?: string) =>
-    request<{ updated: number }>("/notifications/mark_read.php", "POST", { id: id ?? null }),
+    request<{ items: Array<Record<string, unknown>>; unread: number }>("/notifications/list.php"),
+  notificationsList: async () => {
+    const r = await request<{ items: Array<Record<string, unknown> & { is_read?: boolean }>; unread: number }>(
+      "/notifications/list.php",
+    );
+    return r.items.map((n) => ({ ...n, read: n.is_read ?? false }));
+  },
+  markNotificationRead: (payload?: { id?: string | null; all?: boolean }) =>
+    request<{ updated: number }>("/notifications/mark_read.php", "POST", {
+      id: payload?.all ? null : payload?.id ?? null,
+    }),
   deleteNotification: (id: string) =>
     request<{ deleted: number }>("/notifications/delete.php", "POST", { id }),
 
