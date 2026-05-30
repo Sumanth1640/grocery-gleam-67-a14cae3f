@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminLayout() {
-  const check = useServerFn(isAdmin);
+  const check = useDualFn(isAdmin, (_d?: unknown) => php.auth.checkRole());
   const { session, loading: authLoading } = useAuth();
   const { data, isLoading } = useQuery({
     queryKey: ["is-admin", session?.user.id],
