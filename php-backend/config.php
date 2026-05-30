@@ -121,3 +121,64 @@ function current_user_id(): string {
   if (!$payload || empty($payload['sub'])) json_error('Unauthorized', 401);
   return $payload['sub'];
 }
+
+// ============================================================
+// Role / ownership helpers (mirrors Supabase has_role/owns_*)
+// ============================================================
+function has_role(string $user_id, string $role): bool {
+  $st = db()->prepare('SELECT 1 FROM user_roles WHERE user_id = ? AND role = ? LIMIT 1');
+  $st->execute([$user_id, $role]);
+  return (bool)$st->fetchColumn();
+}
+
+function require_admin(?string $user_id = null): string {
+  $uid = $user_id ?? current_user_id();
+  if (!has_role($uid, 'admin')) json_error('Admin role required', 403);
+  return $uid;
+}
+
+function manages_warehouse(string $user_id, string $warehouse_id): bool {
+  $st = db()->prepare('SELECT 1 FROM warehouse_managers WHERE user_id = ? AND warehouse_id = ? LIMIT 1');
+  $st->execute([$user_id, $warehouse_id]);
+  return (bool)$st->fetchColumn();
+}
+
+function my_warehouse_ids(string $user_id): array {
+  $st = db()->prepare('SELECT warehouse_id FROM warehouse_managers WHERE user_id = ?');
+  $st->execute([$user_id]);
+  return $st->fetchAll(PDO::FETCH_COLUMN) ?: [];
+}
+
+/** Returns [bool is_admin, string[] warehouse_ids]. Throws 403 if neither. */
+function require_admin_or_warehouse_manager(?string $user_id = null): array {
+  $uid = $user_id ?? current_user_id();
+  $is_admin = has_role($uid, 'admin');
+  $wh = $is_admin ? [] : my_warehouse_ids($uid);
+  if (!$is_admin && empty($wh)) json_error('Admin or warehouse-manager role required', 403);
+  return [$is_admin, $wh, $uid];
+}
+
+function owns_restaurant(string $user_id, string $restaurant_id): bool {
+  $st = db()->prepare('SELECT 1 FROM partner_restaurants WHERE id = ? AND owner_id = ? LIMIT 1');
+  $st->execute([$restaurant_id, $user_id]);
+  return (bool)$st->fetchColumn();
+}
+
+function my_restaurant_id(string $user_id): ?string {
+  $st = db()->prepare('SELECT id FROM partner_restaurants WHERE owner_id = ? LIMIT 1');
+  $st->execute([$user_id]);
+  $r = $st->fetchColumn();
+  return $r ?: null;
+}
+
+function manages_outlet(string $user_id, string $outlet_id): bool {
+  $st = db()->prepare('SELECT 1 FROM partner_outlet_managers WHERE user_id = ? AND outlet_id = ? LIMIT 1');
+  $st->execute([$user_id, $outlet_id]);
+  return (bool)$st->fetchColumn();
+}
+
+function my_outlet_ids(string $user_id): array {
+  $st = db()->prepare('SELECT outlet_id FROM partner_outlet_managers WHERE user_id = ?');
+  $st->execute([$user_id]);
+  return $st->fetchAll(PDO::FETCH_COLUMN) ?: [];
+}

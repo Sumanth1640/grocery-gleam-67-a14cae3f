@@ -1,70 +1,38 @@
-## Goal
+# PHP parity for Admin / Warehouse / Restaurant Partner
 
-Mirror the warehouse-manager pattern for restaurants: each outlet of a restaurant can have its own manager/cashier. The restaurant owner (partner) assigns managers per outlet from their partner panel. Each assigned manager logs in and sees a dedicated **Outlet Manager panel** scoped to only the outlets they manage — orders, menu availability toggles, and basic outlet ops — without seeing the whole restaurant.
+You asked for full PHP parity across all three surfaces. That's 90+ server functions today, plus 14 new MySQL tables, role enforcement, signed file URLs, and rewiring ~30 React pages. I'll deliver in 4 phases so each phase is reviewable and ships working features.
 
-## What changes
+## Phase 1 — Foundation (this turn)
 
-### 1. Database (migration)
+**MySQL schema (`php-backend/schema_phase4.sql`)** — adds:
+- `user_roles` (admin / moderator / user) + seed helper
+- `warehouses`, `warehouse_pincodes`, `warehouse_managers`, `product_stock`
+- `partner_restaurants`, `partner_outlets`, `partner_outlet_managers`, `partner_dishes`, `partner_dish_variants`, `partner_dish_addons`
+- `banners`, `riders`, `refund_requests`, `order_assignments`, `coupon_redemptions`
+- `ALTER orders` to add `warehouse_id`, `outlet_id`, `restaurant_id`, `razorpay_order_id`, `razorpay_payment_id`, `payment_status`
 
-- New table `partner_outlet_managers`
-  - `id`, `outlet_id` (→ partner_outlets), `user_id` (→ auth user), `restaurant_id` (denormalized for fast RLS), `role` ('manager' | 'cashier'), `created_at`
-  - Unique `(outlet_id, user_id)`
-  - RLS:
-    - Restaurant owner can full-manage rows where they own the restaurant (uses existing `owns_restaurant`).
-    - Manager can `SELECT` their own rows.
-    - Admin full access.
-- Security-definer helpers:
-  - `manages_outlet(_user_id uuid, _outlet_id uuid) returns boolean`
-  - `is_outlet_manager(_user_id uuid) returns boolean`
-- Extend RLS on existing tables so outlet managers can do their job:
-  - `orders`: SELECT + UPDATE when `outlet_id` matches a row in `partner_outlet_managers` for `auth.uid()`.
-  - `partner_dishes`: UPDATE (availability/stock toggle) when `outlet_id` matches their managed outlets, scoped to that outlet only.
-  - `order_assignments`: SELECT when the underlying order belongs to a managed outlet.
-- New notification trigger `notify_outlet_managers_on_order` — inserts a notification for every manager of `NEW.outlet_id` (alongside existing owner notification).
+**PHP helpers (`config.php`)** — add `has_role()`, `require_admin()`, `manages_warehouse()`, `owns_restaurant()`, `manages_outlet()`, `require_admin_or_warehouse_manager()`.
 
-### 2. Server functions (`src/lib/outlet-managers.functions.ts`, new)
+## Phase 2 — Admin endpoints + wiring (this turn if room, else next)
 
-Owner-side (uses `requireSupabaseAuth`, gated by `owns_restaurant`):
-- `listOutletManagers({ restaurant_id })`
-- `addOutletManager({ outlet_id, email, role })` — looks up user by email via `supabaseAdmin`, inserts row.
-- `removeOutletManager({ id })`
+`php-backend/api/admin/*.php` (~30 files): stats, products CRUD, categories CRUD, orders list/update, banners CRUD, customers list/block, refunds, riders + assignments, low-stock + reorder, restaurants approve/block/docs, analytics, settlements, reports, team (grant/revoke admin, warehouse mapping).
 
-Manager-side:
-- `listMyManagedOutlets()` — returns outlets the current user manages (with restaurant name).
-- `listOutletOrders({ outlet_id })` — orders for an outlet they manage.
-- `updateOutletOrderStatus({ order_id, status })`.
+Then add `php.admin.*` methods in `src/lib/php-api/index.ts` and switch each `/admin/*` route to `useDualFn(...)`.
 
-### 3. Partner panel UI
+## Phase 3 — Warehouse manager (warehouses CRUD, pincodes, stock, my warehouses, outlet pages)
+~12 endpoints + wire `/_authenticated/outlet/*` routes.
 
-- New route `src/routes/_authenticated/partner/outlet-managers.tsx`
-  - Per restaurant → list outlets → per outlet show assigned managers, "Add manager by email" form, remove button.
-- Add link in partner sidebar / `partner/outlets.tsx`.
-
-### 4. New "Outlet" panel (separate from partner/admin/warehouse)
-
-- New layout `src/routes/_authenticated/outlet.tsx` — gated by `is_outlet_manager` check; redirects elsewhere if not.
-- Pages:
-  - `outlet/index.tsx` — outlet picker (if user manages multiple) + today's stats.
-  - `outlet/orders.tsx` — live order list with status update (accept / prepare / ready / out for delivery), reusing the existing `OrderAlerts` sound component.
-  - `outlet/menu.tsx` — toggle dish availability / in-stock for that outlet's dishes only.
-- Add post-login routing: if user is outlet-manager-only, land them on `/outlet`.
-
-### 5. Header/menu adjustments
-
-- Add an "Outlet panel" entry in the user dropdown when `is_outlet_manager()` returns true (similar to existing partner/admin entries).
-- Block customer-only routes the same way warehouse managers are handled in `__root.tsx`, if needed.
+## Phase 4 — Restaurant partner (onboarding, dishes, outlets, outlet managers, orders, payouts, dashboard)
+~25 endpoints + wire `/_authenticated/partner/*` and `/_authenticated/outlet/*` routes.
 
 ## Technical notes
 
-- Email lookup for "add manager" uses `supabaseAdmin.auth.admin.listUsers` filtered by email (same pattern used in `warehouse-managers.functions.ts` — will mirror that file).
-- All new RLS uses security-definer helpers — no recursive policies.
-- Realtime: add `partner_outlet_managers` and ensure `orders` is already in `supabase_realtime` publication so the outlet panel can subscribe to new orders for their outlet.
-- Existing owner notifications stay; outlet-manager notifications are additive.
+- **Role check**: mirrors Supabase exactly — `SELECT 1 FROM user_roles WHERE user_id=? AND role='admin'`. `require_admin()` throws 403 on miss.
+- **Auth model unchanged**: existing JWT issued by `auth/login.php` already carries `sub` (user id). Helpers read that, then check role tables.
+- **First admin**: I'll add a one-line SQL snippet in the schema file showing how to grant yourself admin: `INSERT INTO user_roles (id, user_id, role) VALUES (UUID(), '<your-user-id>', 'admin');`
+- **Signed file URLs**: Supabase storage signed URLs become simple authenticated file proxy `php-backend/api/admin/doc_url.php` returning a short-lived token URL.
+- **Razorpay / partner docs**: schema adds the columns, but Razorpay verify and partner doc upload remain Cloud-only until you decide on a PHP storage strategy (local filesystem vs S3). I'll flag where this matters.
 
-## Out of scope (ask later if needed)
+## After approval
 
-- Payout/revenue splitting per outlet.
-- Cashier-specific permissions distinct from manager (role column is stored but treated equally for now).
-- Inviting users who don't yet have an account (today they must sign up first, same as warehouse managers).
-
-Shall I proceed?
+I'll execute Phase 1 (schema + helpers) plus begin Phase 2 (admin endpoints) in the same turn, then continue in follow-up turns.
