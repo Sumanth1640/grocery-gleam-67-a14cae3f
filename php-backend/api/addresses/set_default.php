@@ -2,7 +2,7 @@
 require __DIR__ . '/../../config.php';
 require_method('POST');
 $uid = current_user_id();
-$in = json_input();
+$in = json_body();
 $id = $in['id'] ?? null;
 if (!$id) json_error('id required');
 
