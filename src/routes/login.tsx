@@ -69,7 +69,8 @@ function LoginPage() {
         const { error } = await dualApi.signin(email.trim(), password);
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate({ to: redirect || "/" });
+        const dest = await resolvePostLoginDest(redirect);
+        navigate({ to: dest });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
