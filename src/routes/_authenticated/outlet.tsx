@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { Loader2, Store, LayoutDashboard, ShoppingBag, UtensilsCrossed, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { myManagedOutlets } from "@/lib/outlet-managers.functions";
@@ -23,7 +24,7 @@ const NAV = [
 
 function OutletLayout() {
   const path = useRouterState({ select: (r) => r.location.pathname });
-  const fn = useServerFn(myManagedOutlets);
+  const fn = useDualFn(myManagedOutlets, (d) => php.outletMgr.myManagedOutlets(d));
   const q = useQuery({ queryKey: ["my-managed-outlets"], queryFn: () => fn() });
   const isActive = (to: string, exact: boolean) => (exact ? path === to : path === to || path.startsWith(to + "/"));
 

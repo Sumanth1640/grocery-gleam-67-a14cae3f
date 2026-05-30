@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,9 +25,9 @@ const inputCls = "w-full rounded-lg border bg-background px-3 py-2 text-sm outli
 
 function OutletsPage() {
   const qc = useQueryClient();
-  const listFn = useServerFn(listMyOutlets);
-  const saveFn = useServerFn(saveOutlet);
-  const delFn = useServerFn(deleteOutlet);
+  const listFn = useDualFn(listMyOutlets, (d) => php.partner.listMyOutlets(d));
+  const saveFn = useDualFn(saveOutlet, (d) => php.partner.saveOutlet(d));
+  const delFn = useDualFn(deleteOutlet, (d) => php.partner.deleteOutlet(d));
   const q = useQuery({ queryKey: ["partner", "outlets"], queryFn: () => listFn() });
   const [editing, setEditing] = useState<Outlet | null>(null);
 
