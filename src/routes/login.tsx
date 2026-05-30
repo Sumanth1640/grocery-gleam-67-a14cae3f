@@ -121,7 +121,8 @@ function LoginPage() {
         return;
       }
       if (result.redirected) return;
-      navigate({ to: redirect || "/" });
+      const dest = await resolvePostLoginDest(redirect);
+      navigate({ to: dest });
     } catch {
       toast.error("Google sign-in failed");
       setBusy(false);
