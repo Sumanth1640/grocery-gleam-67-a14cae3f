@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminDeleteCoupon, adminListCoupons, adminSaveCoupon } from "@/lib/coupons.functions";
@@ -55,9 +56,9 @@ const empty: Partial<Coupon> = {
 };
 
 function CouponsPage() {
-  const list = useServerFn(adminListCoupons);
-  const save = useServerFn(adminSaveCoupon);
-  const del = useServerFn(adminDeleteCoupon);
+  const list = useDualFn(adminListCoupons, (d) => php.admin.listCoupons(d));
+  const save = useDualFn(adminSaveCoupon, (d) => php.admin.saveCoupon(d));
+  const del = useDualFn(adminDeleteCoupon, (d) => php.admin.deleteCoupon(d));
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({ queryKey: ["admin-coupons"], queryFn: () => list() });
