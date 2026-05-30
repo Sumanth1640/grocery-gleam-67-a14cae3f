@@ -92,6 +92,16 @@ export const php = {
     ),
   me: () => request<{ id: string; email: string }>("/auth/me.php"),
 
+  // Profile
+  getProfile: () =>
+    request<{ id: string; email: string; full_name: string | null; phone: string | null; avatar_url: string | null }>(
+      "/profile/get.php",
+    ),
+  updateProfile: (payload: { full_name?: string; phone?: string }) =>
+    request<{ updated: number }>("/profile/update.php", "POST", payload),
+  setDefaultAddress: (id: string) =>
+    request<{ updated: number }>("/addresses/set_default.php", "POST", { id }),
+
   // Catalog
   products: () => request<Product[]>("/products/list.php"),
   productsByCategory: (category: string) =>
