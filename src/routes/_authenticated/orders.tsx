@@ -80,9 +80,9 @@ export const Route = createFileRoute("/_authenticated/orders")({
 function OrdersPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const fetchOrders = useDualFn(listOrders, () => php.myOrders());
-  const { session } = useAuth();
+  const { session, user } = useAuth();
   const qc = useQueryClient();
-  const userId = session?.user.id;
+  const userId = user?.id;
   const token = session?.access_token;
   const { data, isLoading } = useQuery({
     queryKey: ["orders"],
@@ -92,9 +92,9 @@ function OrdersPage() {
 
   useEffect(() => {
     if (!userId) return;
-    if (token) {
-      try { supabase.realtime.setAuth(token); } catch { /* ignore */ }
-    }
+    // Skip Supabase realtime in PHP mode (no Supabase session token)
+    if (!token) return;
+    try { supabase.realtime.setAuth(token); } catch { /* ignore */ }
     const ch = supabase
       .channel(`user-orders-${userId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${userId}` }, () => {
