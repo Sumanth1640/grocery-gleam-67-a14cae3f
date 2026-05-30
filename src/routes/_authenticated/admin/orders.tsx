@@ -132,10 +132,7 @@ function OrdersAdmin() {
       ) : (
         <div className="space-y-2">
           {rows.map((o) => {
-            const items = (o.items ?? []) as {
-              product: { name: string; image?: string };
-              qty: number;
-            }[];
+            const items = o.items ?? [];
             const isOpen = open === o.id;
             const addr = o.address ?? {};
             return (
