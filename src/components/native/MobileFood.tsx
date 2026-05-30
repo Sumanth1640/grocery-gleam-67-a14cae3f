@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
+import { dualApi } from "@/lib/dual-api";
 import {
   MapPin,
   Search,
@@ -28,8 +30,8 @@ export function MobileFood() {
   const [q, setQ] = useState("");
   const [cuisine, setCuisine] = useState<string | null>(null);
 
-  const partnerFn = useServerFn(listApprovedRestaurants);
-  const dishesFn = useServerFn(listAllApprovedDishes);
+  const partnerFn = useDualFn(listApprovedRestaurants, (d: any) => php.restaurants(d?.q));
+  const dishesFn = useDualFn(listAllApprovedDishes, () => dualApi.allDishes());
   const partnerQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => partnerFn() });
   const dishesQ = useQuery({ queryKey: ["public-all-dishes"], queryFn: () => dishesFn() });
   const foodCart = useFoodCart();

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { BottomNav } from "@/components/site/BottomNav";
@@ -19,9 +20,9 @@ export const Route = createFileRoute("/_authenticated/notifications")({
 
 function NotificationsPage() {
   const qc = useQueryClient();
-  const list = useServerFn(listNotifications);
-  const readFn = useServerFn(markRead);
-  const delFn = useServerFn(deleteNotification);
+  const list = useDualFn(listNotifications, () => php.notificationsList());
+  const readFn = useDualFn(markRead, (d: any) => php.markNotificationRead(d));
+  const delFn = useDualFn(deleteNotification, (d: any) => php.deleteNotification(d.id));
 
   const { data, isLoading } = useQuery({ queryKey: ["notifications"], queryFn: () => list() });
 

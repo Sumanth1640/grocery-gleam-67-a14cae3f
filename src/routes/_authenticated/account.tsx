@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
@@ -65,7 +66,7 @@ function AccountPage() {
 }
 
 function AdminLink() {
-  const check = useServerFn(isAdmin);
+  const check = useDualFn(isAdmin, async () => ({ isAdmin: false, isWarehouseManager: false }));
   const { data } = useQuery({ queryKey: ["is-admin"], queryFn: () => check(), retry: false });
   if (!data?.isAdmin && !data?.isWarehouseManager) return null;
   const label = data?.isAdmin ? "Admin" : "Warehouse";
@@ -88,8 +89,8 @@ function SectionHeader({ icon: Icon, title, action }: { icon: typeof MapPin; tit
 }
 
 function ProfileCard() {
-  const fetchProfile = useServerFn(getProfile);
-  const updateFn = useServerFn(updateProfile);
+  const fetchProfile = useDualFn(getProfile, () => php.getProfile());
+  const updateFn = useDualFn(updateProfile, (d: any) => php.updateProfile(d));
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["profile"], queryFn: () => fetchProfile() });
   const [name, setName] = useState("");
@@ -156,9 +157,9 @@ function ProfileCard() {
 }
 
 function AddressesCard() {
-  const fetchAddrs = useServerFn(listAddresses);
-  const deleteFn = useServerFn(deleteAddress);
-  const setDefaultFn = useServerFn(setDefaultAddress);
+  const fetchAddrs = useDualFn(listAddresses, () => php.addresses());
+  const deleteFn = useDualFn(deleteAddress, (d: any) => php.deleteAddress(d.id));
+  const setDefaultFn = useDualFn(setDefaultAddress, (d: any) => php.setDefaultAddress(d.id));
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["addresses"], queryFn: () => fetchAddrs() });
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -255,7 +256,7 @@ function AddressesCard() {
 }
 
 function OrdersCard() {
-  const fetchOrders = useServerFn(listOrders);
+  const fetchOrders = useDualFn(listOrders, () => php.myOrders());
   const { data, isLoading } = useQuery({ queryKey: ["orders"], queryFn: () => fetchOrders() });
 
   return (
