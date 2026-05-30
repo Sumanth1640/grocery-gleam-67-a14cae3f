@@ -37,13 +37,25 @@ function LoginPage() {
 
   // If already logged in, bounce out
   useEffect(() => {
+    let active = true;
     if (USE_PHP) {
-      if (phpAuth.get()) navigate({ to: redirect || "/" });
-      return;
+      if (phpAuth.get()) {
+        void resolvePostLoginDest(redirect).then((dest) => {
+          if (active) navigate({ to: dest, replace: true });
+        });
+      }
+      return () => {
+        active = false;
+      };
     }
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: redirect || "/" });
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!active || !data.session) return;
+      const dest = await resolvePostLoginDest(redirect);
+      if (active) navigate({ to: dest, replace: true });
     });
+    return () => {
+      active = false;
+    };
   }, [navigate, redirect]);
 
   const resolvePostLoginDest = async (fallback: string): Promise<string> => {
