@@ -230,21 +230,21 @@ export const php = {
 
   // ---------- Admin ----------
   admin: {
-    stats: () => request<{ products: number; categories: number; orders: number; revenue: number }>("/admin/stats.php"),
+    stats: (_p?: unknown) => request<{ products: number; categories: number; orders: number; revenue: number }>("/admin/stats.php"),
     // products
-    listProducts: () => request<any[]>("/admin/products/list.php"),
+    listProducts: (_p?: unknown) => request<any[]>("/admin/products/list.php"),
     saveProduct:  (p: any) => request<any>("/admin/products/save.php", "POST", p),
     deleteProduct:(p: { id: string }) => request<{ ok: true }>("/admin/products/delete.php", "POST", p),
     // categories
-    listCategories: () => request<any[]>("/admin/categories/list.php"),
+    listCategories: (_p?: unknown) => request<any[]>("/admin/categories/list.php"),
     saveCategory:   (p: any) => request<any>("/admin/categories/save.php", "POST", p),
     deleteCategory: (p: { id: string }) => request<{ ok: true }>("/admin/categories/delete.php", "POST", p),
     // banners
-    listBanners: () => request<any[]>("/admin/banners/list.php"),
+    listBanners: (_p?: unknown) => request<any[]>("/admin/banners/list.php"),
     saveBanner:  (p: any) => request<any>("/admin/banners/save.php", "POST", p),
     deleteBanner:(p: { id: string }) => request<{ ok: true }>("/admin/banners/delete.php", "POST", p),
     // orders
-    listOrders: () => request<any[]>("/admin/orders/list.php"),
+    listOrders: (_p?: unknown) => request<any[]>("/admin/orders/list.php"),
     updateOrderStatus: (p: { id: string; status: string }) =>
       request<{ ok: true; status: string }>("/admin/orders/update_status.php", "POST", p),
     // customers
@@ -258,15 +258,15 @@ export const php = {
     resolveRefund: (p: { id: string; status: string; admin_note?: string }) =>
       request<{ ok: true }>("/admin/refunds/resolve.php", "POST", p),
     // inventory
-    lowStock:    () => request<any[]>("/admin/inventory/low_stock.php"),
+    lowStock: (_p?: unknown) => request<any[]>("/admin/inventory/low_stock.php"),
     reorderStock:(p: { product_id: string; warehouse_id: string; add_qty: number }) =>
       request<{ ok: true; qty: number }>("/admin/inventory/reorder.php", "POST", p),
     // riders
-    listRiders:  () => request<any[]>("/admin/riders/list.php"),
+    listRiders: (_p?: unknown) => request<any[]>("/admin/riders/list.php"),
     saveRider:   (p: any) => request<any>("/admin/riders/save.php", "POST", p),
     deleteRider: (p: { id: string }) => request<{ ok: true }>("/admin/riders/delete.php", "POST", p),
     // assignments
-    assignableOrders: () => request<any[]>("/admin/assignments/assignable.php"),
+    assignableOrders: (_p?: unknown) => request<any[]>("/admin/assignments/assignable.php"),
     assignRider:      (p: { order_id: string; rider_id: string }) =>
       request<{ ok: true }>("/admin/assignments/assign.php", "POST", p),
     updateAssignment: (p: { order_id: string; status: string }) =>
@@ -285,12 +285,36 @@ export const php = {
     settlements: (p?: { days?: number }) => request<any[]>("/admin/settlements.php","POST", { days: p?.days ?? 30 }),
     reports:     (p?: { days?: number }) => request<any>("/admin/reports.php",     "POST", { days: p?.days ?? 90 }),
     // team
-    listTeam:        () => request<{ users: any[]; warehouses: any[] }>("/admin/team/list.php"),
+    listTeam: (_p?: unknown) => request<{ users: any[]; warehouses: any[] }>("/admin/team/list.php"),
     findUserByEmail: (p: { email: string }) => request<{ id: string; email: string }>("/admin/team/find_user.php", "POST", p),
     grantAdmin:      (p: { user_id: string }) => request<{ ok: true }>("/admin/team/grant_admin.php",  "POST", p),
     revokeAdmin:     (p: { user_id: string }) => request<{ ok: true }>("/admin/team/revoke_admin.php", "POST", p),
     setUserWarehouses: (p: { user_id: string; warehouse_ids: string[] }) =>
       request<{ ok: true; added: number; removed: number }>("/admin/team/set_warehouses.php", "POST", p),
+
+    // coupons
+    listCoupons:  (_p?: unknown) => request<any[]>("/admin/coupons/list.php"),
+    saveCoupon:   (p: any)       => request<any>("/admin/coupons/save.php", "POST", p),
+    deleteCoupon: (p: { id: string }) => request<{ ok: true }>("/admin/coupons/delete.php", "POST", p),
+
+    // warehouses
+    listWarehouses:  (_p?: unknown) => request<any[]>("/admin/warehouses/list.php"),
+    saveWarehouse:   (p: any) => request<any>("/admin/warehouses/save.php", "POST", p),
+    deleteWarehouse: (p: { id: string }) => request<{ ok: true }>("/admin/warehouses/delete.php", "POST", p),
+    listWarehousePincodes: (p: { warehouse_id: string }) =>
+      request<any[]>("/admin/warehouses/pincodes_list.php", "POST", p),
+    setWarehousePincodes:  (p: { warehouse_id: string; pincodes: string[] }) =>
+      request<{ ok: true }>("/admin/warehouses/pincodes_set.php", "POST", p),
+    listWarehouseStock: (p: { warehouse_id: string }) =>
+      request<any[]>("/admin/warehouses/stock_list.php", "POST", p),
+    setProductStock:    (p: { warehouse_id: string; product_id: string; qty: number; low_stock_threshold?: number }) =>
+      request<{ ok: true }>("/admin/warehouses/stock_set.php", "POST", p),
+    listWarehouseManagers: (p: { warehouse_id: string }) =>
+      request<any[]>("/admin/warehouses/managers_list.php", "POST", p),
+    addWarehouseManager:    (p: { warehouse_id: string; email: string }) =>
+      request<{ ok: true }>("/admin/warehouses/managers_add.php", "POST", p),
+    removeWarehouseManager: (p: { id: string }) =>
+      request<{ ok: true }>("/admin/warehouses/managers_remove.php", "POST", p),
   },
 };
 

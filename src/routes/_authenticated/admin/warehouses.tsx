@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -29,9 +30,9 @@ const inputCls = "w-full rounded-lg border bg-background px-3 py-2 text-sm outli
 
 function WarehousesAdmin() {
   const qc = useQueryClient();
-  const list = useServerFn(listWarehouses);
-  const save = useServerFn(saveWarehouse);
-  const del = useServerFn(deleteWarehouse);
+  const list = useDualFn(listWarehouses, (d) => php.admin.listWarehouses(d));
+  const save = useDualFn(saveWarehouse, (d) => php.admin.saveWarehouse(d));
+  const del = useDualFn(deleteWarehouse, (d) => php.admin.deleteWarehouse(d));
 
   const q = useQuery({ queryKey: ["admin", "warehouses"], queryFn: () => list() });
   const [editing, setEditing] = useState<Partial<Warehouse> | null>(null);
@@ -119,8 +120,8 @@ function WarehousesAdmin() {
 
 function PincodesPanel({ warehouseId }: { warehouseId: string }) {
   const qc = useQueryClient();
-  const listFn = useServerFn(listWarehousePincodes);
-  const saveFn = useServerFn(setWarehousePincodes);
+  const listFn = useDualFn(listWarehousePincodes, (d) => php.admin.listWarehousePincodes(d));
+  const saveFn = useDualFn(setWarehousePincodes, (d) => php.admin.setWarehousePincodes(d));
   const q = useQuery({ queryKey: ["admin", "wh-pincodes", warehouseId], queryFn: () => listFn({ data: { warehouse_id: warehouseId } }) });
   const [text, setText] = useState("");
   const initial = ((q.data ?? []) as { pincode: string }[]).map((r) => r.pincode).join(", ");
@@ -148,8 +149,8 @@ function PincodesPanel({ warehouseId }: { warehouseId: string }) {
 
 function StockPanel({ warehouseId }: { warehouseId: string }) {
   const qc = useQueryClient();
-  const listFn = useServerFn(listWarehouseStock);
-  const setFn = useServerFn(setProductStock);
+  const listFn = useDualFn(listWarehouseStock, (d) => php.admin.listWarehouseStock(d));
+  const setFn = useDualFn(setProductStock, (d) => php.admin.setProductStock(d));
   const q = useQuery({ queryKey: ["admin", "wh-stock", warehouseId], queryFn: () => listFn({ data: { warehouse_id: warehouseId } }) });
   const [search, setSearch] = useState("");
 
@@ -207,9 +208,9 @@ function StockPanel({ warehouseId }: { warehouseId: string }) {
 
 function ManagersPanel({ warehouseId }: { warehouseId: string }) {
   const qc = useQueryClient();
-  const listFn = useServerFn(listWarehouseManagers);
-  const addFn = useServerFn(addWarehouseManager);
-  const rmFn = useServerFn(removeWarehouseManager);
+  const listFn = useDualFn(listWarehouseManagers, (d) => php.admin.listWarehouseManagers(d));
+  const addFn = useDualFn(addWarehouseManager, (d) => php.admin.addWarehouseManager(d));
+  const rmFn = useDualFn(removeWarehouseManager, (d) => php.admin.removeWarehouseManager(d));
   const q = useQuery({
     queryKey: ["admin", "wh-managers", warehouseId],
     queryFn: () => listFn({ data: { warehouse_id: warehouseId } }),
