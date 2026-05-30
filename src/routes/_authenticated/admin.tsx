@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
 import { isAdmin } from "@/lib/catalog.functions";
 import { useAuth } from "@/lib/use-auth";
