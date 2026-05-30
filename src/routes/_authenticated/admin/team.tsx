@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -29,7 +30,7 @@ type Wh = { id: string; name: string; code: string; city: string };
 
 function TeamPage() {
   const qc = useQueryClient();
-  const list = useServerFn(listTeam);
+  const list = useDualFn(listTeam, (d) => php.admin.listTeam(d));
   const q = useQuery({ queryKey: ["admin", "team"], queryFn: () => list() });
 
   const [search, setSearch] = useState("");
@@ -119,8 +120,8 @@ function TeamPage() {
 }
 
 function TeamRow({ user, onManage, onChanged }: { user: TeamUser; onManage: () => void; onChanged: () => void }) {
-  const grant = useServerFn(grantAdmin);
-  const revoke = useServerFn(revokeAdmin);
+  const grant = useDualFn(grantAdmin, (d) => php.admin.grantAdmin(d));
+  const revoke = useDualFn(revokeAdmin, (d) => php.admin.revokeAdmin(d));
   const grantMut = useMutation({
     mutationFn: () => grant({ data: { user_id: user.user_id } }),
     onSuccess: () => { toast.success("Granted admin"); onChanged(); },
@@ -204,7 +205,7 @@ function ManageDialog({
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(user.warehouses.map((w) => w.warehouse_id)),
   );
-  const setFn = useServerFn(setUserWarehouses);
+  const setFn = useDualFn(setUserWarehouses, (d) => php.admin.setUserWarehouses(d));
   const mut = useMutation({
     mutationFn: () => setFn({ data: { user_id: user.user_id, warehouse_ids: Array.from(selected) } }),
     onSuccess: (res: { added: number; removed: number }) => {
@@ -275,9 +276,9 @@ function InviteDialog({
   const [makeAdmin, setMakeAdmin] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const findFn = useServerFn(findUserByEmail);
-  const grant = useServerFn(grantAdmin);
-  const setFn = useServerFn(setUserWarehouses);
+  const findFn = useDualFn(findUserByEmail, (d) => php.admin.findUserByEmail(d));
+  const grant = useDualFn(grantAdmin, (d) => php.admin.grantAdmin(d));
+  const setFn = useDualFn(setUserWarehouses, (d) => php.admin.setUserWarehouses(d));
 
   const mut = useMutation({
     mutationFn: async () => {

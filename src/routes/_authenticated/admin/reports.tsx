@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminReports } from "@/lib/admin-extra.functions";
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/admin/reports")({
 const inr = (n: number) => `₹${(n ?? 0).toLocaleString("en-IN")}`;
 
 function ReportsPage() {
-  const fn = useServerFn(adminReports);
+  const fn = useDualFn(adminReports, (d) => php.admin.reports(d));
   const [days, setDays] = useState(90);
   const q = useQuery({ queryKey: ["admin-reports", days], queryFn: () => fn({ data: { days } }) });
 

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminAnalytics, adminSettlements } from "@/lib/admin.functions";
@@ -14,8 +15,8 @@ const inr = (n: number) => `₹${(n ?? 0).toLocaleString("en-IN")}`;
 
 function AnalyticsPage() {
   const [days, setDays] = useState(30);
-  const analyticsFn = useServerFn(adminAnalytics);
-  const settleFn = useServerFn(adminSettlements);
+  const analyticsFn = useDualFn(adminAnalytics, (d) => php.admin.analytics(d));
+  const settleFn = useDualFn(adminSettlements, (d) => php.admin.settlements(d));
   const a = useQuery({ queryKey: ["admin-analytics", days], queryFn: () => analyticsFn({ data: { days } }) });
   const s = useQuery({ queryKey: ["admin-settlements", days], queryFn: () => settleFn({ data: { days } }) });
 

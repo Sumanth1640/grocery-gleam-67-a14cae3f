@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { adminListOrders, adminUpdateOrderStatus } from "@/lib/admin.functions";
@@ -38,8 +39,8 @@ const statusTint: Record<Status, string> = {
 };
 
 function OrdersAdmin() {
-  const list = useServerFn(adminListOrders);
-  const update = useServerFn(adminUpdateOrderStatus);
+  const list = useDualFn(adminListOrders, (d) => php.admin.listOrders(d));
+  const update = useDualFn(adminUpdateOrderStatus, (d) => php.admin.updateOrderStatus(d));
   const qc = useQueryClient();
   const { session, loading: authLoading } = useAuth();
   const orders = useQuery({ queryKey: ["admin", "orders", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });

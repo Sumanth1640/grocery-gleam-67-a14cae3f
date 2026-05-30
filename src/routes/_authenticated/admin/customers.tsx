@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListCustomers, adminSetCustomerBlocked, adminSetUserRole } from "@/lib/admin-extra.functions";
@@ -12,9 +13,9 @@ export const Route = createFileRoute("/_authenticated/admin/customers")({
 });
 
 function CustomersPage() {
-  const listFn = useServerFn(adminListCustomers);
-  const blockFn = useServerFn(adminSetCustomerBlocked);
-  const roleFn = useServerFn(adminSetUserRole);
+  const listFn = useDualFn(adminListCustomers, (d) => php.admin.listCustomers(d));
+  const blockFn = useDualFn(adminSetCustomerBlocked, (d) => php.admin.setCustomerBlocked(d));
+  const roleFn = useDualFn(adminSetUserRole, (d) => php.admin.setUserRole(d));
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [active, setActive] = useState("");

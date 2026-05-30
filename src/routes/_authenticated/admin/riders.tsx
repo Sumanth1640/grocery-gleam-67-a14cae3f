@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -17,12 +18,12 @@ export const Route = createFileRoute("/_authenticated/admin/riders")({
 const emptyRider = { name: "", phone: "", vehicle: "bike", vehicle_no: "", is_active: true, notes: "" };
 
 function RidersPage() {
-  const listFn = useServerFn(adminListRiders);
-  const saveFn = useServerFn(adminSaveRider);
-  const delFn = useServerFn(adminDeleteRider);
-  const assignableFn = useServerFn(adminAssignableOrders);
-  const assignFn = useServerFn(adminAssignRider);
-  const updateFn = useServerFn(adminUpdateAssignment);
+  const listFn = useDualFn(adminListRiders, (d) => php.admin.listRiders(d));
+  const saveFn = useDualFn(adminSaveRider, (d) => php.admin.saveRider(d));
+  const delFn = useDualFn(adminDeleteRider, (d) => php.admin.deleteRider(d));
+  const assignableFn = useDualFn(adminAssignableOrders, (d) => php.admin.assignableOrders(d));
+  const assignFn = useDualFn(adminAssignRider, (d) => php.admin.assignRider(d));
+  const updateFn = useDualFn(adminUpdateAssignment, (d) => php.admin.updateAssignment(d));
   const qc = useQueryClient();
 
   const riders = useQuery({ queryKey: ["admin-riders"], queryFn: () => listFn() });
