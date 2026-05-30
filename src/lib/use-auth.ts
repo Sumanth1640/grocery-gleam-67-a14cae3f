@@ -23,13 +23,15 @@ export function useAuth(): AuthState {
           if (!cancelled) setState({ user: null, session: null, loading: false });
           return;
         }
-        php.me()
+        php
+          .me()
           .then((u) => {
             if (cancelled) return;
             // Cast to satisfy the Supabase User shape consumers rely on (id, email).
+            const phpUser = { id: u.id, email: u.email } as unknown as User;
             setState({
-              user: { id: u.id, email: u.email } as unknown as User,
-              session: { access_token: token } as unknown as Session,
+              user: phpUser,
+              session: { access_token: token, user: phpUser } as unknown as Session,
               loading: false,
             });
           })

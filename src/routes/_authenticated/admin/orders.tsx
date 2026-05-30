@@ -13,7 +13,19 @@ export const Route = createFileRoute("/_authenticated/admin/orders")({
 });
 
 const STATUSES = ["placed", "packed", "out_for_delivery", "delivered", "cancelled"] as const;
-type Status = typeof STATUSES[number];
+type Status = (typeof STATUSES)[number];
+type OrderItem = {
+  product: { name: string; image?: string };
+  qty: number;
+};
+type OrderAddress = {
+  full_name?: string;
+  phone?: string;
+  pincode?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+};
 
 type OrderRow = {
   id: string;
@@ -23,8 +35,8 @@ type OrderRow = {
   subtotal: number;
   delivery: number;
   total: number;
-  items: any;
-  address: any;
+  items: OrderItem[] | null;
+  address: OrderAddress | null;
   created_at: string;
   warehouse_id?: string | null;
   warehouse?: { name: string; code: string } | null;
@@ -42,15 +54,26 @@ function OrdersAdmin() {
   const list = useDualFn(adminListOrders, (d) => php.admin.listOrders(d));
   const update = useDualFn(adminUpdateOrderStatus, (d) => php.admin.updateOrderStatus(d));
   const qc = useQueryClient();
-  const { session, loading: authLoading } = useAuth();
-  const orders = useQuery({ queryKey: ["admin", "orders", session?.user.id], queryFn: () => list(), enabled: !authLoading && !!session, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
+  const orders = useQuery({
+    queryKey: ["admin", "orders", userId],
+    queryFn: () => list(),
+    enabled: !authLoading && !!session && !!user,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | Status>("all");
   const [search, setSearch] = useState("");
 
   const mut = useMutation({
     mutationFn: (v: { id: string; status: Status }) => update({ data: v }),
-    onSuccess: () => { toast.success("Status updated"); qc.invalidateQueries({ queryKey: ["admin", "orders"] }); },
+    onSuccess: () => {
+      toast.success("Status updated");
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -88,7 +111,9 @@ function OrdersAdmin() {
             key={s}
             onClick={() => setFilter(s)}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-              filter === s ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:bg-accent"
+              filter === s
+                ? "bg-foreground text-background"
+                : "bg-secondary text-muted-foreground hover:bg-accent"
             }`}
           >
             {s.replace(/_/g, " ")}
@@ -97,13 +122,17 @@ function OrdersAdmin() {
       </div>
 
       {authLoading || orders.isLoading ? (
-        <div className="grid h-32 place-items-center"><Loader2 className="h-5 w-5 animate-spin" /></div>
+        <div className="grid h-32 place-items-center">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
       ) : rows.length === 0 ? (
-        <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground shadow-card">No orders found.</div>
+        <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground shadow-card">
+          No orders found.
+        </div>
       ) : (
         <div className="space-y-2">
           {rows.map((o) => {
-            const items = (o.items ?? []) as { product: { name: string; image?: string }; qty: number }[];
+            const items = o.items ?? [];
             const isOpen = open === o.id;
             const addr = o.address ?? {};
             return (
@@ -112,20 +141,33 @@ function OrdersAdmin() {
                   onClick={() => setOpen(isOpen ? null : o.id)}
                   className="flex w-full items-center gap-3 p-4 text-left hover:bg-secondary/30"
                 >
-                  {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${statusTint[o.status]}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${statusTint[o.status]}`}
+                      >
                         {o.status.replace(/_/g, " ")}
                       </span>
                       <span className="text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
-                      <span className="text-xs text-muted-foreground">· {new Date(o.created_at).toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">
+                        · {new Date(o.created_at).toLocaleString()}
+                      </span>
                       {o.warehouse ? (
-                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground" title={o.warehouse.name}>
+                        <span
+                          className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground"
+                          title={o.warehouse.name}
+                        >
                           🏬 {o.warehouse.code}
                         </span>
                       ) : (
-                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">No warehouse</span>
+                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
+                          No warehouse
+                        </span>
                       )}
                     </div>
                     <div className="mt-0.5 line-clamp-1 text-sm font-semibold">
@@ -134,7 +176,9 @@ function OrdersAdmin() {
                   </div>
                   <div className="text-right">
                     <div className="font-display text-lg font-extrabold">₹{o.total}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{o.payment}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {o.payment}
+                    </div>
                   </div>
                 </button>
 
@@ -142,31 +186,56 @@ function OrdersAdmin() {
                   <div className="space-y-4 border-t bg-secondary/20 p-4">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Delivering to</div>
-                        <div className="mt-1 text-sm font-semibold">{addr.full_name} · {addr.phone}</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Delivering to
+                        </div>
+                        <div className="mt-1 text-sm font-semibold">
+                          {addr.full_name} · {addr.phone}
+                        </div>
                         <div className="text-xs text-muted-foreground">
-                          {addr.line1}{addr.line2 ? `, ${addr.line2}` : ""}, {addr.city} — {addr.pincode}
+                          {addr.line1}
+                          {addr.line2 ? `, ${addr.line2}` : ""}, {addr.city} — {addr.pincode}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Fulfilled by</div>
-                        <div className="mt-1 text-sm font-semibold">
-                          {o.warehouse ? `${o.warehouse.name} (${o.warehouse.code})` : <span className="text-destructive">No warehouse assigned</span>}
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Fulfilled by
                         </div>
-                        <div className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Update status</div>
+                        <div className="mt-1 text-sm font-semibold">
+                          {o.warehouse ? (
+                            `${o.warehouse.name} (${o.warehouse.code})`
+                          ) : (
+                            <span className="text-destructive">No warehouse assigned</span>
+                          )}
+                        </div>
+                        <div className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Update status
+                        </div>
                         <select
                           value={o.status}
-                          onChange={(e) => mut.mutate({ id: o.id, status: e.target.value as Status })}
+                          onChange={(e) =>
+                            mut.mutate({ id: o.id, status: e.target.value as Status })
+                          }
                           className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-focus"
                         >
-                          {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
+                          {STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {s.replace(/_/g, " ")}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
                     <ul className="divide-y rounded-xl border bg-background">
                       {items.map((it, i) => (
                         <li key={i} className="flex items-center gap-3 p-3 text-sm">
-                          {it.product.image && <img src={it.product.image} alt="" className="h-10 w-10 rounded-md object-cover" />}
+                          {it.product.image && (
+                            <img
+                              src={it.product.image}
+                              alt=""
+                              className="h-10 w-10 rounded-md object-cover"
+                            />
+                          )}
                           <div className="flex-1 font-semibold">{it.product.name}</div>
                           <div className="text-xs text-muted-foreground">× {it.qty}</div>
                         </li>
