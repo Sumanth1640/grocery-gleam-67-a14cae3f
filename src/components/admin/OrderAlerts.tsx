@@ -18,7 +18,7 @@ const SEEN_KEY = "admin-alert-seen";
 export function AdminOrderAlerts() {
   const qc = useQueryClient();
   const { session } = useAuth();
-  const check = useServerFn(isAdminFn);
+  const check = useDualFn(isAdminFn, (_d?: unknown) => php.checkRole());
   const { data: role } = useQuery({
     queryKey: ["is-admin", session?.user.id],
     queryFn: () => check(),

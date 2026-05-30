@@ -37,7 +37,7 @@ function showBrowserNotification(title: string, body: string, orderId: string) {
 
 export function OrderAlerts() {
   const qc = useQueryClient();
-  const myFn = useServerFn(myRestaurant);
+  const myFn = useDualFn(myRestaurant, (_d?: unknown) => php.partner.myRestaurant());
   const r = useQuery({ queryKey: ["my-restaurant"], queryFn: () => myFn() });
 
   const [sound, setSound] = useState<boolean>(() => {

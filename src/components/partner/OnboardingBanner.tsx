@@ -8,7 +8,7 @@ import { AlertCircle, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 const STEPS = ["Basics", "Documents", "Menu", "Agreement", "Submit"];
 
 export function OnboardingBanner() {
-  const fn = useServerFn(myRestaurant);
+  const fn = useDualFn(myRestaurant, (_d?: unknown) => php.partner.myRestaurant());
   const q = useQuery({ queryKey: ["my-restaurant"], queryFn: () => fn() });
   const r = q.data;
   if (!r) return null;
