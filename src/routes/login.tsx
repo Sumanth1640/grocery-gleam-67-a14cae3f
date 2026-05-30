@@ -46,6 +46,16 @@ function LoginPage() {
     });
   }, [navigate, redirect]);
 
+  const resolvePostLoginDest = async (fallback: string): Promise<string> => {
+    try {
+      const role = USE_PHP ? await php.checkRole() : await isAdminFn();
+      if (role?.isAdmin || role?.isWarehouseManager) return "/admin";
+    } catch {
+      // ignore — fall back to requested redirect
+    }
+    return fallback || "/";
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
