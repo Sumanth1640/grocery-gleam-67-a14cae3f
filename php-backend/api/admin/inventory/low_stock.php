@@ -10,11 +10,20 @@ if (!$is_admin) {
   $where .= " AND ps.warehouse_id IN ($ph)";
   $params = $wh_ids;
 }
-$sql = "SELECT ps.*, p.name AS product_name, p.image AS product_image, p.slug AS product_slug,
-               w.name AS warehouse_name
+$sql = "SELECT ps.*,
+               p.name AS p_name, p.image AS p_image, p.slug AS p_slug,
+               w.name AS w_name
         FROM product_stock ps
         JOIN products p   ON p.id = ps.product_id
         JOIN warehouses w ON w.id = ps.warehouse_id
         $where ORDER BY ps.qty ASC LIMIT 200";
 $st = db()->prepare($sql); $st->execute($params);
-json_ok($st->fetchAll());
+$rows = $st->fetchAll();
+foreach ($rows as &$r) {
+  $r['qty']                  = (int)$r['qty'];
+  $r['low_stock_threshold']  = (int)$r['low_stock_threshold'];
+  $r['product']   = ['name' => $r['p_name'], 'image' => $r['p_image'], 'slug' => $r['p_slug']];
+  $r['warehouse'] = ['name' => $r['w_name']];
+  unset($r['p_name'],$r['p_image'],$r['p_slug'],$r['w_name']);
+}
+json_ok($rows);
