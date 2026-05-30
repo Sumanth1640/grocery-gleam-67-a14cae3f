@@ -1,8 +1,20 @@
 <?php
 require_once __DIR__ . '/../../../config.php';
-require_method('GET');
+require_method(['GET','POST']);
 require_admin();
-$rows = db()->query('SELECT * FROM partner_restaurants ORDER BY created_at DESC')->fetchAll();
+$status = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $status = (string)(json_body()['status'] ?? '');
+}
+$sql = "SELECT r.*,
+               u.full_name AS owner_name, u.email AS owner_email, u.phone AS owner_phone
+        FROM partner_restaurants r
+        LEFT JOIN users u ON u.id = r.owner_id";
+$params = [];
+if ($status !== '' && $status !== 'all') { $sql .= ' WHERE r.status = ?'; $params[] = $status; }
+$sql .= ' ORDER BY r.created_at DESC';
+$st = db()->prepare($sql); $st->execute($params);
+$rows = $st->fetchAll();
 foreach ($rows as &$r) {
   $r['cuisines']   = json_decode($r['cuisines'] ?? '[]', true) ?: [];
   $r['veg']        = (bool)$r['veg'];
