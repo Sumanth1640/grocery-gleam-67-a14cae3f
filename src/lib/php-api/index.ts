@@ -91,6 +91,8 @@ export const php = {
       { email, password },
     ),
   me: () => request<{ id: string; email: string }>("/auth/me.php"),
+  checkRole: () =>
+    request<{ isAdmin: boolean; isWarehouseManager: boolean; warehouseIds: string[] }>("/auth/check_role.php"),
 
   // Profile
   getProfile: () =>
