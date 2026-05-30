@@ -12,11 +12,12 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 
 function AdminDashboard() {
   const fetchStats = useDualFn(adminStats, (d) => php.admin.stats(d));
-  const { session, loading: authLoading } = useAuth();
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-stats", session?.user.id],
+    queryKey: ["admin-stats", userId],
     queryFn: () => fetchStats(),
-    enabled: !authLoading && !!session,
+    enabled: !authLoading && !!session && !!user,
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
