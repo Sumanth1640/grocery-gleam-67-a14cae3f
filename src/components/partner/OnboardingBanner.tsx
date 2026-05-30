@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 import { myRestaurant } from "@/lib/partner.functions";
 import { AlertCircle, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 
