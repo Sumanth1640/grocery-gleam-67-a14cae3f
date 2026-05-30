@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
@@ -8,7 +7,6 @@ import { ProductGridSkeleton } from "@/components/site/ProductGridSkeleton";
 import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { dualApi } from "@/lib/dual-api";
-import { listApprovedRestaurants, listAllApprovedDishes } from "@/lib/partner-public.functions";
 import { MobileHome } from "@/components/native/MobileHome";
 import { useIsNative } from "@/lib/use-native";
 import heroImg from "@/assets/hero-grocery.jpg";
@@ -25,12 +23,10 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const restos = useServerFn(listApprovedRestaurants);
-  const dishes = useServerFn(listAllApprovedDishes);
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
   const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => dualApi.listProducts() });
-  const restosQ = useQuery({ queryKey: ["home-restaurants"], queryFn: () => restos() });
-  const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dishes() });
+  const restosQ = useQuery({ queryKey: ["home-restaurants"], queryFn: () => dualApi.restaurants() });
+  const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dualApi.allDishes() });
 
 
   const categories = catsQ.data ?? [];
