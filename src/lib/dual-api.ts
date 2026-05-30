@@ -227,5 +227,14 @@ export const dualApi = {
     const { listApprovedRestaurants } = await import("@/lib/partner-public.functions");
     return listApprovedRestaurants({ data: { q: q ?? "" } as never });
   },
+
+  async allDishes() {
+    if (USE_PHP) {
+      // No PHP endpoint yet — return empty so the homepage section stays empty
+      return [] as unknown[];
+    }
+    const { listAllApprovedDishes } = await import("@/lib/partner-public.functions");
+    return listAllApprovedDishes();
+  },
 };
 
