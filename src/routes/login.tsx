@@ -6,7 +6,8 @@ import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { dualApi, USE_PHP } from "@/lib/dual-api";
-import { phpAuth } from "@/lib/php-api";
+import { phpAuth, php } from "@/lib/php-api";
+import { isAdmin as isAdminFn } from "@/lib/catalog.functions";
 
 import { Eye, EyeOff, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -45,6 +46,16 @@ function LoginPage() {
     });
   }, [navigate, redirect]);
 
+  const resolvePostLoginDest = async (fallback: string): Promise<string> => {
+    try {
+      const role = USE_PHP ? await php.checkRole() : await isAdminFn();
+      if (role?.isAdmin || role?.isWarehouseManager) return "/admin";
+    } catch {
+      // ignore — fall back to requested redirect
+    }
+    return fallback || "/";
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
@@ -68,7 +79,8 @@ function LoginPage() {
         const { error } = await dualApi.signin(email.trim(), password);
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate({ to: redirect || "/" });
+        const dest = await resolvePostLoginDest(redirect);
+        navigate({ to: dest });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
@@ -109,7 +121,8 @@ function LoginPage() {
         return;
       }
       if (result.redirected) return;
-      navigate({ to: redirect || "/" });
+      const dest = await resolvePostLoginDest(redirect);
+      navigate({ to: dest });
     } catch {
       toast.error("Google sign-in failed");
       setBusy(false);
