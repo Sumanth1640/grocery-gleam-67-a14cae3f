@@ -1,11 +1,8 @@
 <?php
 require_once __DIR__ . '/../../../config.php';
-require_method(['GET','POST']);
+require_method('POST');
 require_admin();
-$status = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $status = (string)(json_body()['status'] ?? '');
-}
+$status = (string)(json_body()['status'] ?? '');
 $sql = "SELECT r.*,
                u.full_name AS owner_name, u.email AS owner_email, u.phone AS owner_phone
         FROM partner_restaurants r
