@@ -52,11 +52,12 @@ function ProductsAdmin() {
   const save = useDualFn(adminSaveProduct, (d) => php.admin.saveProduct(d));
   const remove = useDualFn(adminDeleteProduct, (d) => php.admin.deleteProduct(d));
   const qc = useQueryClient();
-  const { session, loading: authLoading } = useAuth();
+  const { session, user, loading: authLoading } = useAuth();
+  const userId = session?.user?.id ?? user?.id ?? "unknown";
 
-  const queryEnabled = !authLoading && !!session;
-  const products = useQuery({ queryKey: ["admin", "products", session?.user.id], queryFn: () => list(), enabled: queryEnabled, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
-  const categories = useQuery({ queryKey: ["admin", "categories", session?.user.id], queryFn: () => cats(), enabled: queryEnabled, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const queryEnabled = !authLoading && !!session && !!user;
+  const products = useQuery({ queryKey: ["admin", "products", userId], queryFn: () => list(), enabled: queryEnabled, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  const categories = useQuery({ queryKey: ["admin", "categories", userId], queryFn: () => cats(), enabled: queryEnabled, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
 
   const [form, setForm] = useState<FormState | null>(null);
   const [q, setQ] = useState("");
