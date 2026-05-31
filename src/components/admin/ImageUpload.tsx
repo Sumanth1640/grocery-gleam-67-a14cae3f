@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { USE_PHP } from "@/lib/dual-api";
+import { phpUploads } from "@/lib/php-api";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,14 +26,19 @@ export function ImageUpload({ value, onChange, folder }: Props) {
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("catalog")
-        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
-      if (error) throw error;
-      const { data } = supabase.storage.from("catalog").getPublicUrl(path);
-      onChange(data.publicUrl);
+      if (USE_PHP) {
+        const { url } = await phpUploads.catalog(file, folder);
+        onChange(url);
+      } else {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage
+          .from("catalog")
+          .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+        if (error) throw error;
+        const { data } = supabase.storage.from("catalog").getPublicUrl(path);
+        onChange(data.publicUrl);
+      }
       toast.success("Image uploaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -40,6 +47,7 @@ export function ImageUpload({ value, onChange, folder }: Props) {
       if (inputRef.current) inputRef.current.value = "";
     }
   };
+
 
   return (
     <div className="space-y-2">
