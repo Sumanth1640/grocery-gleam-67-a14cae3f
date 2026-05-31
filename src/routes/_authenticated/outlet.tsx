@@ -3,13 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
 import { Loader2, Store, LayoutDashboard, ShoppingBag, UtensilsCrossed, ArrowLeft } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { myManagedOutlets } from "@/lib/outlet-managers.functions";
 
 export const Route = createFileRoute("/_authenticated/outlet")({
   head: () => ({ meta: [{ title: "Outlet panel — hallifresh" }] }),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
+    const { USE_PHP } = await import("@/lib/dual-api");
+    if (USE_PHP) {
+      const { phpAuth } = await import("@/lib/php-api");
+      if (!phpAuth.get()) throw redirect({ to: "/login", search: { redirect: location.href } });
+      return;
+    }
+    const { supabase } = await import("@/integrations/supabase/client");
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/login", search: { redirect: location.href } });
   },
