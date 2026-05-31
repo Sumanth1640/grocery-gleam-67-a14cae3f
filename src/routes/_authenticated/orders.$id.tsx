@@ -106,7 +106,7 @@ function OrderDetailPage() {
     navigate({ to: "/cart" });
   };
 
-  const cancelRpc = useDualFn(cancelOrder, async () => { throw new Error("Cancel not available on PHP backend yet"); });
+  const cancelRpc = useDualFn(cancelOrder, async ({ data: d }: { data: { id: string } }) => php.cancelOrder(d.id));
   const cancelM = useMutation({
     mutationFn: () => cancelRpc({ data: { id } }),
     onSuccess: () => {
