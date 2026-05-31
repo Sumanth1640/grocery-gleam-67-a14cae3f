@@ -117,6 +117,7 @@ export const php = {
   createOrder: (payload: unknown) => request<{ id: string }>("/orders/create.php", "POST", payload),
   myOrders: () => request<unknown[]>("/orders/list.php"),
   getOrder: (id: string) => request<Record<string, unknown>>(`/orders/get.php?id=${encodeURIComponent(id)}`),
+  cancelOrder: (id: string) => request<{ ok: true }>("/orders/cancel.php", "POST", { id }),
 
   // Addresses
   addresses: () => request<Array<Record<string, unknown> & { id: string }>>("/addresses/list.php"),
