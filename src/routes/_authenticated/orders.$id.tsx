@@ -14,6 +14,16 @@ import { useIsAdmin } from "@/lib/use-is-admin";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck, Download, X, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog-types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { upsertReview } from "@/lib/reviews.functions";
 import { createRefundRequest, myRefundForOrder } from "@/lib/admin-extra.functions";
