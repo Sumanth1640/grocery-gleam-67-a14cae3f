@@ -9,6 +9,8 @@ import { getOrder, cancelOrder } from "@/lib/account.functions";
 import { cartStore } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
 import { USE_PHP } from "@/lib/dual-api";
+import { useAuth } from "@/lib/use-auth";
+import { useIsAdmin } from "@/lib/use-is-admin";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck, Download, X, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog-types";
@@ -33,6 +35,8 @@ export const Route = createFileRoute("/_authenticated/orders/$id")({
 function OrderDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const fetchOrder = useDualFn(getOrder, (d: any) => php.getOrder(d.id));
   const qc = useQueryClient();
   const { data: order, isLoading } = useQuery({
@@ -201,7 +205,7 @@ function OrderDetailPage() {
                 >
                   <Download className="h-3.5 w-3.5" /> Invoice
                 </Link>
-                {order.status === "placed" && (
+                {order.status === "placed" && (order.user_id === user?.id || isAdmin) && (
                   <button
                     onClick={() => { if (confirm("Cancel this order?")) cancelM.mutate(); }}
                     disabled={cancelM.isPending}
