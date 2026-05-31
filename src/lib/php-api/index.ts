@@ -383,4 +383,56 @@ export const php = {
   },
 };
 
+// ---------- File uploads (multipart) ----------
+async function uploadMultipart(path: string, form: FormData): Promise<{ path: string; url: string }> {
+  const headers: Record<string, string> = {};
+  const token = phpAuth.get();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const tried: string[] = [];
+  let lastError: unknown;
+  for (const base of baseCandidates()) {
+    const url = `${base}${path}`;
+    tried.push(url);
+    try {
+      const res = await fetch(url, { method: "POST", headers, body: form });
+      const text = await res.text();
+      let data: unknown = null;
+      try { data = text ? JSON.parse(text) : null; } catch {
+        throw new Error(`Invalid JSON from ${url}: ${text.slice(0, 120)}`);
+      }
+      if (!res.ok) throw new Error((data as { error?: string })?.error ?? `HTTP ${res.status}`);
+      return data as { path: string; url: string };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw new Error(
+    `PHP upload failed for ${path}. Tried: ${tried.join(", ")}. ${
+      lastError instanceof Error ? lastError.message : String(lastError)
+    }`,
+  );
+}
+
+export const phpUploads = {
+  /** Admin upload to public catalog bucket (products, categories, banners, etc). */
+  catalog: (file: File, folder: "products" | "categories" | "restaurants" | "dishes" | "banners") => {
+    const fd = new FormData();
+    fd.append("bucket", "catalog");
+    fd.append("folder", folder);
+    fd.append("file", file);
+    return uploadMultipart("/uploads/upload.php", fd);
+  },
+  /** Partner KYC document — folder MUST equal the current user's id. */
+  partnerDoc: (file: File, userId: string, kind: string) => {
+    const fd = new FormData();
+    fd.append("bucket", "partner-docs");
+    fd.append("folder", userId);
+    fd.append("kind", kind);
+    fd.append("file", file);
+    return uploadMultipart("/uploads/upload.php", fd);
+  },
+};
+
+
 
