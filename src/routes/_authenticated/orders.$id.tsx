@@ -14,6 +14,16 @@ import { useIsAdmin } from "@/lib/use-is-admin";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck, Download, X, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog-types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { upsertReview } from "@/lib/reviews.functions";
 import { createRefundRequest, myRefundForOrder } from "@/lib/admin-extra.functions";
@@ -122,6 +132,7 @@ function OrderDetailPage() {
   });
 
   const reviewRpc = useDualFn(upsertReview, (d: any) => php.addReview(d));
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewBody, setReviewBody] = useState("");
@@ -207,7 +218,7 @@ function OrderDetailPage() {
                 </Link>
                 {order.status === "placed" && (order.user_id === user?.id || isAdmin) && (
                   <button
-                    onClick={() => { if (confirm("Cancel this order?")) cancelM.mutate(); }}
+                    onClick={() => setShowCancelDialog(true)}
                     disabled={cancelM.isPending}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-destructive/30 px-3 py-2 text-xs font-bold text-destructive hover:bg-destructive/5 disabled:opacity-50"
                   >
@@ -447,6 +458,30 @@ function OrderDetailPage() {
                 )}
               </div>
             </div>
+
+            {/* Cancel confirmation modal */}
+            <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel order?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will cancel order #{order.id.slice(0, 8)}. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setShowCancelDialog(false)}>Keep order</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      setShowCancelDialog(false);
+                      cancelM.mutate();
+                    }}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Yes, cancel
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </div>
