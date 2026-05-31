@@ -8,6 +8,7 @@ import { Footer } from "@/components/site/Footer";
 import { getOrder, cancelOrder } from "@/lib/account.functions";
 import { cartStore } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
+import { USE_PHP } from "@/lib/dual-api";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, MapPin, Package, Repeat, Truck, Download, X, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog-types";
@@ -51,6 +52,7 @@ function OrderDetailPage() {
     let lastStatus: string | undefined;
 
     const start = async () => {
+      if (USE_PHP) return; // No realtime in PHP mode — polling below handles it.
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
       if (token) supabase.realtime.setAuth(token);
@@ -134,8 +136,8 @@ function OrderDetailPage() {
   });
 
   // ----- Refund request -----
-  const refundFetchRpc = useDualFn(myRefundForOrder, async () => null);
-  const refundCreateRpc = useDualFn(createRefundRequest, async () => { throw new Error("Refund not available on PHP backend yet"); });
+  const refundFetchRpc = useDualFn(myRefundForOrder, (d: any) => php.myRefundForOrder(d.order_id));
+  const refundCreateRpc = useDualFn(createRefundRequest, (d: any) => php.createRefund(d));
   const refundQ = useQuery({
     queryKey: ["refund", id],
     queryFn: () => refundFetchRpc({ data: { order_id: id } }),
