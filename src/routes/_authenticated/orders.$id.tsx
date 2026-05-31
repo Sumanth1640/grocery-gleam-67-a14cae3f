@@ -218,7 +218,7 @@ function OrderDetailPage() {
                 </Link>
                 {order.status === "placed" && (order.user_id === user?.id || isAdmin) && (
                   <button
-                    onClick={() => { if (confirm("Cancel this order?")) cancelM.mutate(); }}
+                    onClick={() => setShowCancelDialog(true)}
                     disabled={cancelM.isPending}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-destructive/30 px-3 py-2 text-xs font-bold text-destructive hover:bg-destructive/5 disabled:opacity-50"
                   >
