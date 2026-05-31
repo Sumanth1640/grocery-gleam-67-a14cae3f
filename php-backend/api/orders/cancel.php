@@ -10,7 +10,10 @@ if (!$id) json_error('id required');
 $stmt = db()->prepare('SELECT id, status, user_id FROM orders WHERE id = ?');
 $stmt->execute([$id]);
 $row = $stmt->fetch();
-if (!$row || $row['user_id'] !== $uid) json_error('Order not found', 404);
+if (!$row) json_error('Order not found', 404);
+
+$is_admin = has_role($uid, 'admin');
+if ($row['user_id'] !== $uid && !$is_admin) json_error('Order not found', 404);
 if ($row['status'] !== 'placed') json_error('Order can no longer be cancelled', 400);
 
 $upd = db()->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
