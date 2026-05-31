@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { USE_PHP } from "@/lib/dual-api";
+import { phpUploads } from "@/lib/php-api";
 import { FileUp, Loader2, FileText, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,13 +32,18 @@ export function DocumentUpload({ value, onChange, kind, userId, label }: Props) 
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
-      const path = `${userId}/${kind}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("partner-docs")
-        .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
-      if (error) throw error;
-      onChange(path);
+      if (USE_PHP) {
+        const { path } = await phpUploads.partnerDoc(file, userId, kind);
+        onChange(path);
+      } else {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
+        const path = `${userId}/${kind}-${Date.now()}.${ext}`;
+        const { error } = await supabase.storage
+          .from("partner-docs")
+          .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
+        if (error) throw error;
+        onChange(path);
+      }
       toast.success("Document uploaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -45,6 +52,7 @@ export function DocumentUpload({ value, onChange, kind, userId, label }: Props) 
       if (inputRef.current) inputRef.current.value = "";
     }
   };
+
 
   return (
     <div className="rounded-xl border bg-background p-3">
