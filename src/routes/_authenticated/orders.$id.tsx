@@ -132,6 +132,7 @@ function OrderDetailPage() {
   });
 
   const reviewRpc = useDualFn(upsertReview, (d: any) => php.addReview(d));
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewBody, setReviewBody] = useState("");
