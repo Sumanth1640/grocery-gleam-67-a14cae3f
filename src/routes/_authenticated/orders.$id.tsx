@@ -458,6 +458,30 @@ function OrderDetailPage() {
                 )}
               </div>
             </div>
+
+            {/* Cancel confirmation modal */}
+            <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel order?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will cancel order #{order.id.slice(0, 8)}. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setShowCancelDialog(false)}>Keep order</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      setShowCancelDialog(false);
+                      cancelM.mutate();
+                    }}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Yes, cancel
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </div>
