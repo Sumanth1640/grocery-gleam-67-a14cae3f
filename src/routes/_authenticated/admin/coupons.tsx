@@ -96,12 +96,21 @@ function CouponsPage() {
   };
 
   const submit = () => {
+    const code = (form.code ?? "").trim().toUpperCase();
+    if (!code) return toast.error("Code is required");
+    if (!/^[A-Z0-9_-]{2,40}$/.test(code))
+      return toast.error("Code must be 2–40 chars: A-Z, 0-9, _ or -");
+    const type = form.discount_type ?? "percent";
+    if (type !== "flat" && type !== "percent") return toast.error("Invalid discount type");
+    const value = Number(form.discount_value ?? 0);
+    if (!value || value <= 0) return toast.error("Discount value must be greater than 0");
+    if (type === "percent" && value > 100) return toast.error("Percent discount cannot exceed 100");
     const payload: any = {
       id: form.id,
-      code: (form.code ?? "").trim().toUpperCase(),
+      code,
       description: form.description ?? "",
-      discount_type: form.discount_type ?? "percent",
-      discount_value: Number(form.discount_value ?? 0),
+      discount_type: type,
+      discount_value: value,
       min_order: Number(form.min_order ?? 0),
       max_discount: form.max_discount === null || form.max_discount === undefined || form.max_discount === ("" as any)
         ? null
@@ -117,6 +126,7 @@ function CouponsPage() {
     };
     saveMut.mutate(payload);
   };
+
 
   return (
     <div className="space-y-4">

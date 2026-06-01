@@ -232,14 +232,23 @@ function ProductsAdmin() {
           setForm={setForm}
           categories={(categories.data as { slug: string; name: string }[] | undefined) ?? []}
           onSave={() => {
+            const slug = form.slug.trim();
+            const name = form.name.trim();
+            const category_slug = form.category_slug.trim();
+            if (!name) return toast.error("Name is required");
+            if (!slug) return toast.error("Slug is required");
+            if (!/^[a-z0-9-]+$/.test(slug)) return toast.error("Slug must be lowercase letters, numbers, dashes");
+            if (!category_slug) return toast.error("Pick a category");
+            const price = parseInt(form.price, 10);
+            if (!price || price <= 0) return toast.error("Price must be greater than 0");
             const payload = {
               ...(form.id ? { id: form.id } : {}),
-              slug: form.slug.trim(),
-              name: form.name.trim(),
-              category_slug: form.category_slug.trim(),
+              slug,
+              name,
+              category_slug,
               image: form.image.trim(),
               weight: form.weight.trim(),
-              price: parseInt(form.price, 10) || 0,
+              price,
               mrp: parseInt(form.mrp, 10) || 0,
               eta: form.eta.trim() || "11 mins",
               rating: parseFloat(form.rating) || 4.5,
@@ -247,6 +256,7 @@ function ProductsAdmin() {
             };
             saveMut.mutate(payload);
           }}
+
           saving={saveMut.isPending}
         />
       )}
