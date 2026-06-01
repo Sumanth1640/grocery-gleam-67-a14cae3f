@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
+import { USE_PHP } from "@/lib/dual-api";
 import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
