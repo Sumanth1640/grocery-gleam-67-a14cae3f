@@ -17,7 +17,7 @@ if (!$razorpay_order_id || !$razorpay_payment_id || !$razorpay_signature) {
 }
 if (!is_array($order)) json_error('order payload required');
 
-$secret = getenv('RAZORPAY_KEY_SECRET') ?: (defined('RAZORPAY_KEY_SECRET') ? RAZORPAY_KEY_SECRET : '');
+$secret = razorpay_keys()['key_secret'];
 if (!$secret) json_error('Razorpay secret not configured', 500);
 
 $expected = hash_hmac('sha256', $razorpay_order_id . '|' . $razorpay_payment_id, $secret);

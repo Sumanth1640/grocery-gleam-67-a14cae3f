@@ -3,7 +3,7 @@
 require __DIR__ . '/../../config.php';
 require_method('POST');
 
-$secret = getenv('RAZORPAY_WEBHOOK_SECRET') ?: (defined('RAZORPAY_WEBHOOK_SECRET') ? RAZORPAY_WEBHOOK_SECRET : '');
+$secret = razorpay_keys()['webhook_secret'];
 if (!$secret) json_error('Webhook secret not configured', 500);
 
 $raw = file_get_contents('php://input');

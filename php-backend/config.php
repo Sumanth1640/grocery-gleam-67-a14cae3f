@@ -10,6 +10,21 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('JWT_SECRET', 'CHANGE_ME_TO_A_LONG_RANDOM_STRING_64_CHARS_MINIMUM');
 define('JWT_TTL_SECONDS', 60 * 60 * 24 * 7); // 7 days
+
+// ---------- Razorpay ----------
+// Switch between 'test' and 'live' without touching endpoint code.
+// Override per environment with:  putenv('RAZORPAY_MODE=live');
+define('RAZORPAY_MODE', getenv('RAZORPAY_MODE') ?: 'test');
+
+// TEST keys — get from https://dashboard.razorpay.com/app/keys (Test Mode)
+define('RAZORPAY_TEST_KEY_ID',         '');  // rzp_test_xxx
+define('RAZORPAY_TEST_KEY_SECRET',     '');
+define('RAZORPAY_TEST_WEBHOOK_SECRET', '');
+
+// LIVE keys — fill only when you're ready to take real payments
+define('RAZORPAY_LIVE_KEY_ID',         '');  // rzp_live_xxx
+define('RAZORPAY_LIVE_KEY_SECRET',     '');
+define('RAZORPAY_LIVE_WEBHOOK_SECRET', '');
 // -----------------------------------------------------
 
 // CORS — allow your React frontend domain
@@ -181,4 +196,44 @@ function my_outlet_ids(string $user_id): array {
   $st = db()->prepare('SELECT outlet_id FROM partner_outlet_managers WHERE user_id = ?');
   $st->execute([$user_id]);
   return $st->fetchAll(PDO::FETCH_COLUMN) ?: [];
+}
+
+// ============================================================
+// Razorpay key helper — returns ['mode','key_id','key_secret','webhook_secret']
+// Picks LIVE_* when RAZORPAY_MODE=live, otherwise TEST_*.
+// Env vars override the config.php constants:
+//   RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET
+//     → force a specific key set regardless of mode
+// ============================================================
+function razorpay_keys(): array {
+  $mode = strtolower(RAZORPAY_MODE) === 'live' ? 'live' : 'test';
+
+  $forced_id      = getenv('RAZORPAY_KEY_ID')         ?: '';
+  $forced_secret  = getenv('RAZORPAY_KEY_SECRET')     ?: '';
+  $forced_webhook = getenv('RAZORPAY_WEBHOOK_SECRET') ?: '';
+
+  if ($mode === 'live') {
+    $key_id     = $forced_id     ?: (defined('RAZORPAY_LIVE_KEY_ID')         ? RAZORPAY_LIVE_KEY_ID         : '');
+    $key_secret = $forced_secret ?: (defined('RAZORPAY_LIVE_KEY_SECRET')     ? RAZORPAY_LIVE_KEY_SECRET     : '');
+    $webhook    = $forced_webhook?: (defined('RAZORPAY_LIVE_WEBHOOK_SECRET') ? RAZORPAY_LIVE_WEBHOOK_SECRET : '');
+  } else {
+    $key_id     = $forced_id     ?: (defined('RAZORPAY_TEST_KEY_ID')         ? RAZORPAY_TEST_KEY_ID         : '');
+    $key_secret = $forced_secret ?: (defined('RAZORPAY_TEST_KEY_SECRET')     ? RAZORPAY_TEST_KEY_SECRET     : '');
+    $webhook    = $forced_webhook?: (defined('RAZORPAY_TEST_WEBHOOK_SECRET') ? RAZORPAY_TEST_WEBHOOK_SECRET : '');
+  }
+
+  // Safety net — a 'live' key in test mode (or vice versa) usually means misconfiguration.
+  if ($key_id && $mode === 'test' && !str_starts_with($key_id, 'rzp_test_')) {
+    error_log("razorpay_keys(): mode=test but key_id does not start with rzp_test_");
+  }
+  if ($key_id && $mode === 'live' && !str_starts_with($key_id, 'rzp_live_')) {
+    error_log("razorpay_keys(): mode=live but key_id does not start with rzp_live_");
+  }
+
+  return [
+    'mode'           => $mode,
+    'key_id'         => $key_id,
+    'key_secret'     => $key_secret,
+    'webhook_secret' => $webhook,
+  ];
 }
