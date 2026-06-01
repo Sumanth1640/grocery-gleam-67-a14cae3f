@@ -26,6 +26,7 @@ import { Route as FoodFavouritesRouteImport } from './routes/food/favourites'
 import { Route as FoodDishesRouteImport } from './routes/food/dishes'
 import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
+import { Route as DebugPhpModeRouteImport } from './routes/debug.php-mode'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
 import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedOutletRouteImport } from './routes/_authenticated/outlet'
@@ -146,6 +147,11 @@ const FoodCheckoutRoute = FoodCheckoutRouteImport.update({
 const FoodCartRoute = FoodCartRouteImport.update({
   id: '/food/cart',
   path: '/food/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DebugPhpModeRoute = DebugPhpModeRouteImport.update({
+  id: '/debug/php-mode',
+  path: '/debug/php-mode',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CSlugRoute = CSlugRouteImport.update({
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/c/$slug': typeof CSlugRoute
+  '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
@@ -428,6 +435,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/c/$slug': typeof CSlugRoute
+  '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
@@ -485,6 +493,7 @@ export interface FileRoutesById {
   '/_authenticated/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/_authenticated/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/c/$slug': typeof CSlugRoute
+  '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
   '/food/checkout': typeof FoodCheckoutRoute
   '/food/dishes': typeof FoodDishesRoute
@@ -542,6 +551,7 @@ export interface FileRouteTypes {
     | '/outlet'
     | '/partner'
     | '/c/$slug'
+    | '/debug/php-mode'
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
@@ -594,6 +604,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/orders'
     | '/c/$slug'
+    | '/debug/php-mode'
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/_authenticated/outlet'
     | '/_authenticated/partner'
     | '/c/$slug'
+    | '/debug/php-mode'
     | '/food/cart'
     | '/food/checkout'
     | '/food/dishes'
@@ -701,6 +713,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   WishlistRoute: typeof WishlistRoute
   CSlugRoute: typeof CSlugRoute
+  DebugPhpModeRoute: typeof DebugPhpModeRoute
   FoodCartRoute: typeof FoodCartRoute
   FoodCheckoutRoute: typeof FoodCheckoutRoute
   FoodDishesRoute: typeof FoodDishesRoute
@@ -831,6 +844,13 @@ declare module '@tanstack/react-router' {
       path: '/food/cart'
       fullPath: '/food/cart'
       preLoaderRoute: typeof FoodCartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/debug/php-mode': {
+      id: '/debug/php-mode'
+      path: '/debug/php-mode'
+      fullPath: '/debug/php-mode'
+      preLoaderRoute: typeof DebugPhpModeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/c/$slug': {
@@ -1232,6 +1252,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   WishlistRoute: WishlistRoute,
   CSlugRoute: CSlugRoute,
+  DebugPhpModeRoute: DebugPhpModeRoute,
   FoodCartRoute: FoodCartRoute,
   FoodCheckoutRoute: FoodCheckoutRoute,
   FoodDishesRoute: FoodDishesRoute,
@@ -1245,13 +1266,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
