@@ -26,7 +26,7 @@ function PhpModeDebug() {
     // ---- public ----
     { name: "GET /categories/list", group: "public", run: () => php.categories() },
     { name: "GET /products/list", group: "public", run: () => php.products() },
-    { name: "GET /banners/list", group: "public", run: () => php.banners?.() ?? Promise.resolve([]) },
+    { name: "GET /banners/list", group: "public", run: () => php.banners() },
     { name: "GET /coupons/list", group: "public", run: () => php.coupons() },
     { name: "GET /restaurants/list", group: "public", run: () => php.restaurants() },
     { name: "GET /search/global?q=test", group: "public", run: () => php.search("test") },
@@ -41,19 +41,19 @@ function PhpModeDebug() {
     { name: "GET /coupons/my_usage", group: "auth", needsAuth: true, run: () => php.myCouponUsage() },
 
     // ---- admin ----
-    { name: "GET /admin/stats", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.adminStats() },
-    { name: "GET /admin/orders/list", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.adminOrders() },
-    { name: "GET /admin/products/list", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.adminProducts() },
-    { name: "GET /admin/inventory/low_stock", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.adminLowStock() },
+    { name: "GET /admin/stats", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.admin.stats() },
+    { name: "GET /admin/orders/list", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.admin.listOrders() },
+    { name: "GET /admin/products/list", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.admin.listProducts() },
+    { name: "GET /admin/inventory/low_stock", group: "admin", needsAuth: true, needsRole: "admin", run: () => php.admin.lowStock() },
 
     // ---- partner ----
-    { name: "GET /partner/me", group: "partner", needsAuth: true, needsRole: "partner", run: () => php.partnerMe() },
-    { name: "GET /partner/dashboard", group: "partner", needsAuth: true, needsRole: "partner", run: () => php.partnerDashboard() },
-    { name: "GET /partner/orders", group: "partner", needsAuth: true, needsRole: "partner", run: () => php.partnerOrders() },
+    { name: "GET /partner/me", group: "partner", needsAuth: true, needsRole: "partner", run: () => php.partner.myRestaurant() },
+    { name: "GET /partner/dashboard", group: "partner", needsAuth: true, needsRole: "partner", run: () => php.partner.dashboard() },
+    { name: "GET /partner/orders", group: "partner", needsAuth: true, needsRole: "partner", run: () => php.partner.listMyRestaurantOrders() },
 
     // ---- outlet manager ----
-    { name: "GET /outlet_mgr/my_outlets", group: "outlet", needsAuth: true, needsRole: "outlet_mgr", run: () => php.outletMgrOutlets() },
-    { name: "GET /outlet_mgr/orders_list", group: "outlet", needsAuth: true, needsRole: "outlet_mgr", run: () => php.outletMgrOrders() },
+    { name: "GET /outlet_mgr/my_outlets", group: "outlet", needsAuth: true, needsRole: "outlet_mgr", run: () => php.outletMgr.myManagedOutlets() },
+    { name: "POST /outlet_mgr/orders_list", group: "outlet", needsAuth: true, needsRole: "outlet_mgr", run: () => php.outletMgr.listOutletOrders() },
   ];
 
   async function runAll() {
