@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
+import { USE_PHP } from "@/lib/dual-api";
 import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +47,20 @@ export function AdminOrderAlerts() {
     if (!session) return;
     if (!isAdminUser && warehouseIds.length === 0) return;
 
+    const invalidateAll = () => {
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+      qc.invalidateQueries({ queryKey: ["admin-assignable"] });
+      qc.invalidateQueries({ queryKey: ["admin-analytics"] });
+      qc.invalidateQueries({ queryKey: ["admin-low-stock"] });
+    };
+
+    // PHP mode: poll instead of realtime.
+    if (USE_PHP) {
+      const t = setInterval(invalidateAll, 20_000);
+      return () => clearInterval(t);
+    }
+
     // Ensure realtime is authenticated for RLS-aware postgres_changes
     if (token) {
       try {
@@ -58,13 +73,6 @@ export function AdminOrderAlerts() {
     const seenAt = Date.now();
     if (typeof window !== "undefined") sessionStorage.setItem(SEEN_KEY, String(seenAt));
 
-    const invalidateAll = () => {
-      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
-      qc.invalidateQueries({ queryKey: ["admin-stats"] });
-      qc.invalidateQueries({ queryKey: ["admin-assignable"] });
-      qc.invalidateQueries({ queryKey: ["admin-analytics"] });
-      qc.invalidateQueries({ queryKey: ["admin-low-stock"] });
-    };
 
     const insertHandler = (payload: { new: { id: string; total: number; created_at: string } }) => {
       const row = payload.new;

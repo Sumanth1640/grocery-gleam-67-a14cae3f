@@ -92,8 +92,11 @@ function OrdersPage() {
 
   useEffect(() => {
     if (!userId) return;
-    // Skip Supabase realtime in PHP mode (no Supabase session token)
-    if (!token) return;
+    // PHP mode has no realtime — poll instead.
+    if (!token) {
+      const t = setInterval(() => qc.invalidateQueries({ queryKey: ["orders"] }), 15_000);
+      return () => clearInterval(t);
+    }
     try { supabase.realtime.setAuth(token); } catch { /* ignore */ }
     const ch = supabase
       .channel(`user-orders-${userId}`)

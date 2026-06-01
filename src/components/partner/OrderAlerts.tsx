@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { USE_PHP } from "@/lib/dual-api";
 import { myRestaurant } from "@/lib/partner.functions";
 import { playAlert } from "@/lib/alert-sounds";
 import { AlertSoundSettingsButton } from "@/components/admin/AlertSoundSettings";
@@ -65,6 +66,13 @@ export function OrderAlerts() {
       qc.invalidateQueries({ queryKey: ["partner-dashboard"] });
       qc.invalidateQueries({ queryKey: ["partner-orders"] });
     };
+
+    // PHP mode: poll instead of realtime.
+    if (USE_PHP) {
+      const t = setInterval(invalidateAll, 20_000);
+      return () => clearInterval(t);
+    }
+
 
     const channel = supabase
       .channel(`partner-orders-${restaurantId}`)
