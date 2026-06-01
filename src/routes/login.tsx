@@ -79,6 +79,16 @@ function LoginPage() {
           setBusy(false);
           return;
         }
+        if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+          toast.error("Please enter a valid email address");
+          setBusy(false);
+          return;
+        }
+        if (password.length < 8) {
+          toast.error("Password must be at least 8 characters");
+          setBusy(false);
+          return;
+        }
         const { error } = await dualApi.signup(email.trim(), password, name.trim());
         if (error) throw error;
         if (USE_PHP) {
