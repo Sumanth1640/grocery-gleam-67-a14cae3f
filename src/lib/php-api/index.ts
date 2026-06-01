@@ -275,7 +275,8 @@ export const php = {
     request<{ order_id: string; amount: number; currency: string; key_id: string }>(
       "/payments/razorpay_create_order.php",
       "POST",
-      { amount },
+      // Cloud server fn takes rupees and multiplies by 100; PHP endpoint expects paise directly.
+      { amount: Math.round(amount * 100) },
     ),
   verifyAndPlaceOrder: (payload: {
     razorpay_order_id: string;
