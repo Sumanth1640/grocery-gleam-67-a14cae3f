@@ -205,16 +205,23 @@ function CategoriesAdmin() {
                 Cancel
               </button>
               <button
-                onClick={() =>
+                onClick={() => {
+                  const slug = form.slug.trim();
+                  const name = form.name.trim();
+                  if (!name) return toast.error("Name is required");
+                  if (!slug) return toast.error("Slug is required");
+                  if (!/^[a-z0-9-]+$/.test(slug))
+                    return toast.error("Slug must be lowercase letters, numbers, dashes");
                   saveMut.mutate({
                     ...(form.id ? { id: form.id } : {}),
-                    slug: form.slug.trim(),
-                    name: form.name.trim(),
+                    slug,
+                    name,
                     image: form.image.trim(),
                     tint: form.tint.trim(),
                     sort_order: parseInt(form.sort_order, 10) || 0,
-                  })
-                }
+                  });
+                }}
+
                 disabled={saveMut.isPending}
                 className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-pop disabled:opacity-50"
               >
