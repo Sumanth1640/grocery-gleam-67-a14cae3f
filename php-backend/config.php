@@ -10,6 +10,21 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('JWT_SECRET', 'CHANGE_ME_TO_A_LONG_RANDOM_STRING_64_CHARS_MINIMUM');
 define('JWT_TTL_SECONDS', 60 * 60 * 24 * 7); // 7 days
+
+// ---------- Razorpay ----------
+// Switch between 'test' and 'live' without touching endpoint code.
+// Override per environment with:  putenv('RAZORPAY_MODE=live');
+define('RAZORPAY_MODE', getenv('RAZORPAY_MODE') ?: 'test');
+
+// TEST keys — get from https://dashboard.razorpay.com/app/keys (Test Mode)
+define('RAZORPAY_TEST_KEY_ID',         '');  // rzp_test_xxx
+define('RAZORPAY_TEST_KEY_SECRET',     '');
+define('RAZORPAY_TEST_WEBHOOK_SECRET', '');
+
+// LIVE keys — fill only when you're ready to take real payments
+define('RAZORPAY_LIVE_KEY_ID',         '');  // rzp_live_xxx
+define('RAZORPAY_LIVE_KEY_SECRET',     '');
+define('RAZORPAY_LIVE_WEBHOOK_SECRET', '');
 // -----------------------------------------------------
 
 // CORS — allow your React frontend domain
