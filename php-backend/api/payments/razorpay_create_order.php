@@ -39,5 +39,6 @@ json_ok([
   'order_id' => $data['id'],
   'amount'   => $data['amount'],
   'currency' => $data['currency'],
-  'key_id'   => $key_id, // safe — publishable on Razorpay checkout
+  'key_id'   => $key_id,       // safe — publishable on Razorpay checkout
+  'mode'     => $rzp['mode'],  // 'test' or 'live' — useful for client banners
 ]);
