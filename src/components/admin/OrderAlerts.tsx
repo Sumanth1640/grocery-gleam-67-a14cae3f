@@ -73,13 +73,6 @@ export function AdminOrderAlerts() {
     const seenAt = Date.now();
     if (typeof window !== "undefined") sessionStorage.setItem(SEEN_KEY, String(seenAt));
 
-    const invalidateAll = () => {
-      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
-      qc.invalidateQueries({ queryKey: ["admin-stats"] });
-      qc.invalidateQueries({ queryKey: ["admin-assignable"] });
-      qc.invalidateQueries({ queryKey: ["admin-analytics"] });
-      qc.invalidateQueries({ queryKey: ["admin-low-stock"] });
-    };
 
     const insertHandler = (payload: { new: { id: string; total: number; created_at: string } }) => {
       const row = payload.new;
