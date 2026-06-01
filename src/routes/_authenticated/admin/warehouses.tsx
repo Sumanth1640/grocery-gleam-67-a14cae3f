@@ -76,7 +76,14 @@ function WarehousesAdmin() {
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_active ?? true} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Active</label>
           </div>
           <div className="mt-4 flex gap-2">
-            <button onClick={() => saveMut.mutate(editing)} disabled={saveMut.isPending} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
+            <button onClick={() => {
+              const name = (editing.name ?? "").trim();
+              const code = (editing.code ?? "").trim();
+              if (!name) { toast.error("Name is required"); return; }
+              if (!code) { toast.error("Code is required"); return; }
+              if (!/^[a-zA-Z0-9_-]+$/.test(code)) { toast.error("Code may only contain letters, numbers, _ and -"); return; }
+              saveMut.mutate({ ...editing, name, code });
+            }} disabled={saveMut.isPending} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
               <Save className="h-4 w-4" /> Save
             </button>
             <button onClick={() => setEditing(null)} className="rounded-xl border px-4 py-2 text-sm font-semibold">Cancel</button>
