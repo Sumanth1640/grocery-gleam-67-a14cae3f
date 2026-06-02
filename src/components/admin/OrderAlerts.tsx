@@ -55,9 +55,36 @@ export function AdminOrderAlerts() {
       qc.invalidateQueries({ queryKey: ["admin-low-stock"] });
     };
 
-    // PHP mode: poll instead of realtime.
+    // PHP mode: poll instead of realtime; detect new orders to play alert sound.
     if (USE_PHP) {
-      const t = setInterval(invalidateAll, 20_000);
+      let lastSeenAt = 0;
+      let primed = false;
+      const tick = async () => {
+        invalidateAll();
+        try {
+          const rows = (await php.admin.listOrders()) as Array<{ id: string; total: number; created_at: string }>;
+          if (!Array.isArray(rows) || rows.length === 0) return;
+          const newest = rows.reduce((max, r) => {
+            const t = new Date(r.created_at).getTime();
+            return t > max ? t : max;
+          }, 0);
+          if (!primed) { lastSeenAt = newest; primed = true; return; }
+          if (newest > lastSeenAt) {
+            const fresh = rows.filter((r) => new Date(r.created_at).getTime() > lastSeenAt);
+            lastSeenAt = newest;
+            for (const r of fresh) {
+              if (soundRef.current) playAlert("admin_order");
+              toast.success(`New product order — ₹${r.total}`, {
+                description: `Order #${r.id.slice(0, 6)} just placed`,
+                duration: 8000,
+                action: { label: "Open", onClick: () => { window.location.href = "/admin/orders"; } },
+              });
+            }
+          }
+        } catch { /* ignore */ }
+      };
+      void tick();
+      const t = setInterval(tick, 15_000);
       return () => clearInterval(t);
     }
 
