@@ -5,7 +5,7 @@ require_method('POST');
 $b = json_body();
 $id = (string)($b['id'] ?? '');
 $status = (string)($b['status'] ?? '');
-$allowed = ['placed','accepted','preparing','out_for_delivery','delivered','cancelled'];
+$allowed = ['placed','accepted','preparing','packed','ready','out_for_delivery','delivered','cancelled'];
 if ($id==='' || !in_array($status, $allowed, true)) json_error('Invalid input');
 if (!$is_admin) {
   $st = db()->prepare('SELECT warehouse_id FROM orders WHERE id=?');
