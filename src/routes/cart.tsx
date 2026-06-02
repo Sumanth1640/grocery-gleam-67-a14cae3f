@@ -20,9 +20,9 @@ function CartPage() {
   const [code, setCode] = useState("");
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { data: availableCoupons = [] } = useQuery({
+  const { data: availableCoupons = [] } = useQuery<Coupon[]>({
     queryKey: ["active-coupons"],
-    queryFn: listActiveCoupons,
+    queryFn: async () => ((await dualApi.listCoupons()) as Coupon[]) ?? [],
   });
 
   const couponResult = useMemo(
