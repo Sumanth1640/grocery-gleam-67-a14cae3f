@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/site/BottomNav";
 import { NativeInit } from "@/components/native/NativeInit";
