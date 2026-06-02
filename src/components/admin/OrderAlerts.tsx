@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
-import { USE_PHP } from "@/lib/dual-api";
+import { dualApi, USE_PHP } from "@/lib/dual-api";
 import { toast } from "sonner";
 import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,33 +54,29 @@ export function AdminOrderAlerts() {
       qc.invalidateQueries({ queryKey: ["admin-assignable"] });
       qc.invalidateQueries({ queryKey: ["admin-analytics"] });
       qc.invalidateQueries({ queryKey: ["admin-low-stock"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["notifications", "unread"] });
     };
 
-    // PHP mode: poll instead of realtime; detect new orders to play alert sound.
+    // PHP mode: poll instead of realtime; detect new order IDs to play alert sound.
     if (USE_PHP) {
-      let lastSeenAt = 0;
+      const seenIds = new Set<string>();
       let primed = false;
       const tick = async () => {
         invalidateAll();
         try {
           const rows = (await php.admin.listOrders()) as Array<{ id: string; total: number; created_at: string }>;
           if (!Array.isArray(rows) || rows.length === 0) return;
-          const newest = rows.reduce((max, r) => {
-            const t = new Date(r.created_at).getTime();
-            return t > max ? t : max;
-          }, 0);
-          if (!primed) { lastSeenAt = newest; primed = true; return; }
-          if (newest > lastSeenAt) {
-            const fresh = rows.filter((r) => new Date(r.created_at).getTime() > lastSeenAt);
-            lastSeenAt = newest;
-            for (const r of fresh) {
-              if (soundRef.current) playAlert("admin_order");
-              toast.success(`New product order — ₹${r.total}`, {
-                description: `Order #${r.id.slice(0, 6)} just placed`,
-                duration: 8000,
-                action: { label: "Open", onClick: () => { window.location.href = "/admin/orders"; } },
-              });
-            }
+          const fresh = rows.filter((r) => r.id && !seenIds.has(r.id));
+          rows.forEach((r) => { if (r.id) seenIds.add(r.id); });
+          if (!primed) { primed = true; return; }
+          for (const r of fresh) {
+            if (soundRef.current) playAlert("admin_order");
+            toast.success(`New product order — ₹${r.total}`, {
+              description: `Order #${r.id.slice(0, 6)} just placed`,
+              duration: 8000,
+              action: { label: "Open", onClick: () => { window.location.href = "/admin/orders"; } },
+            });
           }
         } catch { /* ignore */ }
       };
@@ -186,6 +183,16 @@ export function AdminOrderAlertsControl() {
     if (typeof window === "undefined") return true;
     return localStorage.getItem(SOUND_KEY) !== "0";
   });
+  const unreadQ = useQuery({
+    queryKey: ["notifications", "unread"],
+    queryFn: async () => {
+      const n = await dualApi.notifications();
+      return (n as { unread?: number })?.unread ?? 0;
+    },
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+  });
+  const unread = unreadQ.data ?? 0;
   useEffect(() => {
     localStorage.setItem(SOUND_KEY, sound ? "1" : "0");
   }, [sound]);
@@ -221,12 +228,18 @@ export function AdminOrderAlertsControl() {
           },
         ]}
       />
-      <span
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-card text-muted-foreground"
-        title="Order alerts"
+      <Link
+        to="/notifications"
+        className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-card text-muted-foreground hover:bg-secondary"
+        title="Notifications"
       >
         {sound ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
-      </span>
+        {unread > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
+      </Link>
     </div>
   );
 }
