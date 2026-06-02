@@ -51,8 +51,18 @@ function db(): PDO {
         PDO::ATTR_EMULATE_PREPARES => false,
       ]
     );
+    // Always store/read timestamps as UTC so the frontend's
+    // `new Date(...)` interprets them correctly.
+    try { $pdo->exec("SET time_zone = '+00:00'"); } catch (Throwable $e) { /* ignore */ }
   }
   return $pdo;
+}
+
+/** Convert a MySQL DATETIME/TIMESTAMP value to an ISO-8601 UTC string the browser can parse. */
+function to_iso_utc($value): ?string {
+  if (!$value) return null;
+  $t = is_numeric($value) ? (int)$value : strtotime((string)$value . ' UTC');
+  return $t ? gmdate('Y-m-d\TH:i:s\Z', $t) : null;
 }
 
 // ---------- JSON helpers ----------
