@@ -6,6 +6,7 @@ $stmt = db()->prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY cr
 $stmt->execute([$uid]);
 $rows = array_map(function ($r) {
   $r['is_read'] = (bool)$r['is_read'];
+  if (isset($r['created_at'])) $r['created_at'] = to_iso_utc($r['created_at']);
   return $r;
 }, $stmt->fetchAll());
 
