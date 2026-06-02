@@ -16,5 +16,6 @@ $row['address']  = json_decode($row['address'], true);
 $row['subtotal'] = (int)$row['subtotal'];
 $row['delivery'] = (int)$row['delivery'];
 $row['total']    = (int)$row['total'];
+if (isset($row['created_at'])) $row['created_at'] = to_iso_utc($row['created_at']);
 
 json_ok($row);
