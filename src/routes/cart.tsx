@@ -3,8 +3,9 @@ import { useState, useMemo } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { cartStore, cartTotals, useCart } from "@/lib/cart-store";
-import { applyCoupon, couponDescription, listActiveCoupons, type Coupon } from "@/lib/public-coupons";
+import { applyCoupon, couponDescription, type Coupon } from "@/lib/public-coupons";
 import { useQuery } from "@tanstack/react-query";
+import { dualApi } from "@/lib/dual-api";
 import { Minus, Plus, Trash2, ShoppingBag, Clock, Tag, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/cart")({
@@ -19,9 +20,9 @@ function CartPage() {
   const [code, setCode] = useState("");
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { data: availableCoupons = [] } = useQuery({
+  const { data: availableCoupons = [] } = useQuery<Coupon[]>({
     queryKey: ["active-coupons"],
-    queryFn: listActiveCoupons,
+    queryFn: async () => ((await dualApi.listCoupons()) as Coupon[]) ?? [],
   });
 
   const couponResult = useMemo(
