@@ -2,6 +2,7 @@
 // Verify a Razorpay payment signature and persist the order in one step.
 // Mirrors verifyAndPlaceOrder() from src/lib/razorpay.functions.ts.
 require __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../order_helpers.php';
 require_method('POST');
 
 $uid = current_user_id();
@@ -35,15 +36,33 @@ if (!is_array($address))                       json_error('address required');
 if (!in_array($payment, ['upi','card'], true)) json_error('invalid payment');
 if (!is_int($subtotal) || !is_int($total))    json_error('subtotal/total must be integers');
 
+$warehouseId = resolve_warehouse_id_for_address($address);
 $id = uuid_v4();
-db()->prepare('
-  INSERT INTO orders (id, user_id, items, address, payment, subtotal, delivery, total, payment_status)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-')->execute([
-  $id, $uid,
-  json_encode($items, JSON_UNESCAPED_UNICODE),
-  json_encode($address, JSON_UNESCAPED_UNICODE),
-  $payment, $subtotal, (int)$delivery, $total, 'paid',
-]);
+try {
+  db()->prepare('
+    INSERT INTO orders (id, user_id, warehouse_id, items, address, payment, subtotal, delivery, total, payment_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ')->execute([
+    $id, $uid, $warehouseId,
+    json_encode($items, JSON_UNESCAPED_UNICODE),
+    json_encode($address, JSON_UNESCAPED_UNICODE),
+    $payment, $subtotal, (int)$delivery, $total, 'paid',
+  ]);
+} catch (Throwable $e) {
+  db()->prepare('
+    INSERT INTO orders (id, user_id, items, address, payment, subtotal, delivery, total, payment_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ')->execute([
+    $id, $uid,
+    json_encode($items, JSON_UNESCAPED_UNICODE),
+    json_encode($address, JSON_UNESCAPED_UNICODE),
+    $payment, $subtotal, (int)$delivery, $total, 'paid',
+  ]);
+}
 
-json_ok(['id' => $id, 'created_at' => date('c')], 201);
+notify_user($uid, 'order', 'Order placed',
+  'Your order of ₹'.$total.' has been placed successfully.',
+  '/orders/'.$id);
+notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
+
+json_ok(['id' => $id, 'created_at' => date('c'), 'warehouse_id' => $warehouseId], 201);
