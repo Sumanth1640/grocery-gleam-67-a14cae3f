@@ -11,5 +11,14 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
+    // SPA mode — emits a static shell HTML so the app can be hosted on
+    // plain static hosts (Hostinger shared, etc.) without a Node server.
+    // All routes are handled client-side after the shell loads.
+    spa: {
+      enabled: true,
+      prerender: {
+        outputPath: "/index.html",
+      },
+    },
   },
 });
