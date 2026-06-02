@@ -12,6 +12,11 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // the entry breaks TanStack's SPA prerender preview server (which expects the
 // default dist/server/server.js path).
 export default defineConfig({
+  // Disable the Cloudflare/nitro deploy plugin — this is a static SPA build
+  // for Hostinger. Without this, Vite emits a Cloudflare worker-entry instead
+  // of the standard dist/server/server.js that the prerender step expects,
+  // causing: ERR_MODULE_NOT_FOUND: Cannot find module dist/server/server.js
+  nitro: false,
   tanstackStart: {
     spa: {
       enabled: true,
