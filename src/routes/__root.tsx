@@ -126,6 +126,32 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const { isAdmin } = useIsAdmin();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // SSR/prerender renders only a minimal, route-agnostic shell so the
+  // prerendered dist/client/index.html hydrates cleanly on ANY URL (e.g. /admin).
+  // The real route tree mounts on the client after hydration.
+  if (!mounted) {
+    return (
+      <div
+        aria-hidden
+        style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#fff" }}
+      >
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            border: "3px solid rgba(0,0,0,0.1)",
+            borderTopColor: "rgba(0,0,0,0.55)",
+            borderRadius: "50%",
+            animation: "tss-spin 0.8s linear infinite",
+          }}
+        />
+        <style>{`@keyframes tss-spin{to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
