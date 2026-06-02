@@ -61,6 +61,7 @@ export function AdminOrderAlerts() {
     // PHP mode: poll instead of realtime; detect new order IDs to play alert sound.
     if (USE_PHP) {
       const seenIds = new Set<string>();
+      let primed = false;
       const tick = async () => {
         invalidateAll();
         try {
@@ -68,8 +69,7 @@ export function AdminOrderAlerts() {
           if (!Array.isArray(rows) || rows.length === 0) return;
           const fresh = rows.filter((r) => r.id && !seenIds.has(r.id));
           rows.forEach((r) => { if (r.id) seenIds.add(r.id); });
-          const shouldAlert = seenIds.size > rows.length;
-          if (!shouldAlert) return;
+          if (!primed) { primed = true; return; }
           for (const r of fresh) {
             if (soundRef.current) playAlert("admin_order");
             toast.success(`New product order — ₹${r.total}`, {
@@ -183,6 +183,16 @@ export function AdminOrderAlertsControl() {
     if (typeof window === "undefined") return true;
     return localStorage.getItem(SOUND_KEY) !== "0";
   });
+  const unreadQ = useQuery({
+    queryKey: ["notifications", "unread"],
+    queryFn: async () => {
+      const n = await dualApi.notifications();
+      return (n as { unread?: number })?.unread ?? 0;
+    },
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+  });
+  const unread = unreadQ.data ?? 0;
   useEffect(() => {
     localStorage.setItem(SOUND_KEY, sound ? "1" : "0");
   }, [sound]);
@@ -218,12 +228,18 @@ export function AdminOrderAlertsControl() {
           },
         ]}
       />
-      <span
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-card text-muted-foreground"
-        title="Order alerts"
+      <Link
+        to="/notifications"
+        className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-card text-muted-foreground hover:bg-secondary"
+        title="Notifications"
       >
         {sound ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
-      </span>
+        {unread > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
+      </Link>
     </div>
   );
 }
