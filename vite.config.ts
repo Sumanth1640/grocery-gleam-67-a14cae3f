@@ -12,6 +12,12 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // the entry breaks TanStack's SPA prerender preview server (which expects the
 // default dist/server/server.js path).
 export default defineConfig({
+  // Disable the Cloudflare Worker build plugin for SPA/Hostinger builds.
+  // The CF plugin hashes the server entry filename (e.g. server-XXXX.js),
+  // but TanStack's SPA prerender preview server expects an unhashed
+  // `dist/server/server.js`. Turning CF off keeps the canonical name so
+  // prerender can boot and emit `dist/client/index.html`.
+  cloudflare: false,
   tanstackStart: {
     spa: {
       enabled: true,
