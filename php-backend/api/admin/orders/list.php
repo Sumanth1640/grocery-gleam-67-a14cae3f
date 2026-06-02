@@ -21,9 +21,10 @@ $rows = $st->fetchAll();
 foreach ($rows as &$r) {
   $r['items']   = json_decode($r['items']   ?? '[]', true) ?: [];
   $r['address'] = json_decode($r['address'] ?? '{}', true) ?: null;
-  $r['warehouse'] = $r['warehouse_id']
+  $r['warehouse'] = !empty($r['warehouse_id'])
     ? ['name' => $r['w_name'] ?? '', 'code' => $r['w_code'] ?? '']
     : null;
+  if (isset($r['created_at'])) $r['created_at'] = to_iso_utc($r['created_at']);
   unset($r['w_name'], $r['w_code']);
 }
 json_ok($rows);
