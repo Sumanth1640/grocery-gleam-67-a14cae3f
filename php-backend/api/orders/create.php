@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../partner_helpers.php';
+require_once __DIR__ . '/../../order_helpers.php';
 require_method('POST');
 
 $uid = current_user_id();
@@ -19,21 +20,7 @@ if (!in_array($payment, ['upi','card','cod'], true)) json_error('invalid payment
 if (!is_int($subtotal) || !is_int($total))    json_error('subtotal/total must be integers');
 
 // ---------- Resolve warehouse from the delivery pincode ----------
-$warehouseId = null;
-$pin = trim((string)($address['pincode'] ?? ''));
-if (preg_match('/^\d{4,8}$/', $pin)) {
-  try {
-    $st = db()->prepare(
-      'SELECT w.id FROM warehouses w
-       JOIN warehouse_pincodes wp ON wp.warehouse_id = w.id
-       WHERE w.is_active = 1 AND wp.pincode = ?
-       ORDER BY wp.priority DESC
-       LIMIT 1'
-    );
-    $st->execute([$pin]);
-    $warehouseId = $st->fetchColumn() ?: null;
-  } catch (Throwable $e) { /* ignore — warehouse columns may not exist yet */ }
-}
+$warehouseId = resolve_warehouse_id_for_address($address);
 
 $id = uuid_v4();
 try {
@@ -65,19 +52,6 @@ notify_user($uid, 'order', 'Order placed',
   '/orders/'.$id);
 
 // ---------- Notify warehouse managers ----------
-if ($warehouseId) {
-  try {
-    $wname = null;
-    $st = db()->prepare('SELECT name FROM warehouses WHERE id=?');
-    $st->execute([$warehouseId]); $wname = $st->fetchColumn() ?: null;
-    $st = db()->prepare('SELECT user_id FROM warehouse_managers WHERE warehouse_id=?');
-    $st->execute([$warehouseId]);
-    foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $mgrId) {
-      notify_user($mgrId, 'order', 'New product order',
-        'A customer placed an order of ₹'.$total.($wname ? ' at '.$wname : '').'.',
-        '/admin/orders');
-    }
-  } catch (Throwable $e) { /* ignore */ }
-}
+notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
 
 json_ok(['id' => $id, 'status' => 'placed', 'warehouse_id' => $warehouseId], 201);
