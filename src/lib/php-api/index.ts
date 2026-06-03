@@ -135,7 +135,9 @@ export const php = {
   restaurants: (q?: string) =>
     request<unknown[]>(`/restaurants/list.php${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   restaurantDishes: (slug: string) =>
-    request<{ restaurant: unknown; dishes: unknown[] }>(`/restaurants/dishes.php?slug=${encodeURIComponent(slug)}`),
+    request<Record<string, unknown> & { partner_dishes: unknown[] }>(
+      `/restaurants/dishes.php?slug=${encodeURIComponent(slug)}`,
+    ),
 
   // Wishlist
   wishlist: () => request<unknown[]>("/wishlist/list.php"),
@@ -343,9 +345,17 @@ export const php = {
       request<{ ok: true }>("/admin/restaurants/set_status.php", "POST", p),
     setRestaurantBlocked: (p: { id: string; is_blocked: boolean }) =>
       request<{ ok: true }>("/admin/restaurants/set_blocked.php", "POST", p),
-    getDocSignedUrl: (p: { path: string }) =>
-      // PHP backend serves uploaded docs publicly; just return the URL as-is.
-      Promise.resolve({ url: p.path }),
+    getDocSignedUrl: (p: { path: string }) => {
+      // PHP backend stores docs under /php-backend/uploads/<path>. If we were
+      // already given an absolute URL, pass it through unchanged.
+      if (/^https?:\/\//i.test(p.path)) return Promise.resolve({ url: p.path });
+      const rel = p.path.replace(/^\/+/, "");
+      // Derive backend root from the configured API base by stripping the /api suffix
+      // (e.g. ".../php-backend/api" -> ".../php-backend"). Fall back to /php-backend.
+      const apiBase = baseCandidates()[0] || "/api";
+      const backendRoot = apiBase.replace(/\/api\/?$/, "") || "/php-backend";
+      return Promise.resolve({ url: `${backendRoot}/uploads/${rel}` });
+    },
     // analytics / settlements / reports
     analytics:   (p?: { days?: number }) => request<any>("/admin/analytics.php",   "POST", { days: p?.days ?? 30 }),
     settlements: (p?: { days?: number }) => request<any[]>("/admin/settlements.php","POST", { days: p?.days ?? 30 }),

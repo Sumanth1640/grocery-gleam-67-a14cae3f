@@ -292,8 +292,11 @@ export const dualApi = {
       const flat: unknown[] = [];
       for (const r of all) {
         if (!r) continue;
-        for (const d of r.dishes as Array<Record<string, unknown>>) {
-          flat.push({ ...d, restaurant: r.restaurant });
+        const restaurant = { ...r } as Record<string, unknown>;
+        const dishes = (restaurant.partner_dishes as Array<Record<string, unknown>>) ?? [];
+        delete restaurant.partner_dishes;
+        for (const d of dishes) {
+          flat.push({ ...d, restaurant });
         }
       }
       return flat;

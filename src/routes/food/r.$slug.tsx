@@ -10,7 +10,8 @@ import { ArrowLeft, Star, Clock, MapPin, Plus, Flame, Award, ShoppingBag, Heart 
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 import { toast } from "sonner";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
-import { getApprovedRestaurant } from "@/lib/partner-public.functions";
+
+import { dualApi } from "@/lib/dual-api";
 import { listOutletsForRestaurant } from "@/lib/outlets.functions";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +21,8 @@ export const Route = createFileRoute("/food/r/$slug")({
     meta: [{ title: `${params.slug} — Order online · hallifresh` }],
   }),
   loader: async ({ params }) => {
-    const db = await getApprovedRestaurant({ data: { slug: params.slug } });
+    // Use dualApi so PHP-mode deployments hit the partner_restaurants table.
+    const db = (await dualApi.getRestaurant(params.slug)) as any;
     if (!db) throw notFound();
     const dishes = (db.partner_dishes ?? []) as Array<{
       id: string; name: string; description: string; image: string; price: number; mrp: number | null;
