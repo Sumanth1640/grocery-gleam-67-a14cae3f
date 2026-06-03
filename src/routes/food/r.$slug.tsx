@@ -10,7 +10,7 @@ import { ArrowLeft, Star, Clock, MapPin, Plus, Flame, Award, ShoppingBag, Heart 
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
 import { toast } from "sonner";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
-import { getApprovedRestaurant } from "@/lib/partner-public.functions";
+
 import { dualApi } from "@/lib/dual-api";
 import { listOutletsForRestaurant } from "@/lib/outlets.functions";
 import { useDualFn } from "@/lib/use-dual-fn";
