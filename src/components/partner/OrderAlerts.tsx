@@ -124,7 +124,10 @@ export function OrderAlerts() {
       };
       void pollOrders();
       const t = setInterval(pollOrders, 10_000);
-      return () => clearInterval(t);
+      return () => {
+        stopped = true;
+        clearInterval(t);
+      };
     }
 
 
@@ -142,7 +145,7 @@ export function OrderAlerts() {
           const row = payload.new as { id: string; total: number; created_at: string };
           invalidateAll();
           if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
-          if (soundRef.current) alertForNewOrder(row);
+          alertForNewOrder(row);
         },
       )
       .on(
