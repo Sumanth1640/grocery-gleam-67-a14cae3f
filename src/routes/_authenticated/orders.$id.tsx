@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useDualFn } from "@/lib/use-dual-fn";
-import { php } from "@/lib/php-api";
+import { php, phpUploads } from "@/lib/php-api";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
@@ -161,16 +162,50 @@ function OrderDetailPage() {
   const [showRefund, setShowRefund] = useState(false);
   const [refundReason, setRefundReason] = useState("Item missing");
   const [refundDetails, setRefundDetails] = useState("");
+  const [proofUrls, setProofUrls] = useState<string[]>([]);
+  const [uploadingProof, setUploadingProof] = useState(false);
+  const { user } = useAuth();
+
+  async function handleProofUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const remaining = 5 - proofUrls.length;
+    const picked = Array.from(files).slice(0, remaining);
+    if (picked.length === 0) { toast.error("Max 5 images"); return; }
+    setUploadingProof(true);
+    try {
+      const uploaded: string[] = [];
+      for (const f of picked) {
+        if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} > 5MB`); continue; }
+        if (USE_PHP) {
+          if (!user?.id) { toast.error("Please sign in again"); break; }
+          const r = await phpUploads.refundProof(f, user.id);
+          uploaded.push(r.url);
+        } else {
+          if (!user?.id) { toast.error("Please sign in again"); break; }
+          const path = `${user.id}/${Date.now()}-${f.name.replace(/[^A-Za-z0-9._-]/g, "_")}`;
+          const { error } = await supabase.storage.from("refund-proofs").upload(path, f, { upsert: false });
+          if (error) { toast.error(error.message); continue; }
+          const { data } = supabase.storage.from("refund-proofs").getPublicUrl(path);
+          uploaded.push(data.publicUrl);
+        }
+      }
+      setProofUrls((prev) => [...prev, ...uploaded]);
+    } finally {
+      setUploadingProof(false);
+    }
+  }
+
   const refundM = useMutation({
-    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0 } }),
+    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0, proof_urls: proofUrls } }),
     onSuccess: () => {
       toast.success("Refund request submitted");
-      setShowRefund(false); setRefundDetails("");
+      setShowRefund(false); setRefundDetails(""); setProofUrls([]);
       qc.invalidateQueries({ queryKey: ["refund", id] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
   const canRequestRefund = !!order && (order.status === "delivered" || order.status === "cancelled" || order.status === "out_for_delivery") && !refundQ.data;
+
 
   return (
     <div className="min-h-screen bg-background">
