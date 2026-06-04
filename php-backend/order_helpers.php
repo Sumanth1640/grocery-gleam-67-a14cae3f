@@ -90,7 +90,33 @@ function notify_partner_for_order(?string $restaurant_id, int $total, string $or
   } catch (Throwable $e) { /* ignore */ }
 }
 
+function order_column_exists(string $column): bool {
+  try {
+    $st = db()->prepare('SHOW COLUMNS FROM orders LIKE ?');
+    $st->execute([$column]);
+    return (bool)$st->fetch();
+  } catch (Throwable $e) { return false; }
+}
+
+function ensure_order_routing_columns(): void {
+  static $done = false;
+  if ($done) return;
+  $defs = [
+    'restaurant_id' => 'ALTER TABLE orders ADD COLUMN restaurant_id CHAR(36) DEFAULT NULL AFTER user_id',
+    'warehouse_id' => 'ALTER TABLE orders ADD COLUMN warehouse_id CHAR(36) DEFAULT NULL AFTER restaurant_id',
+    'outlet_id' => 'ALTER TABLE orders ADD COLUMN outlet_id CHAR(36) DEFAULT NULL AFTER warehouse_id',
+    'payment_status' => "ALTER TABLE orders ADD COLUMN payment_status ENUM('pending','paid','failed','refunded') NOT NULL DEFAULT 'pending' AFTER status",
+  ];
+  foreach ($defs as $col => $sql) {
+    if (!order_column_exists($col)) {
+      try { db()->exec($sql); } catch (Throwable $e) { /* existing installs may lack ALTER privileges */ }
+    }
+  }
+  $done = true;
+}
+
 function insert_order_row(string $id, string $uid, ?string $warehouseId, ?string $restaurantId, ?string $outletId, array $items, array $address, string $payment, int $subtotal, int $delivery, int $total, ?string $paymentStatus = null): void {
+  ensure_order_routing_columns();
   // Try the most-complete column set, then fall back progressively.
   $attempts = [];
   if ($paymentStatus !== null) {
@@ -111,6 +137,12 @@ function insert_order_row(string $id, string $uid, ?string $warehouseId, ?string
       'p' => [$id,$uid,$restaurantId, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total]];
     $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, items, address, payment, subtotal, delivery, total) VALUES (?,?,?,?,?,?,?,?)',
       'p' => [$id,$uid, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total]];
+  }
+  if ($restaurantId !== null) {
+    $attempts = array_values(array_filter($attempts, fn($a) => strpos($a['sql'], 'restaurant_id') !== false));
+  }
+  if ($outletId !== null) {
+    $attempts = array_values(array_filter($attempts, fn($a) => strpos($a['sql'], 'outlet_id') !== false));
   }
   $lastErr = null;
   foreach ($attempts as $a) {
