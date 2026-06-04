@@ -64,3 +64,58 @@ function notify_warehouse_managers_for_order(?string $warehouse_id, int $total, 
     }
   } catch (Throwable $e) { /* ignore notification failures */ }
 }
+
+function notify_partner_for_order(?string $restaurant_id, int $total, string $order_id): void {
+  if (!$restaurant_id) return;
+  try {
+    $st = db()->prepare('SELECT owner_id, name FROM partner_restaurants WHERE id=?');
+    $st->execute([$restaurant_id]);
+    $row = $st->fetch();
+    if (!$row) return;
+    $owner = $row['owner_id'] ?? null;
+    if ($owner) {
+      notify_user($owner, 'order', 'New food order',
+        'A customer placed an order of ₹'.$total.' at '.($row['name'] ?? 'your restaurant').'.',
+        '/partner/orders');
+    }
+    // Also notify partner managers (if table exists)
+    try {
+      $m = db()->prepare('SELECT user_id FROM partner_managers WHERE restaurant_id=?');
+      $m->execute([$restaurant_id]);
+      foreach ($m->fetchAll(PDO::FETCH_COLUMN) as $mgrId) {
+        notify_user($mgrId, 'order', 'New food order',
+          'A customer placed an order of ₹'.$total.'.', '/partner/orders');
+      }
+    } catch (Throwable $e) { /* ignore */ }
+  } catch (Throwable $e) { /* ignore */ }
+}
+
+function insert_order_row(string $id, string $uid, ?string $warehouseId, ?string $restaurantId, ?string $outletId, array $items, array $address, string $payment, int $subtotal, int $delivery, int $total, ?string $paymentStatus = null): void {
+  // Try the most-complete column set, then fall back progressively.
+  $attempts = [];
+  if ($paymentStatus !== null) {
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, warehouse_id, restaurant_id, outlet_id, items, address, payment, subtotal, delivery, total, payment_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid,$warehouseId,$restaurantId,$outletId, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total,$paymentStatus]];
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, warehouse_id, restaurant_id, items, address, payment, subtotal, delivery, total, payment_status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid,$warehouseId,$restaurantId, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total,$paymentStatus]];
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, restaurant_id, items, address, payment, subtotal, delivery, total, payment_status) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid,$restaurantId, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total,$paymentStatus]];
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, items, address, payment, subtotal, delivery, total, payment_status) VALUES (?,?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total,$paymentStatus]];
+  } else {
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, warehouse_id, restaurant_id, outlet_id, items, address, payment, subtotal, delivery, total) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid,$warehouseId,$restaurantId,$outletId, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total]];
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, warehouse_id, restaurant_id, items, address, payment, subtotal, delivery, total) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid,$warehouseId,$restaurantId, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total]];
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, restaurant_id, items, address, payment, subtotal, delivery, total) VALUES (?,?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid,$restaurantId, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total]];
+    $attempts[] = ['sql' => 'INSERT INTO orders (id, user_id, items, address, payment, subtotal, delivery, total) VALUES (?,?,?,?,?,?,?,?)',
+      'p' => [$id,$uid, json_encode($items, JSON_UNESCAPED_UNICODE), json_encode($address, JSON_UNESCAPED_UNICODE), $payment,$subtotal,$delivery,$total]];
+  }
+  $lastErr = null;
+  foreach ($attempts as $a) {
+    try { db()->prepare($a['sql'])->execute($a['p']); return; }
+    catch (Throwable $e) { $lastErr = $e; }
+  }
+  if ($lastErr) throw $lastErr;
+}
