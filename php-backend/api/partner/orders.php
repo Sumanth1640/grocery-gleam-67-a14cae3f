@@ -4,8 +4,8 @@ require __DIR__ . '/../../config.php';
 require_method('GET');
 $uid = current_user_id();
 
-// Find restaurants owned by this user
-$r = db()->prepare('SELECT id FROM restaurants WHERE owner_id = ?');
+// Find restaurants owned by this user (partner_restaurants is the source of truth)
+$r = db()->prepare('SELECT id FROM partner_restaurants WHERE owner_id = ?');
 $r->execute([$uid]);
 $ids = array_column($r->fetchAll(), 'id');
 if (count($ids) === 0) { json_ok([]); }
