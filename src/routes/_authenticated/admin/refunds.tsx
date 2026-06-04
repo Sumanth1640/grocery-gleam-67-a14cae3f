@@ -2,10 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminListRefunds, adminResolveRefund } from "@/lib/admin-extra.functions";
 import { Loader2, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/refunds")({
   head: () => ({ meta: [{ title: "Refunds — Admin" }] }),
@@ -48,8 +49,61 @@ function RefundsPage() {
   );
 }
 
+function parseProofs(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.filter((x): x is string => typeof x === "string");
+  if (typeof raw === "string") {
+    try { const j = JSON.parse(raw); return Array.isArray(j) ? j.filter((x: unknown): x is string => typeof x === "string") : []; }
+    catch { return []; }
+  }
+  return [];
+}
+
+function ProofThumbs({ urls }: { urls: string[] }) {
+  const [resolved, setResolved] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const out: string[] = [];
+      for (const u of urls) {
+        if (u.startsWith("http://") || u.startsWith("https://")) {
+          out.push(u);
+        } else if (u.startsWith("refund-proofs://")) {
+          const path = u.replace("refund-proofs://", "");
+          const { data } = await supabase.storage.from("refund-proofs").createSignedUrl(path, 60 * 60);
+          out.push(data?.signedUrl ?? "");
+        } else {
+          out.push(u);
+        }
+      }
+      if (!cancelled) setResolved(out);
+    })();
+    return () => { cancelled = true; };
+  }, [urls.join("|")]);
+
+  if (urls.length === 0) return null;
+  return (
+    <div className="mt-2">
+      <div className="mb-1 text-[11px] font-semibold uppercase text-muted-foreground">Proof ({urls.length})</div>
+      <div className="flex flex-wrap gap-2">
+        {resolved.map((u, i) => (
+          u ? (
+            <a key={i} href={u} target="_blank" rel="noopener noreferrer" className="block h-20 w-20 overflow-hidden rounded-lg border bg-muted">
+              <img src={u} alt={`proof-${i + 1}`} className="h-full w-full object-cover" loading="lazy" />
+            </a>
+          ) : (
+            <div key={i} className="grid h-20 w-20 place-items-center rounded-lg border bg-muted text-[10px] text-muted-foreground">…</div>
+          )
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RefundCard({ r, onResolve }: { r: any; onResolve: (s: "approved" | "rejected", note: string) => void }) {
   const [note, setNote] = useState("");
+  const proofs = parseProofs(r.proof_urls);
   return (
     <div className="rounded-2xl border bg-card p-4 shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -64,6 +118,7 @@ function RefundCard({ r, onResolve }: { r: any; onResolve: (s: "approved" | "rej
           r.status === "approved" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
         }`}>{r.status}</span>
       </div>
+      <ProofThumbs urls={proofs} />
       {r.admin_note && <div className="mt-2 rounded-lg bg-muted/50 p-2 text-xs">Admin: {r.admin_note}</div>}
       {r.status === "pending" && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
