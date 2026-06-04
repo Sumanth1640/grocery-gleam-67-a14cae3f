@@ -21,7 +21,7 @@ $bucket = $_POST['bucket'] ?? '';
 $folder = $_POST['folder'] ?? '';
 $kind   = $_POST['kind']   ?? '';
 
-if (!in_array($bucket, ['catalog', 'partner-docs'], true)) {
+if (!in_array($bucket, ['catalog', 'partner-docs', 'refund-proofs'], true)) {
   json_error('Invalid bucket', 400);
 }
 
@@ -30,17 +30,19 @@ if (!in_array($bucket, ['catalog', 'partner-docs'], true)) {
 // - catalog/dishes|restaurants are open to any authenticated user
 //   (partners upload their own dish/restaurant images here)
 // - partner-docs uploads must be scoped to the caller's own user id folder
+// - refund-proofs uploads must be scoped to the caller's own user id folder
 if ($bucket === 'catalog') {
   $partnerFolders = ['dishes', 'restaurants'];
   if (!in_array($folder, $partnerFolders, true)) {
     require_admin($uid);
   }
   // any authenticated user may upload to dishes/restaurants
-} else { // partner-docs
+} else if ($bucket === 'partner-docs' || $bucket === 'refund-proofs') {
   if ($folder === '' || $folder !== $uid) {
-    json_error('Forbidden: docs must be uploaded to your own folder', 403);
+    json_error('Forbidden: files must be uploaded to your own folder', 403);
   }
 }
+
 
 if (!isset($_FILES['file']) || !is_array($_FILES['file'])) {
   json_error('No file provided', 400);
