@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useDualFn } from "@/lib/use-dual-fn";
-import { php } from "@/lib/php-api";
+import { php, phpUploads } from "@/lib/php-api";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
@@ -161,16 +162,51 @@ function OrderDetailPage() {
   const [showRefund, setShowRefund] = useState(false);
   const [refundReason, setRefundReason] = useState("Item missing");
   const [refundDetails, setRefundDetails] = useState("");
+  const [proofUrls, setProofUrls] = useState<string[]>([]);
+  const [uploadingProof, setUploadingProof] = useState(false);
+
+
+
+  async function handleProofUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const remaining = 5 - proofUrls.length;
+    const picked = Array.from(files).slice(0, remaining);
+    if (picked.length === 0) { toast.error("Max 5 images"); return; }
+    setUploadingProof(true);
+    try {
+      const uploaded: string[] = [];
+      for (const f of picked) {
+        if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} > 5MB`); continue; }
+        if (USE_PHP) {
+          if (!user?.id) { toast.error("Please sign in again"); break; }
+          const r = await phpUploads.refundProof(f, user.id);
+          uploaded.push(r.url);
+        } else {
+          if (!user?.id) { toast.error("Please sign in again"); break; }
+          const path = `${user.id}/${Date.now()}-${f.name.replace(/[^A-Za-z0-9._-]/g, "_")}`;
+          const { error } = await supabase.storage.from("refund-proofs").upload(path, f, { upsert: false });
+          if (error) { toast.error(error.message); continue; }
+          uploaded.push(`refund-proofs://${path}`);
+        }
+
+      }
+      setProofUrls((prev) => [...prev, ...uploaded]);
+    } finally {
+      setUploadingProof(false);
+    }
+  }
+
   const refundM = useMutation({
-    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0 } }),
+    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0, proof_urls: proofUrls } }),
     onSuccess: () => {
       toast.success("Refund request submitted");
-      setShowRefund(false); setRefundDetails("");
+      setShowRefund(false); setRefundDetails(""); setProofUrls([]);
       qc.invalidateQueries({ queryKey: ["refund", id] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
   const canRequestRefund = !!order && (order.status === "delivered" || order.status === "cancelled" || order.status === "out_for_delivery") && !refundQ.data;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -330,7 +366,44 @@ function OrderDetailPage() {
                             className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-focus"
                           />
                         </label>
+                        <div>
+                          <div className="mb-1 text-xs font-semibold text-muted-foreground">
+                            Photo proof (optional, up to 5) — helps for damaged or missing items
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {proofUrls.map((u, i) => (
+                              <div key={i} className="relative h-16 w-16 overflow-hidden rounded-lg border bg-muted">
+                                <img src={u.startsWith("refund-proofs://") ? "" : u} alt="proof" className="h-full w-full object-cover" />
+                                {u.startsWith("refund-proofs://") && (
+                                  <div className="absolute inset-0 grid place-items-center text-[9px] text-muted-foreground">uploaded</div>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => setProofUrls((p) => p.filter((_, idx) => idx !== i))}
+                                  className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/60 text-white"
+                                  aria-label="Remove"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                            {proofUrls.length < 5 && (
+                              <label className="grid h-16 w-16 cursor-pointer place-items-center rounded-lg border border-dashed text-[10px] text-muted-foreground hover:bg-secondary">
+                                {uploadingProof ? <Loader2 className="h-4 w-4 animate-spin" /> : "+ Add"}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple
+                                  className="hidden"
+                                  disabled={uploadingProof}
+                                  onChange={(e) => { handleProofUpload(e.target.files); e.currentTarget.value = ""; }}
+                                />
+                              </label>
+                            )}
+                          </div>
+                        </div>
                         <div className="text-[11px] text-muted-foreground">Refund amount of ₹{order.total} will be reviewed by our team.</div>
+
                         <div className="flex gap-2">
                           <button type="submit" disabled={refundM.isPending} className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white shadow-pop disabled:opacity-50">
                             {refundM.isPending ? "Submitting…" : "Submit request"}

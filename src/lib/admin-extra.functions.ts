@@ -131,6 +131,7 @@ export const createRefundRequest = createServerFn({ method: "POST" })
     reason: z.string().trim().min(3).max(120),
     details: z.string().trim().max(1000).default(""),
     amount: z.number().int().min(0).max(10_000_000).default(0),
+    proof_urls: z.array(z.string().trim().min(1).max(500)).max(5).default([]),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -140,10 +141,12 @@ export const createRefundRequest = createServerFn({ method: "POST" })
     const amount = data.amount > 0 ? data.amount : order.total;
     const { error } = await supabaseAdmin.from("refund_requests").insert({
       order_id: data.order_id, user_id: userId, reason: data.reason, details: data.details, amount,
+      proof_urls: data.proof_urls,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const myRefundForOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
