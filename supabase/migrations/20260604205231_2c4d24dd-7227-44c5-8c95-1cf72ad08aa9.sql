@@ -1,0 +1,1 @@
+ALTER TABLE public.refund_requests ADD COLUMN IF NOT EXISTS proof_urls jsonb NOT NULL DEFAULT '[]'::jsonb;

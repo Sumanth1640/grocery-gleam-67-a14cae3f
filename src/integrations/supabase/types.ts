@@ -887,6 +887,7 @@ export type Database = {
           details: string
           id: string
           order_id: string
+          proof_urls: Json
           reason: string
           status: string
           updated_at: string
@@ -899,6 +900,7 @@ export type Database = {
           details?: string
           id?: string
           order_id: string
+          proof_urls?: Json
           reason: string
           status?: string
           updated_at?: string
@@ -911,6 +913,7 @@ export type Database = {
           details?: string
           id?: string
           order_id?: string
+          proof_urls?: Json
           reason?: string
           status?: string
           updated_at?: string
