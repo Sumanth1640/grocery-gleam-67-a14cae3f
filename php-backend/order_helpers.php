@@ -78,9 +78,9 @@ function notify_partner_for_order(?string $restaurant_id, int $total, string $or
         'A customer placed an order of ₹'.$total.' at '.($row['name'] ?? 'your restaurant').'.',
         '/partner/orders');
     }
-    // Also notify partner managers (if table exists)
+    // Also notify outlet managers for this restaurant.
     try {
-      $m = db()->prepare('SELECT user_id FROM partner_managers WHERE restaurant_id=?');
+      $m = db()->prepare('SELECT DISTINCT user_id FROM partner_outlet_managers WHERE restaurant_id=?');
       $m->execute([$restaurant_id]);
       foreach ($m->fetchAll(PDO::FETCH_COLUMN) as $mgrId) {
         notify_user($mgrId, 'order', 'New food order',
