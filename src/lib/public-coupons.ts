@@ -1,4 +1,4 @@
-import { listPublicCoupons } from "@/lib/public-coupons.functions";
+import { dualApi } from "@/lib/dual-api";
 
 export type Coupon = {
   id: string;
@@ -15,8 +15,23 @@ export type Coupon = {
 export type UserCouponUsage = Record<string, number>;
 
 export async function listActiveCoupons(): Promise<Coupon[]> {
-  const data = await listPublicCoupons();
-  return data as unknown as Coupon[];
+  try {
+    const data = await dualApi.listCoupons();
+    if (!Array.isArray(data)) return [];
+    return data.map((c: any) => ({
+      id: c.id ?? c.code,
+      code: c.code,
+      description: c.description ?? c.title ?? null,
+      discount_type: c.discount_type,
+      discount_value: Number(c.discount_value) || 0,
+      min_order: Number(c.min_order) || 0,
+      max_discount: c.max_discount != null ? Number(c.max_discount) : null,
+      per_user_limit: c.per_user_limit != null ? Number(c.per_user_limit) : null,
+      valid_until: c.valid_until ?? c.expires_at ?? null,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export function couponLabel(coupon: Coupon) {
