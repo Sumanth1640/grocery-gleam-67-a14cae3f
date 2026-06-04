@@ -144,6 +144,9 @@ function insert_order_row(string $id, string $uid, ?string $warehouseId, ?string
   if ($outletId !== null) {
     $attempts = array_values(array_filter($attempts, fn($a) => strpos($a['sql'], 'outlet_id') !== false));
   }
+  if (!$attempts) {
+    throw new RuntimeException('orders table is missing restaurant/outlet routing columns');
+  }
   $lastErr = null;
   foreach ($attempts as $a) {
     try { db()->prepare($a['sql'])->execute($a['p']); return; }
