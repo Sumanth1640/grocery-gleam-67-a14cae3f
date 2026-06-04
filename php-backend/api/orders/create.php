@@ -20,38 +20,20 @@ if (!in_array($payment, ['upi','card','cod'], true)) json_error('invalid payment
 if (!is_int($subtotal) || !is_int($total))    json_error('subtotal/total must be integers');
 
 // ---------- Resolve warehouse from the delivery pincode ----------
-$warehouseId = resolve_warehouse_id_for_address($address);
+$warehouseId  = resolve_warehouse_id_for_address($address);
+$restaurantId = isset($in['restaurant_id']) && is_string($in['restaurant_id']) && $in['restaurant_id'] !== '' ? $in['restaurant_id'] : null;
+$outletId     = isset($in['outlet_id']) && is_string($in['outlet_id']) && $in['outlet_id'] !== '' ? $in['outlet_id'] : null;
 
 $id = uuid_v4();
-try {
-  db()->prepare('
-    INSERT INTO orders (id, user_id, warehouse_id, items, address, payment, subtotal, delivery, total)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  ')->execute([
-    $id, $uid, $warehouseId,
-    json_encode($items, JSON_UNESCAPED_UNICODE),
-    json_encode($address, JSON_UNESCAPED_UNICODE),
-    $payment, $subtotal, (int)$delivery, $total,
-  ]);
-} catch (Throwable $e) {
-  // Fallback for installs that haven't run schema_phase4 (no warehouse_id column yet)
-  db()->prepare('
-    INSERT INTO orders (id, user_id, items, address, payment, subtotal, delivery, total)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  ')->execute([
-    $id, $uid,
-    json_encode($items, JSON_UNESCAPED_UNICODE),
-    json_encode($address, JSON_UNESCAPED_UNICODE),
-    $payment, $subtotal, (int)$delivery, $total,
-  ]);
-}
+insert_order_row($id, $uid, $warehouseId, $restaurantId, $outletId, $items, $address, $payment, (int)$subtotal, (int)$delivery, (int)$total, null);
 
 // ---------- Notify the customer ----------
 notify_user($uid, 'order', 'Order placed',
   'Your order of ₹'.$total.' has been placed successfully.',
   '/orders/'.$id);
 
-// ---------- Notify warehouse managers ----------
+// ---------- Notify warehouse managers / partner ----------
 notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
+notify_partner_for_order($restaurantId, (int)$total, $id);
 
-json_ok(['id' => $id, 'status' => 'placed', 'warehouse_id' => $warehouseId], 201);
+json_ok(['id' => $id, 'status' => 'placed', 'warehouse_id' => $warehouseId, 'restaurant_id' => $restaurantId], 201);

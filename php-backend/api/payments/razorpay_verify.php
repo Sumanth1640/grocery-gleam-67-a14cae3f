@@ -36,33 +36,17 @@ if (!is_array($address))                       json_error('address required');
 if (!in_array($payment, ['upi','card'], true)) json_error('invalid payment');
 if (!is_int($subtotal) || !is_int($total))    json_error('subtotal/total must be integers');
 
-$warehouseId = resolve_warehouse_id_for_address($address);
+$warehouseId  = resolve_warehouse_id_for_address($address);
+$restaurantId = isset($order['restaurant_id']) && is_string($order['restaurant_id']) && $order['restaurant_id'] !== '' ? $order['restaurant_id'] : null;
+$outletId     = isset($order['outlet_id']) && is_string($order['outlet_id']) && $order['outlet_id'] !== '' ? $order['outlet_id'] : null;
+
 $id = uuid_v4();
-try {
-  db()->prepare('
-    INSERT INTO orders (id, user_id, warehouse_id, items, address, payment, subtotal, delivery, total, payment_status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  ')->execute([
-    $id, $uid, $warehouseId,
-    json_encode($items, JSON_UNESCAPED_UNICODE),
-    json_encode($address, JSON_UNESCAPED_UNICODE),
-    $payment, $subtotal, (int)$delivery, $total, 'paid',
-  ]);
-} catch (Throwable $e) {
-  db()->prepare('
-    INSERT INTO orders (id, user_id, items, address, payment, subtotal, delivery, total, payment_status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  ')->execute([
-    $id, $uid,
-    json_encode($items, JSON_UNESCAPED_UNICODE),
-    json_encode($address, JSON_UNESCAPED_UNICODE),
-    $payment, $subtotal, (int)$delivery, $total, 'paid',
-  ]);
-}
+insert_order_row($id, $uid, $warehouseId, $restaurantId, $outletId, $items, $address, $payment, (int)$subtotal, (int)$delivery, (int)$total, 'paid');
 
 notify_user($uid, 'order', 'Order placed',
   'Your order of ₹'.$total.' has been placed successfully.',
   '/orders/'.$id);
 notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
+notify_partner_for_order($restaurantId, (int)$total, $id);
 
-json_ok(['id' => $id, 'created_at' => date('c'), 'warehouse_id' => $warehouseId], 201);
+json_ok(['id' => $id, 'created_at' => date('c'), 'warehouse_id' => $warehouseId, 'restaurant_id' => $restaurantId], 201);
