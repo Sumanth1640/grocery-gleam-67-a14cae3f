@@ -291,8 +291,9 @@ export const php = {
   banners: () => request<unknown[]>("/banners/list.php"),
 
   // Refunds (user)
-  createRefund: (payload: { order_id: string; reason: string; details?: string; amount?: number }) =>
+  createRefund: (payload: { order_id: string; reason: string; details?: string; amount?: number; proof_urls?: string[] }) =>
     request<{ id: string }>("/refunds/create.php", "POST", payload),
+
   myRefundForOrder: (order_id: string) =>
     request<Record<string, unknown> | null>("/refunds/my_for_order.php", "POST", { order_id }),
 
@@ -443,6 +444,15 @@ export const phpUploads = {
     fd.append("file", file);
     return uploadMultipart("/uploads/upload.php", fd);
   },
+  /** Customer refund proof image — folder MUST equal the current user's id. */
+  refundProof: (file: File, userId: string) => {
+    const fd = new FormData();
+    fd.append("bucket", "refund-proofs");
+    fd.append("folder", userId);
+    fd.append("file", file);
+    return uploadMultipart("/uploads/upload.php", fd);
+  },
+
 };
 
 
