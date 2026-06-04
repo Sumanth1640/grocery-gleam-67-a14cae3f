@@ -186,9 +186,9 @@ function OrderDetailPage() {
           const path = `${user.id}/${Date.now()}-${f.name.replace(/[^A-Za-z0-9._-]/g, "_")}`;
           const { error } = await supabase.storage.from("refund-proofs").upload(path, f, { upsert: false });
           if (error) { toast.error(error.message); continue; }
-          const { data } = supabase.storage.from("refund-proofs").getPublicUrl(path);
-          uploaded.push(data.publicUrl);
+          uploaded.push(`refund-proofs://${path}`);
         }
+
       }
       setProofUrls((prev) => [...prev, ...uploaded]);
     } finally {
