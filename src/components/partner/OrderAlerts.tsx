@@ -15,6 +15,16 @@ const SOUND_KEY = "partner-alert-sound";
 const PUSH_KEY = "partner-alert-push";
 const SEEN_KEY = "partner-alert-seen";
 
+type PartnerOrderAlertRow = {
+  id: string;
+  total: number;
+  created_at?: string;
+};
+
+function isSoundEnabled() {
+  return typeof window === "undefined" || localStorage.getItem(SOUND_KEY) !== "0";
+}
+
 
 function showBrowserNotification(title: string, body: string, orderId: string) {
   try {
@@ -34,6 +44,28 @@ function showBrowserNotification(title: string, body: string, orderId: string) {
   } catch {
     /* ignore */
   }
+}
+
+function alertForNewOrder(row: PartnerOrderAlertRow) {
+  if (isSoundEnabled()) playAlert("partner_order");
+  const pushOn = typeof window !== "undefined" && localStorage.getItem(PUSH_KEY) === "1";
+  if (pushOn) {
+    showBrowserNotification(
+      `New order — ₹${row.total}`,
+      `Tap to view order #${row.id.slice(0, 6)}`,
+      row.id,
+    );
+  }
+  toast.success(`New order — ₹${row.total}`, {
+    description: `Tap to view order #${row.id.slice(0, 6)}`,
+    duration: 8000,
+    action: {
+      label: "Open",
+      onClick: () => {
+        window.location.href = "/partner/orders";
+      },
+    },
+  });
 }
 
 export function OrderAlerts() {
@@ -69,8 +101,33 @@ export function OrderAlerts() {
 
     // PHP mode: poll instead of realtime.
     if (USE_PHP) {
-      const t = setInterval(invalidateAll, 20_000);
-      return () => clearInterval(t);
+      let knownIds = new Set<string>();
+      let initialized = false;
+      let stopped = false;
+      const pollOrders = async () => {
+        try {
+          const orders = (await php.partner.listMyRestaurantOrders()) as PartnerOrderAlertRow[];
+          if (stopped || !Array.isArray(orders)) return;
+          invalidateAll();
+          const nextIds = new Set(orders.map((o) => o.id));
+          if (initialized) {
+            orders
+              .filter((o) => o?.id && !knownIds.has(o.id))
+              .sort((a, b) => new Date(a.created_at ?? 0).getTime() - new Date(b.created_at ?? 0).getTime())
+              .forEach(alertForNewOrder);
+          }
+          knownIds = nextIds;
+          initialized = true;
+        } catch {
+          invalidateAll();
+        }
+      };
+      void pollOrders();
+      const t = setInterval(pollOrders, 10_000);
+      return () => {
+        stopped = true;
+        clearInterval(t);
+      };
     }
 
 
@@ -88,25 +145,7 @@ export function OrderAlerts() {
           const row = payload.new as { id: string; total: number; created_at: string };
           invalidateAll();
           if (new Date(row.created_at).getTime() < seenAt - 5_000) return;
-          if (soundRef.current) playAlert("partner_order");
-          const pushOn = typeof window !== "undefined" && localStorage.getItem(PUSH_KEY) === "1";
-          if (pushOn) {
-            showBrowserNotification(
-              `New order — ₹${row.total}`,
-              `Tap to view order #${row.id.slice(0, 6)}`,
-              row.id,
-            );
-          }
-          toast.success(`New order — ₹${row.total}`, {
-            description: `Tap to view order #${row.id.slice(0, 6)}`,
-            duration: 8000,
-            action: {
-              label: "Open",
-              onClick: () => {
-                window.location.href = "/partner/orders";
-              },
-            },
-          });
+          alertForNewOrder(row);
         },
       )
       .on(

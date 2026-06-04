@@ -19,6 +19,7 @@ $rows = array_map(function ($r) {
   $r['subtotal'] = (int)$r['subtotal'];
   $r['delivery'] = (int)$r['delivery'];
   $r['total']    = (int)$r['total'];
+  if (isset($r['created_at'])) $r['created_at'] = to_iso_utc($r['created_at']);
   return $r;
 }, $stmt->fetchAll());
 json_ok($rows);
