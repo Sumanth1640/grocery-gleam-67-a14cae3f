@@ -181,6 +181,7 @@ function FoodCheckoutPage() {
         delivery: Math.max(0, totals.delivery + totals.packaging + totals.taxes - discount),
         total: totals.total,
         restaurant_id: restaurantId,
+        outlet_id: outletQ.data?.outlet?.id ?? null,
         coupon_id: couponData?.id ?? null,
         coupon_discount: discount,
         scheduled_for: scheduledFor,
