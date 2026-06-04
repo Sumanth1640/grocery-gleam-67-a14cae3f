@@ -62,9 +62,11 @@ $origName = (string)($f['name'] ?? 'file');
 $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION)) ?: 'bin';
 
 $allowedByBucket = [
-  'catalog'      => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-  'partner-docs' => ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+  'catalog'        => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+  'partner-docs'   => ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+  'refund-proofs'  => ['jpg', 'jpeg', 'png', 'webp'],
 ];
+
 if (!in_array($ext, $allowedByBucket[$bucket], true)) {
   json_error('File type not allowed for this bucket', 400);
 }
