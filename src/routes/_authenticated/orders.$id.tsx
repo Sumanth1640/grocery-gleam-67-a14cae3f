@@ -164,7 +164,8 @@ function OrderDetailPage() {
   const [refundDetails, setRefundDetails] = useState("");
   const [proofUrls, setProofUrls] = useState<string[]>([]);
   const [uploadingProof, setUploadingProof] = useState(false);
-  const { user } = useAuth();
+
+
 
   async function handleProofUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
