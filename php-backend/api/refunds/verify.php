@@ -44,6 +44,7 @@ db()->prepare(
 // Best-effort notify customer + admins.
 try {
   require_once __DIR__ . '/../../order_helpers.php';
+  require_once __DIR__ . '/../../partner_helpers.php';
   if (function_exists('notify_user') && !empty($row['user_id'])) {
     if ($status === 'verified') {
       notify_user((string)$row['user_id'], 'order', 'Refund verified',
@@ -59,6 +60,16 @@ try {
   if ($status === 'rejected') {
     db()->prepare("UPDATE refund_requests SET status = 'rejected', admin_note = ? WHERE id = ?")
         ->execute(['Rejected by manager: ' . $verifier_note, $id]);
+  }
+  // Notify admins so they ring + the queue updates.
+  if ($status === 'verified') {
+    notify_admins('order', 'Refund ready to process',
+      'A manager verified a refund of ₹' . (int)$row['amount'] . '. Approve to issue the refund.',
+      '/admin/refunds');
+  } else {
+    notify_admins('order', 'Refund rejected by manager',
+      'Manager rejected a refund request of ₹' . (int)$row['amount'] . '.',
+      '/admin/refunds');
   }
 } catch (Throwable $e) { /* non-fatal */ }
 
