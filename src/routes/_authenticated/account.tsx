@@ -15,9 +15,10 @@ import {
 } from "@/lib/account.functions";
 import { signOut } from "@/lib/use-auth";
 import { isAdmin } from "@/lib/catalog.functions";
+import { myManagedOutlets } from "@/lib/outlet-managers.functions";
 import { AddressDialog } from "@/components/site/AddressDialog";
 
-import { LogOut, MapPin, Package, Pencil, Plus, Star, Trash2, User as UserIcon, Loader2, Shield } from "lucide-react";
+import { LogOut, MapPin, Package, Pencil, Plus, Star, Trash2, User as UserIcon, Loader2, Shield, Store } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
