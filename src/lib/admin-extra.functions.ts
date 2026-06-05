@@ -437,18 +437,18 @@ export const managerVerifyRefund = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const patch: Record<string, unknown> = {
+    const patch = {
       verification_status: data.status,
       verifier_note: data.verifier_note,
       verified_by: userId,
       verified_at: new Date().toISOString(),
+      ...(data.status === "rejected"
+        ? { status: "rejected", admin_note: `Rejected by manager: ${data.verifier_note}` }
+        : {}),
     };
-    if (data.status === "rejected") {
-      patch.status = "rejected";
-      patch.admin_note = `Rejected by manager: ${data.verifier_note}`;
-    }
     const { data: row, error } = await supabase
-      .from("refund_requests").update(patch).eq("id", data.id).select("user_id, order_id").maybeSingle();
+      .from("refund_requests").update(patch as never).eq("id", data.id).select("user_id, order_id").maybeSingle();
+
     if (error) throw new Error(error.message);
     if (row) {
       await supabaseAdmin.from("notifications").insert({
