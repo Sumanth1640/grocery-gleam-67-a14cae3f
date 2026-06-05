@@ -407,3 +407,51 @@ export const adminReports = createServerFn({ method: "POST" })
 
     return { gmvTotal, gmvWeekly, couponROI, cohorts };
   });
+
+// ---------- Manager-side refund verification ----------
+export const managerListRefundsToVerify = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context;
+    // RLS scopes to refunds the warehouse/outlet manager can see.
+    const { data, error } = await supabase
+      .from("refund_requests").select("*").order("created_at", { ascending: false }).limit(300);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const managerVerifyRefund = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    id: z.string().uuid(),
+    status: z.enum(["verified", "rejected"]),
+    verifier_note: z.string().trim().max(1000).default(""),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const patch: Record<string, unknown> = {
+      verification_status: data.status,
+      verifier_note: data.verifier_note,
+      verified_by: userId,
+      verified_at: new Date().toISOString(),
+    };
+    if (data.status === "rejected") {
+      patch.status = "rejected";
+      patch.admin_note = `Rejected by manager: ${data.verifier_note}`;
+    }
+    const { data: row, error } = await supabase
+      .from("refund_requests").update(patch).eq("id", data.id).select("user_id, order_id").maybeSingle();
+    if (error) throw new Error(error.message);
+    if (row) {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: row.user_id,
+        kind: "order",
+        title: data.status === "verified" ? "Refund verified" : "Refund rejected",
+        body: data.status === "verified"
+          ? "Your refund request was verified and forwarded to admin for processing."
+          : (data.verifier_note || "Your refund request was rejected after review."),
+        link: `/orders/${row.order_id}`,
+      });
+    }
+    return { ok: true };
+  });
