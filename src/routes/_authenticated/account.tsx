@@ -36,6 +36,7 @@ function AccountPage() {
           <h1 className="font-display text-2xl font-bold md:text-3xl">Your account</h1>
           <div className="flex items-center gap-2">
             <AdminLink />
+            <OutletLink />
             <Link to="/orders" className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold hover:bg-secondary">
               <Package className="h-3.5 w-3.5" /> Orders
             </Link>
