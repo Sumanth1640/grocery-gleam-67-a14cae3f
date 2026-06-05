@@ -26,7 +26,9 @@ const NAV = [
   { to: "/outlet", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/outlet/orders", label: "Orders", icon: ShoppingBag, exact: false },
   { to: "/outlet/menu", label: "Menu", icon: UtensilsCrossed, exact: false },
+  { to: "/outlet/refunds", label: "Refunds", icon: ReceiptText, exact: false },
 ] as const;
+
 
 function OutletLayout() {
   const path = useRouterState({ select: (r) => r.location.pathname });
