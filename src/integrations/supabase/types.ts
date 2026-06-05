@@ -892,6 +892,10 @@ export type Database = {
           status: string
           updated_at: string
           user_id: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+          verifier_note: string
         }
         Insert: {
           admin_note?: string
@@ -905,6 +909,10 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verifier_note?: string
         }
         Update: {
           admin_note?: string
@@ -918,6 +926,10 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verifier_note?: string
         }
         Relationships: []
       }

@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tansta
 import { useQuery } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
-import { Loader2, Store, LayoutDashboard, ShoppingBag, UtensilsCrossed, ArrowLeft } from "lucide-react";
+import { Loader2, Store, LayoutDashboard, ShoppingBag, UtensilsCrossed, ArrowLeft, ReceiptText } from "lucide-react";
 import { myManagedOutlets } from "@/lib/outlet-managers.functions";
 
 export const Route = createFileRoute("/_authenticated/outlet")({
@@ -26,7 +26,9 @@ const NAV = [
   { to: "/outlet", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/outlet/orders", label: "Orders", icon: ShoppingBag, exact: false },
   { to: "/outlet/menu", label: "Menu", icon: UtensilsCrossed, exact: false },
+  { to: "/outlet/refunds", label: "Refunds", icon: ReceiptText, exact: false },
 ] as const;
+
 
 function OutletLayout() {
   const path = useRouterState({ select: (r) => r.location.pathname });

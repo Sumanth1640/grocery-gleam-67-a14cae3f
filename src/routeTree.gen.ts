@@ -45,6 +45,7 @@ import { Route as AuthenticatedPartnerOutletsRouteImport } from './routes/_authe
 import { Route as AuthenticatedPartnerOrdersRouteImport } from './routes/_authenticated/partner/orders'
 import { Route as AuthenticatedPartnerMenuRouteImport } from './routes/_authenticated/partner/menu'
 import { Route as AuthenticatedPartnerManagersRouteImport } from './routes/_authenticated/partner/managers'
+import { Route as AuthenticatedOutletRefundsRouteImport } from './routes/_authenticated/outlet/refunds'
 import { Route as AuthenticatedOutletOrdersRouteImport } from './routes/_authenticated/outlet/orders'
 import { Route as AuthenticatedOutletMenuRouteImport } from './routes/_authenticated/outlet/menu'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
@@ -54,6 +55,7 @@ import { Route as AuthenticatedAdminTeamRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminRidersRouteImport } from './routes/_authenticated/admin/riders'
 import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin/restaurants'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
+import { Route as AuthenticatedAdminRefundsVerifyRouteImport } from './routes/_authenticated/admin/refunds-verify'
 import { Route as AuthenticatedAdminRefundsRouteImport } from './routes/_authenticated/admin/refunds'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
@@ -254,6 +256,12 @@ const AuthenticatedPartnerManagersRoute =
     path: '/managers',
     getParentRoute: () => AuthenticatedPartnerRoute,
   } as any)
+const AuthenticatedOutletRefundsRoute =
+  AuthenticatedOutletRefundsRouteImport.update({
+    id: '/refunds',
+    path: '/refunds',
+    getParentRoute: () => AuthenticatedOutletRoute,
+  } as any)
 const AuthenticatedOutletOrdersRoute =
   AuthenticatedOutletOrdersRouteImport.update({
     id: '/orders',
@@ -302,6 +310,12 @@ const AuthenticatedAdminReportsRoute =
   AuthenticatedAdminReportsRouteImport.update({
     id: '/reports',
     path: '/reports',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRefundsVerifyRoute =
+  AuthenticatedAdminRefundsVerifyRouteImport.update({
+    id: '/refunds-verify',
+    path: '/refunds-verify',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminRefundsRoute =
@@ -399,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/refunds': typeof AuthenticatedAdminRefundsRoute
+  '/admin/refunds-verify': typeof AuthenticatedAdminRefundsVerifyRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/admin/riders': typeof AuthenticatedAdminRidersRoute
@@ -408,6 +423,7 @@ export interface FileRoutesByFullPath {
   '/orders/$id': typeof AuthenticatedOrdersIdRouteWithChildren
   '/outlet/menu': typeof AuthenticatedOutletMenuRoute
   '/outlet/orders': typeof AuthenticatedOutletOrdersRoute
+  '/outlet/refunds': typeof AuthenticatedOutletRefundsRoute
   '/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
@@ -452,6 +468,7 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/refunds': typeof AuthenticatedAdminRefundsRoute
+  '/admin/refunds-verify': typeof AuthenticatedAdminRefundsVerifyRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/admin/riders': typeof AuthenticatedAdminRidersRoute
@@ -461,6 +478,7 @@ export interface FileRoutesByTo {
   '/orders/$id': typeof AuthenticatedOrdersIdRouteWithChildren
   '/outlet/menu': typeof AuthenticatedOutletMenuRoute
   '/outlet/orders': typeof AuthenticatedOutletOrdersRoute
+  '/outlet/refunds': typeof AuthenticatedOutletRefundsRoute
   '/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/partner/orders': typeof AuthenticatedPartnerOrdersRoute
@@ -510,6 +528,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/refunds': typeof AuthenticatedAdminRefundsRoute
+  '/_authenticated/admin/refunds-verify': typeof AuthenticatedAdminRefundsVerifyRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/_authenticated/admin/riders': typeof AuthenticatedAdminRidersRoute
@@ -519,6 +538,7 @@ export interface FileRoutesById {
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRouteWithChildren
   '/_authenticated/outlet/menu': typeof AuthenticatedOutletMenuRoute
   '/_authenticated/outlet/orders': typeof AuthenticatedOutletOrdersRoute
+  '/_authenticated/outlet/refunds': typeof AuthenticatedOutletRefundsRoute
   '/_authenticated/partner/managers': typeof AuthenticatedPartnerManagersRoute
   '/_authenticated/partner/menu': typeof AuthenticatedPartnerMenuRoute
   '/_authenticated/partner/orders': typeof AuthenticatedPartnerOrdersRoute
@@ -568,6 +588,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/refunds'
+    | '/admin/refunds-verify'
     | '/admin/reports'
     | '/admin/restaurants'
     | '/admin/riders'
@@ -577,6 +598,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/outlet/menu'
     | '/outlet/orders'
+    | '/outlet/refunds'
     | '/partner/managers'
     | '/partner/menu'
     | '/partner/orders'
@@ -621,6 +643,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/refunds'
+    | '/admin/refunds-verify'
     | '/admin/reports'
     | '/admin/restaurants'
     | '/admin/riders'
@@ -630,6 +653,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/outlet/menu'
     | '/outlet/orders'
+    | '/outlet/refunds'
     | '/partner/managers'
     | '/partner/menu'
     | '/partner/orders'
@@ -678,6 +702,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/refunds'
+    | '/_authenticated/admin/refunds-verify'
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/restaurants'
     | '/_authenticated/admin/riders'
@@ -687,6 +712,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orders/$id'
     | '/_authenticated/outlet/menu'
     | '/_authenticated/outlet/orders'
+    | '/_authenticated/outlet/refunds'
     | '/_authenticated/partner/managers'
     | '/_authenticated/partner/menu'
     | '/_authenticated/partner/orders'
@@ -979,6 +1005,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPartnerManagersRouteImport
       parentRoute: typeof AuthenticatedPartnerRoute
     }
+    '/_authenticated/outlet/refunds': {
+      id: '/_authenticated/outlet/refunds'
+      path: '/refunds'
+      fullPath: '/outlet/refunds'
+      preLoaderRoute: typeof AuthenticatedOutletRefundsRouteImport
+      parentRoute: typeof AuthenticatedOutletRoute
+    }
     '/_authenticated/outlet/orders': {
       id: '/_authenticated/outlet/orders'
       path: '/orders'
@@ -1040,6 +1073,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/admin/reports'
       preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/refunds-verify': {
+      id: '/_authenticated/admin/refunds-verify'
+      path: '/refunds-verify'
+      fullPath: '/admin/refunds-verify'
+      preLoaderRoute: typeof AuthenticatedAdminRefundsVerifyRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/refunds': {
@@ -1125,6 +1165,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminRefundsRoute: typeof AuthenticatedAdminRefundsRoute
+  AuthenticatedAdminRefundsVerifyRoute: typeof AuthenticatedAdminRefundsVerifyRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminRestaurantsRoute: typeof AuthenticatedAdminRestaurantsRoute
   AuthenticatedAdminRidersRoute: typeof AuthenticatedAdminRidersRoute
@@ -1143,6 +1184,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminRefundsRoute: AuthenticatedAdminRefundsRoute,
+  AuthenticatedAdminRefundsVerifyRoute: AuthenticatedAdminRefundsVerifyRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminRestaurantsRoute: AuthenticatedAdminRestaurantsRoute,
   AuthenticatedAdminRidersRoute: AuthenticatedAdminRidersRoute,
@@ -1181,12 +1223,14 @@ const AuthenticatedOrdersRouteWithChildren =
 interface AuthenticatedOutletRouteChildren {
   AuthenticatedOutletMenuRoute: typeof AuthenticatedOutletMenuRoute
   AuthenticatedOutletOrdersRoute: typeof AuthenticatedOutletOrdersRoute
+  AuthenticatedOutletRefundsRoute: typeof AuthenticatedOutletRefundsRoute
   AuthenticatedOutletIndexRoute: typeof AuthenticatedOutletIndexRoute
 }
 
 const AuthenticatedOutletRouteChildren: AuthenticatedOutletRouteChildren = {
   AuthenticatedOutletMenuRoute: AuthenticatedOutletMenuRoute,
   AuthenticatedOutletOrdersRoute: AuthenticatedOutletOrdersRoute,
+  AuthenticatedOutletRefundsRoute: AuthenticatedOutletRefundsRoute,
   AuthenticatedOutletIndexRoute: AuthenticatedOutletIndexRoute,
 }
 

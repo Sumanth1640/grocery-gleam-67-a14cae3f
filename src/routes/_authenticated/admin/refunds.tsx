@@ -104,6 +104,8 @@ function ProofThumbs({ urls }: { urls: string[] }) {
 function RefundCard({ r, onResolve }: { r: any; onResolve: (s: "approved" | "rejected", note: string) => void }) {
   const [note, setNote] = useState("");
   const proofs = parseProofs(r.proof_urls);
+  const vstatus = (r.verification_status ?? "pending") as string;
+  const canApprove = vstatus === "verified";
   return (
     <div className="rounded-2xl border bg-card p-4 shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -113,19 +115,30 @@ function RefundCard({ r, onResolve }: { r: any; onResolve: (s: "approved" | "rej
           <div className="mt-1 text-sm"><span className="font-semibold">Reason:</span> {r.reason}</div>
           {r.details && <div className="text-sm text-muted-foreground">{r.details}</div>}
         </div>
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-          r.status === "pending" ? "bg-warning/15 text-warning" :
-          r.status === "approved" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
-        }`}>{r.status}</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+            r.status === "pending" ? "bg-warning/15 text-warning" :
+            r.status === "approved" || r.status === "refunded" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
+          }`}>{r.status}</span>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+            vstatus === "pending" ? "bg-warning/15 text-warning" :
+            vstatus === "verified" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
+          }`}>Mgr: {vstatus}</span>
+        </div>
       </div>
       <ProofThumbs urls={proofs} />
+      {r.verifier_note && <div className="mt-2 rounded-lg bg-muted/50 p-2 text-xs"><b>Manager note:</b> {r.verifier_note}</div>}
       {r.admin_note && <div className="mt-2 rounded-lg bg-muted/50 p-2 text-xs">Admin: {r.admin_note}</div>}
       {r.status === "pending" && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a note (optional)"
             className="min-w-0 flex-1 rounded-lg border bg-background px-3 py-1.5 text-sm" />
-          <button onClick={() => onResolve("approved", note)} className="inline-flex items-center gap-1 rounded-lg bg-success px-3 py-1.5 text-xs font-bold text-success-foreground">
-            <Check className="h-3.5 w-3.5" /> Approve
+          <button
+            disabled={!canApprove}
+            title={canApprove ? "Issue refund" : "Waiting for manager verification"}
+            onClick={() => onResolve("approved", note)}
+            className="inline-flex items-center gap-1 rounded-lg bg-success px-3 py-1.5 text-xs font-bold text-success-foreground disabled:cursor-not-allowed disabled:opacity-50">
+            <Check className="h-3.5 w-3.5" /> {canApprove ? "Approve & Refund" : "Awaiting verification"}
           </button>
           <button onClick={() => onResolve("rejected", note)} className="inline-flex items-center gap-1 rounded-lg bg-destructive px-3 py-1.5 text-xs font-bold text-destructive-foreground">
             <X className="h-3.5 w-3.5" /> Reject
@@ -135,3 +148,4 @@ function RefundCard({ r, onResolve }: { r: any; onResolve: (s: "approved" | "rej
     </div>
   );
 }
+

@@ -178,9 +178,17 @@ export const adminResolveRefund = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
+    if (data.status === "approved") {
+      const { data: cur } = await supabaseAdmin
+        .from("refund_requests").select("verification_status").eq("id", data.id).maybeSingle();
+      if ((cur?.verification_status ?? "pending") !== "verified") {
+        throw new Error("Refund must be verified by warehouse/outlet manager first.");
+      }
+    }
     const { data: rr, error } = await supabaseAdmin.from("refund_requests")
       .update({ status: data.status, admin_note: data.admin_note }).eq("id", data.id).select("user_id, order_id, amount").single();
     if (error) throw new Error(error.message);
+
     if (rr) {
       await supabaseAdmin.from("notifications").insert({
         user_id: rr.user_id, kind: "system",
@@ -406,4 +414,52 @@ export const adminReports = createServerFn({ method: "POST" })
     }));
 
     return { gmvTotal, gmvWeekly, couponROI, cohorts };
+  });
+
+// ---------- Manager-side refund verification ----------
+export const managerListRefundsToVerify = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context;
+    // RLS scopes to refunds the warehouse/outlet manager can see.
+    const { data, error } = await supabase
+      .from("refund_requests").select("*").order("created_at", { ascending: false }).limit(300);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const managerVerifyRefund = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    id: z.string().uuid(),
+    status: z.enum(["verified", "rejected"]),
+    verifier_note: z.string().trim().max(1000).default(""),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const patch = {
+      verification_status: data.status,
+      verifier_note: data.verifier_note,
+      verified_by: userId,
+      verified_at: new Date().toISOString(),
+      ...(data.status === "rejected"
+        ? { status: "rejected", admin_note: `Rejected by manager: ${data.verifier_note}` }
+        : {}),
+    };
+    const { data: row, error } = await supabase
+      .from("refund_requests").update(patch as never).eq("id", data.id).select("user_id, order_id").maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (row) {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: row.user_id,
+        kind: "order",
+        title: data.status === "verified" ? "Refund verified" : "Refund rejected",
+        body: data.status === "verified"
+          ? "Your refund request was verified and forwarded to admin for processing."
+          : (data.verifier_note || "Your refund request was rejected after review."),
+        link: `/orders/${row.order_id}`,
+      });
+    }
+    return { ok: true };
   });
