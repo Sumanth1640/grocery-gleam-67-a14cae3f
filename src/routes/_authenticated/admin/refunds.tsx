@@ -18,7 +18,12 @@ function RefundsPage() {
   const resolveFn = useDualFn(adminResolveRefund, (d) => php.admin.resolveRefund(d));
   const qc = useQueryClient();
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "all">("pending");
-  const q = useQuery({ queryKey: ["admin-refunds", status], queryFn: () => listFn({ data: { status } }) });
+  const q = useQuery({
+    queryKey: ["admin-refunds", status],
+    queryFn: () => listFn({ data: { status } }),
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+  });
 
   const resolveM = useMutation({
     mutationFn: (v: { id: string; status: "approved" | "rejected"; admin_note: string }) => resolveFn({ data: v }),
