@@ -54,7 +54,7 @@ const viteExit = await new Promise((resolve) => {
   const proc = spawn(process.execPath, [
     join(root, "node_modules", "vite", "bin", "vite.js"),
     "build",
-  ], { cwd: root });
+  ], { cwd: root, env: { ...process.env, BUILD_SPA: "1" } });
   streamFilter(proc.stdout, process.stdout);
   streamFilter(proc.stderr, process.stderr);
   proc.on("close", resolve);
