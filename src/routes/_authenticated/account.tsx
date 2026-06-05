@@ -78,6 +78,18 @@ function AdminLink() {
     </Link>
   );
 }
+
+function OutletLink() {
+  const fn = useDualFn(myManagedOutlets, (d) => php.outletMgr.myManagedOutlets(d));
+  const { data } = useQuery({ queryKey: ["my-managed-outlets"], queryFn: () => fn(), retry: false });
+  if (!data || data.length === 0) return null;
+  return (
+    <Link to="/outlet" className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-pop">
+      <Store className="h-3.5 w-3.5" /> Outlet
+    </Link>
+  );
+}
+
 function SectionHeader({ icon: Icon, title, action }: { icon: typeof MapPin; title: string; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
