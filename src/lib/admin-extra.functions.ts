@@ -178,9 +178,17 @@ export const adminResolveRefund = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
+    if (data.status === "approved") {
+      const { data: cur } = await supabaseAdmin
+        .from("refund_requests").select("verification_status").eq("id", data.id).maybeSingle();
+      if ((cur?.verification_status ?? "pending") !== "verified") {
+        throw new Error("Refund must be verified by warehouse/outlet manager first.");
+      }
+    }
     const { data: rr, error } = await supabaseAdmin.from("refund_requests")
       .update({ status: data.status, admin_note: data.admin_note }).eq("id", data.id).select("user_id, order_id, amount").single();
     if (error) throw new Error(error.message);
+
     if (rr) {
       await supabaseAdmin.from("notifications").insert({
         user_id: rr.user_id, kind: "system",
