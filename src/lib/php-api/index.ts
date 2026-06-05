@@ -297,6 +297,15 @@ export const php = {
   myRefundForOrder: (order_id: string) =>
     request<Record<string, unknown> | null>("/refunds/my_for_order.php", "POST", { order_id }),
 
+  // Refunds (manager: warehouse / outlet)
+  refunds: {
+    verifyList: () => request<any[]>("/refunds/verify_list.php"),
+    verify: (p: { id: string; status: "verified" | "rejected"; verifier_note?: string }) =>
+      request<{ ok: true }>("/refunds/verify.php", "POST", p),
+  },
+
+
+
   // ---------- Admin ----------
   admin: {
     stats: (_p?: unknown) => request<{ products: number; categories: number; orders: number; revenue: number }>("/admin/stats.php"),
