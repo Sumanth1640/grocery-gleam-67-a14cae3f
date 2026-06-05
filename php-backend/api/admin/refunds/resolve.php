@@ -16,7 +16,7 @@ if ($id === '' || !in_array($status, ['approved', 'rejected', 'refunded', 'pendi
 
 // Load the refund request + linked order so we can call Razorpay.
 $st = db()->prepare(
-  'SELECT r.id, r.order_id, r.amount, r.status AS req_status,
+  'SELECT r.id, r.order_id, r.amount, r.status AS req_status, r.verification_status,
           o.razorpay_payment_id, o.payment_status, o.total, o.payment
      FROM refund_requests r
      LEFT JOIN orders o ON o.id = r.order_id
@@ -26,6 +26,13 @@ $st = db()->prepare(
 $st->execute([$id]);
 $row = $st->fetch();
 if (!$row) json_error('Refund request not found', 404);
+
+// Admin can only approve/refund a request that the warehouse/outlet manager has verified.
+if (in_array($status, ['approved', 'refunded'], true)
+    && ($row['verification_status'] ?? 'pending') !== 'verified') {
+  json_error('Refund must be verified by warehouse/outlet manager before admin can approve.', 409);
+}
+
 
 $final_status = $status;
 $final_note   = $note;
