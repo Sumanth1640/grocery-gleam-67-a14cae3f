@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+
 import { dualApi, USE_PHP } from "@/lib/dual-api";
 import { phpAuth, php } from "@/lib/php-api";
 import { isAdmin as isAdminFn } from "@/lib/catalog.functions";
