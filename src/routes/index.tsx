@@ -150,10 +150,10 @@ function HomePage() {
                 className="group flex flex-col items-center rounded-2xl border bg-card p-3 text-center shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
               >
                 <div
-                  className="grid h-20 w-20 place-items-center rounded-xl"
+                  className="grid aspect-square w-full max-w-[80px] place-items-center overflow-hidden rounded-xl"
                   style={{ backgroundColor: c.tint }}
                 >
-                  <img src={c.image} alt={c.name} loading="lazy" className="h-full w-full rounded-xl object-cover" />
+                  <img src={c.image} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
                 </div>
                 <div className="mt-2 text-xs font-semibold leading-tight">{c.name}</div>
               </Link>
