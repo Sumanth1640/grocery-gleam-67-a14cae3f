@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tansta
 import { useQuery } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
-import { Loader2, Store, LayoutDashboard, ShoppingBag, UtensilsCrossed, ArrowLeft } from "lucide-react";
+import { Loader2, Store, LayoutDashboard, ShoppingBag, UtensilsCrossed, ArrowLeft, ReceiptText } from "lucide-react";
 import { myManagedOutlets } from "@/lib/outlet-managers.functions";
 
 export const Route = createFileRoute("/_authenticated/outlet")({
