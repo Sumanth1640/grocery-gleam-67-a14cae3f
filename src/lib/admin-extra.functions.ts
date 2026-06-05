@@ -447,7 +447,7 @@ export const managerVerifyRefund = createServerFn({ method: "POST" })
         : {}),
     };
     const { data: row, error } = await supabase
-      .from("refund_requests").update(patch as never).eq("id", data.id).select("user_id, order_id").maybeSingle();
+      .from("refund_requests").update(patch as never).eq("id", data.id).select("user_id, order_id, amount").maybeSingle();
 
     if (error) throw new Error(error.message);
     if (row) {
@@ -460,6 +460,18 @@ export const managerVerifyRefund = createServerFn({ method: "POST" })
           : (data.verifier_note || "Your refund request was rejected after review."),
         link: `/orders/${row.order_id}`,
       });
+      // Ring admins so they see/process verified refunds quickly.
+      const { data: admins } = await supabaseAdmin
+        .from("user_roles").select("user_id").eq("role", "admin");
+      const adminTitle = data.status === "verified" ? "Refund ready to process" : "Refund rejected by manager";
+      const adminBody = data.status === "verified"
+        ? `A manager verified a refund of ₹${row.amount}. Approve to issue the refund.`
+        : `Manager rejected a refund request of ₹${row.amount}.`;
+      for (const a of admins ?? []) {
+        await supabaseAdmin.from("notifications").insert({
+          user_id: a.user_id, kind: "order", title: adminTitle, body: adminBody, link: "/admin/refunds",
+        });
+      }
     }
     return { ok: true };
   });
