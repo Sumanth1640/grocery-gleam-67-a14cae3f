@@ -4,6 +4,7 @@ import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
 import { Loader2, Store, LayoutDashboard, ShoppingBag, UtensilsCrossed, ArrowLeft, ReceiptText } from "lucide-react";
 import { myManagedOutlets } from "@/lib/outlet-managers.functions";
+import { OutletAlerts } from "@/components/outlet/OutletAlerts";
 
 export const Route = createFileRoute("/_authenticated/outlet")({
   head: () => ({ meta: [{ title: "Outlet panel — hallifresh" }] }),
@@ -68,6 +69,9 @@ function OutletLayout() {
                 {outlets.length === 1 ? outlets[0].outlet?.name : `${outlets.length} outlets`}
               </div>
             </div>
+          </div>
+          <div className="ml-auto">
+            <OutletAlerts />
           </div>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2">

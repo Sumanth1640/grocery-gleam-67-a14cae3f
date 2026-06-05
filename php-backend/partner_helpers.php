@@ -62,3 +62,34 @@ function notify_user(string $user_id, string $kind, string $title, string $body,
     VALUES (?, ?, ?, ?, ?, ?, NOW())');
   try { $stmt->execute([uuid_v4(), $user_id, $kind, $title, $body, $link]); } catch (Throwable $e) { /* ignore */ }
 }
+
+function notify_admins(string $kind, string $title, string $body, string $link): void {
+  try {
+    $st = db()->prepare("SELECT user_id FROM user_roles WHERE role = 'admin'");
+    $st->execute();
+    foreach ($st->fetchAll() as $row) {
+      notify_user((string)$row['user_id'], $kind, $title, $body, $link);
+    }
+  } catch (Throwable $e) { /* ignore */ }
+}
+
+function notify_outlet_managers(string $outlet_id, string $kind, string $title, string $body, string $link): void {
+  try {
+    $st = db()->prepare('SELECT user_id FROM partner_outlet_managers WHERE outlet_id = ?');
+    $st->execute([$outlet_id]);
+    foreach ($st->fetchAll() as $row) {
+      notify_user((string)$row['user_id'], $kind, $title, $body, $link);
+    }
+  } catch (Throwable $e) { /* ignore */ }
+}
+
+function notify_warehouse_managers(string $warehouse_id, string $kind, string $title, string $body, string $link): void {
+  try {
+    $st = db()->prepare('SELECT user_id FROM warehouse_managers WHERE warehouse_id = ?');
+    $st->execute([$warehouse_id]);
+    foreach ($st->fetchAll() as $row) {
+      notify_user((string)$row['user_id'], $kind, $title, $body, $link);
+    }
+  } catch (Throwable $e) { /* ignore */ }
+}
+

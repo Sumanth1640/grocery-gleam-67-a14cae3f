@@ -12,7 +12,12 @@ export function VerifyRefundsView() {
   const verifyFn = useDualFn(managerVerifyRefund, (d) => php.refunds.verify(d));
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"pending" | "verified" | "rejected" | "all">("pending");
-  const q = useQuery({ queryKey: ["mgr-refunds"], queryFn: () => listFn({ data: {} as never }) });
+  const q = useQuery({
+    queryKey: ["mgr-refunds"],
+    queryFn: () => listFn({ data: {} as never }),
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+  });
 
   const verifyM = useMutation({
     mutationFn: (v: { id: string; status: "verified" | "rejected"; verifier_note: string }) => verifyFn({ data: v }),
