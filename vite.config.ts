@@ -5,12 +5,21 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// NOTE: SPA / static-only mode broke the Lovable preview & published deploys
-// (Cloudflare worker SSR bundle failed with `No such module "assets/h3-v2"`).
-// For Hostinger / PHP static export, run the separate scripts/build-spa.mjs
-// pipeline instead of forcing the main Vite config into SPA mode.
-export default defineConfig({
-  vite: {
-    build: { manifest: true },
-  },
-});
+// IMPORTANT: Lovable preview & published deploys MUST use SSR mode (Cloudflare worker).
+// SPA / static-only mode is ONLY for the separate Hostinger PHP static export, which
+// is triggered by scripts/build-spa.mjs setting BUILD_SPA=1.
+const SPA = process.env.BUILD_SPA === "1";
+
+export default defineConfig(
+  SPA
+    ? {
+        tanstackStart: {
+          spa: { enabled: true, prerender: { outputPath: "/index.html" } },
+          server: { preset: "static" },
+        },
+        vite: { build: { manifest: true } },
+      }
+    : {
+        vite: { build: { manifest: true } },
+      },
+);
