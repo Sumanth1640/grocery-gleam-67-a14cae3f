@@ -15,9 +15,10 @@ import {
 } from "@/lib/account.functions";
 import { signOut } from "@/lib/use-auth";
 import { isAdmin } from "@/lib/catalog.functions";
+import { myManagedOutlets } from "@/lib/outlet-managers.functions";
 import { AddressDialog } from "@/components/site/AddressDialog";
 
-import { LogOut, MapPin, Package, Pencil, Plus, Star, Trash2, User as UserIcon, Loader2, Shield } from "lucide-react";
+import { LogOut, MapPin, Package, Pencil, Plus, Star, Trash2, User as UserIcon, Loader2, Shield, Store } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -35,6 +36,7 @@ function AccountPage() {
           <h1 className="font-display text-2xl font-bold md:text-3xl">Your account</h1>
           <div className="flex items-center gap-2">
             <AdminLink />
+            <OutletLink />
             <Link to="/orders" className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold hover:bg-secondary">
               <Package className="h-3.5 w-3.5" /> Orders
             </Link>
@@ -76,6 +78,18 @@ function AdminLink() {
     </Link>
   );
 }
+
+function OutletLink() {
+  const fn = useDualFn(myManagedOutlets, (d) => php.outletMgr.myManagedOutlets(d));
+  const { data } = useQuery({ queryKey: ["my-managed-outlets"], queryFn: () => fn(), retry: false });
+  if (!data || data.length === 0) return null;
+  return (
+    <Link to="/outlet" className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-pop">
+      <Store className="h-3.5 w-3.5" /> Outlet
+    </Link>
+  );
+}
+
 function SectionHeader({ icon: Icon, title, action }: { icon: typeof MapPin; title: string; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
