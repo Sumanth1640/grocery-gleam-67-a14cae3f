@@ -130,7 +130,7 @@ function HeroSlidesPage() {
                 <Field label="Secondary CTA link"><input className="w-full rounded-lg border bg-background px-3 py-2 text-sm" value={editing.secondary_cta_link} onChange={(e) => setEditing({ ...editing, secondary_cta_link: e.target.value })} /></Field>
               </div>
               <Field label="Hero image">
-                <ImageUpload value={editing.image} folder="hero-slides" onChange={(url) => setEditing({ ...editing, image: url })} />
+                <ImageUpload value={editing.image} folder="banners" onChange={(url) => setEditing({ ...editing, image: url })} />
               </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Deal label (small)"><input className="w-full rounded-lg border bg-background px-3 py-2 text-sm" value={editing.deal_label} onChange={(e) => setEditing({ ...editing, deal_label: e.target.value })} /></Field>
