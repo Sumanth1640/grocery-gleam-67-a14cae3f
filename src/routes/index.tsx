@@ -87,6 +87,10 @@ function HomePage() {
         </Link>
       </section>
 
+      {/* FURNITURE — equal weight promo */}
+      <FurnitureShowcase />
+
+
       {/* CATEGORIES */}
       <section id="categories" className="mx-auto max-w-7xl px-4 py-12">
         <SectionHeader title="Shop by category" subtitle="Everything you need, neatly stacked" />
