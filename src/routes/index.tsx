@@ -275,8 +275,8 @@ function OfferStrip() {
   const tiles = (data ?? []) as Array<{ id: string; title: string; subtitle: string; cta_label: string; link_to: string; tint: string }>;
   if (tiles.length === 0) return null;
   return (
-    <section className="mx-auto max-w-7xl px-4">
-      <div className="grid gap-3 md:grid-cols-3">
+    <section className="mx-auto max-w-7xl px-4 py-8">
+      <div className="grid gap-4 md:grid-cols-3">
         {tiles.map((t) => (
           <OfferTile key={t.id} title={t.title} sub={t.subtitle} tint={t.tint} ctaLabel={t.cta_label || "Shop"} linkTo={t.link_to || "/"} />
         ))}
@@ -289,14 +289,23 @@ function OfferTile({ title, sub, tint, ctaLabel = "Shop", linkTo = "/" }: { titl
   return (
     <Link
       to={linkTo}
-      className="flex items-center justify-between rounded-2xl border p-5 shadow-card transition hover:opacity-95"
+      className="group relative flex items-center justify-between overflow-hidden rounded-2xl border-0 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-6"
       style={{ backgroundColor: tint }}
     >
-      <div>
-        <div className="font-display text-lg font-bold">{title}</div>
-        <div className="text-xs text-foreground/70">{sub}</div>
+      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-foreground/5 transition-transform duration-500 group-hover:scale-110" />
+      
+      <div className="relative z-10 flex flex-col gap-1">
+        <div className="font-display text-xl font-extrabold leading-tight tracking-tight md:text-2xl">{title}</div>
+        <div className="text-sm font-medium text-foreground/60">{sub}</div>
+        <div className="mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-background/80 px-4 py-2 text-xs font-bold backdrop-blur-sm transition-all group-hover:bg-background group-hover:shadow-md">
+          {ctaLabel}
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+        </div>
       </div>
-      <div className="rounded-lg bg-background/70 px-2.5 py-1 text-xs font-bold backdrop-blur">{ctaLabel} →</div>
+      
+      <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/10 transition-all duration-300 group-hover:scale-110 sm:h-12 sm:w-12">
+        <ArrowRight className="h-5 w-5 -rotate-45 text-foreground/40" />
+      </div>
     </Link>
   );
 }
