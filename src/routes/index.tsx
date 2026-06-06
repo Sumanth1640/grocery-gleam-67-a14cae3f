@@ -468,8 +468,9 @@ function FurniturePromo() {
     staleTime: 60_000,
   });
 
-  const promos: Promo[] = (promosQ.data ?? []) as Promo[];
-  const all: FurnitureItem[] = itemsQ.data && itemsQ.data.length > 0 ? (itemsQ.data as FurnitureItem[]) : fallbackFurniture;
+  const promos: Promo[] = Array.isArray(promosQ.data) ? (promosQ.data as Promo[]) : [];
+  const itemsData = Array.isArray(itemsQ.data) ? (itemsQ.data as FurnitureItem[]) : [];
+  const all: FurnitureItem[] = itemsData.length > 0 ? itemsData : fallbackFurniture;
   const items = all.slice(0, 4);
 
   if (promos.length === 0 && items.length === 0) return null;
