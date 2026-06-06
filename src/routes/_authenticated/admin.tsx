@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +11,39 @@ import { AdminOrderAlerts, AdminOrderAlertsControl } from "@/components/admin/Or
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — hallifresh" }] }),
+  beforeLoad: async ({ location }) => {
+    // Server-side role gate: block non-admin / non-warehouse-manager users
+    // from loading the admin UI shell at all.
+    if (typeof window === "undefined") return;
+    const { USE_PHP } = await import("@/lib/dual-api");
+    let role: { isAdmin?: boolean; isWarehouseManager?: boolean } | null = null;
+    if (USE_PHP) {
+      const { phpAuth, php: phpApi } = await import("@/lib/php-api");
+      if (!phpAuth.get()) {
+        throw redirect({ to: "/login", search: { redirect: location.href } });
+      }
+      try {
+        role = await phpApi.checkRole();
+      } catch {
+        role = null;
+      }
+    } else {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        throw redirect({ to: "/login", search: { redirect: location.href } });
+      }
+      try {
+        const { isAdmin: isAdminFn } = await import("@/lib/catalog.functions");
+        role = await isAdminFn();
+      } catch {
+        role = null;
+      }
+    }
+    if (!role?.isAdmin && !role?.isWarehouseManager) {
+      throw redirect({ to: "/" });
+    }
+  },
   component: AdminLayout,
 });
 
