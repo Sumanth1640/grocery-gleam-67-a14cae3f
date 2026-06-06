@@ -33,6 +33,9 @@ const items = [
   { to: "/admin/coupons", label: "Coupons", icon: TicketPercent, exact: false, adminOnly: true },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon, exact: false, adminOnly: true },
   { to: "/admin/hero-slides", label: "Hero slides", icon: ImageIcon, exact: false, adminOnly: true },
+  { to: "/admin/offer-tiles", label: "Offer tiles", icon: ImageIcon, exact: false, adminOnly: true },
+
+
 
 ] as const;
 
