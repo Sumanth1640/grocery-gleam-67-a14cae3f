@@ -2,18 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { ArrowRight, Trees, Hammer, Truck, Leaf, ShoppingBag, Plus } from "lucide-react";
+import { ArrowRight, Trees, Hammer, Truck, Leaf } from "lucide-react";
 import { furnitureCategories, furnitureItems as fallbackItems, type FurnitureItem } from "@/lib/furniture-data";
 import { useQuery } from "@tanstack/react-query";
 import { php } from "@/lib/php-api";
-import { furnitureCart, useFurnitureCart, furnitureTotals } from "@/lib/furniture-cart-store";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/furniture/")({
   head: () => ({
     meta: [
       { title: "Wooden Furniture — Handcrafted Solid Wood Pieces" },
-      { name: "description", content: "Shop handcrafted wooden furniture in teak, sheesham, mango, oak and walnut. Sofas, beds, dining sets and storage built to last." },
+      { name: "description", content: "Browse handcrafted wooden furniture in teak, sheesham, mango, oak and walnut. Sofas, beds, dining sets and storage built to last." },
       { property: "og:title", content: "Wooden Furniture — Handcrafted Solid Wood" },
       { property: "og:description", content: "Solid wood sofas, beds, dining sets and storage — handcrafted to order." },
     ],
@@ -28,8 +26,6 @@ function FurnitureLanding() {
     queryFn: () => php.furniture(),
     staleTime: 60_000,
   });
-  const cart = useFurnitureCart();
-  const { count } = furnitureTotals(cart);
 
   const allItems: FurnitureItem[] = q.data && q.data.length > 0 ? (q.data as FurnitureItem[]) : fallbackItems;
   const items = useMemo(
@@ -40,17 +36,6 @@ function FurnitureLanding() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-
-      {/* Floating wishlist button */}
-      {count > 0 && (
-        <Link
-          to="/furniture/cart"
-          className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-bold text-background shadow-pop transition hover:-translate-y-0.5"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          {count} in wishlist
-        </Link>
-      )}
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
@@ -69,11 +54,11 @@ function FurnitureLanding() {
               <span className="text-primary">handcrafted</span> for life.
             </h1>
             <p className="mt-4 max-w-md text-sm text-foreground/75 md:text-base">
-              Teak, sheesham, mango, oak and walnut — shaped by master carpenters, finished by hand, and delivered to your doorstep.
+              Teak, sheesham, mango, oak and walnut — shaped by master carpenters, finished by hand.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a href="#shop" className="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-3 text-sm font-bold text-background shadow-pop transition hover:-translate-y-0.5">
-                Shop the collection <ArrowRight className="h-4 w-4" />
+                Browse the collection <ArrowRight className="h-4 w-4" />
               </a>
               <a href="#why" className="inline-flex items-center gap-2 rounded-xl border border-foreground/20 bg-background/60 px-5 py-3 text-sm font-bold backdrop-blur">
                 Why solid wood
@@ -130,7 +115,7 @@ function FurnitureLanding() {
       <section id="shop" className="mx-auto max-w-7xl px-4 pt-12">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="font-display text-2xl font-extrabold md:text-3xl">Shop by room</h2>
+            <h2 className="font-display text-2xl font-extrabold md:text-3xl">Browse by room</h2>
             <p className="text-sm text-muted-foreground">Pick a space, find pieces that fit.</p>
           </div>
         </div>
@@ -168,8 +153,12 @@ function Chip({ label, active, onClick, tint }: { label: string; active: boolean
 function FurnitureCard({ item }: { item: FurnitureItem }) {
   const off = Math.round(((item.mrp - item.price) / item.mrp) * 100);
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-1 hover:shadow-xl">
-      <Link to="/furniture/$id" params={{ id: item.slug }} className="relative block aspect-square overflow-hidden bg-secondary/60">
+    <Link
+      to="/furniture/$id"
+      params={{ id: item.slug }}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-1 hover:shadow-xl"
+    >
+      <div className="relative block aspect-square overflow-hidden bg-secondary/60">
         <img src={item.image} alt={item.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
         {off > 0 && (
           <div className="absolute left-3 top-3 rounded-md bg-discount px-1.5 py-0.5 text-[10px] font-bold text-white">{off}% OFF</div>
@@ -177,29 +166,18 @@ function FurnitureCard({ item }: { item: FurnitureItem }) {
         <div className="absolute bottom-3 left-3 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur">
           {item.wood}
         </div>
-      </Link>
+      </div>
       <div className="flex flex-1 flex-col p-3">
-        <Link to="/furniture/$id" params={{ id: item.slug }} className="line-clamp-2 text-sm font-semibold leading-tight hover:underline">
-          {item.name}
-        </Link>
+        <div className="line-clamp-2 text-sm font-semibold leading-tight">{item.name}</div>
         <div className="mt-1 text-xs text-muted-foreground">{item.dimensions}</div>
         <div className="mt-auto flex items-end justify-between pt-3">
           <div>
             <div className="text-base font-extrabold">₹{item.price.toLocaleString("en-IN")}</div>
             {off > 0 && <div className="text-[11px] text-muted-foreground line-through">₹{item.mrp.toLocaleString("en-IN")}</div>}
           </div>
-          <button
-            onClick={() => {
-              furnitureCart.add({ id: item.id, slug: item.slug, name: item.name, wood: item.wood, image: item.image, price: item.price });
-              toast.success(`${item.name} added to wishlist`);
-            }}
-            className="grid h-9 w-9 place-items-center rounded-full border-2 border-foreground text-foreground transition hover:bg-foreground hover:text-background"
-            aria-label="Add to wishlist"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-primary">View ›</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
