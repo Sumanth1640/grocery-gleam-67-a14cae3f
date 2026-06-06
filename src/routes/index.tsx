@@ -13,7 +13,8 @@ import { useIsNative } from "@/lib/use-native";
 import { USE_PHP } from "@/lib/dual-api";
 import { php } from "@/lib/php-api";
 import heroImg from "@/assets/hero-grocery.jpg";
-import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
+import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star, Trees, Hammer } from "lucide-react";
+import { furnitureCategories, furnitureItems as fallbackFurniture, type FurnitureItem } from "@/lib/furniture-data";
 
 
 export const Route = createFileRoute("/")({
