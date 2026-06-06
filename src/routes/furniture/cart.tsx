@@ -102,8 +102,14 @@ function FurnitureCartPage() {
                 <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Indicative total</div>
                 <div className="mt-1 font-display text-3xl font-extrabold">₹{total.toLocaleString("en-IN")}</div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Final price depends on customisation, delivery, and any add-ons. We'll send a precise quote.
+                  Buy now with white-glove delivery, or request a tailored quote for customisation.
                 </p>
+                <Link
+                  to="/furniture/checkout"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-foreground px-5 py-3 text-sm font-bold text-background shadow-pop"
+                >
+                  Proceed to checkout
+                </Link>
               </div>
 
               <form

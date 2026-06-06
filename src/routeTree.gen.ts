@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FurnitureIndexRouteImport } from './routes/furniture/index'
 import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as FurnitureCheckoutRouteImport } from './routes/furniture/checkout'
 import { Route as FurnitureCartRouteImport } from './routes/furniture/cart'
 import { Route as FurnitureIdRouteImport } from './routes/furniture/$id'
 import { Route as FoodOffersRouteImport } from './routes/food/offers'
@@ -136,6 +137,11 @@ const FoodIndexRoute = FoodIndexRouteImport.update({
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FurnitureCheckoutRoute = FurnitureCheckoutRouteImport.update({
+  id: '/furniture/checkout',
+  path: '/furniture/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FurnitureCartRoute = FurnitureCartRouteImport.update({
@@ -450,6 +456,7 @@ export interface FileRoutesByFullPath {
   '/food/offers': typeof FoodOffersRoute
   '/furniture/$id': typeof FurnitureIdRoute
   '/furniture/cart': typeof FurnitureCartRoute
+  '/furniture/checkout': typeof FurnitureCheckoutRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
@@ -512,6 +519,7 @@ export interface FileRoutesByTo {
   '/food/offers': typeof FoodOffersRoute
   '/furniture/$id': typeof FurnitureIdRoute
   '/furniture/cart': typeof FurnitureCartRoute
+  '/furniture/checkout': typeof FurnitureCheckoutRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
   '/furniture': typeof FurnitureIndexRoute
@@ -579,6 +587,7 @@ export interface FileRoutesById {
   '/food/offers': typeof FoodOffersRoute
   '/furniture/$id': typeof FurnitureIdRoute
   '/furniture/cart': typeof FurnitureCartRoute
+  '/furniture/checkout': typeof FurnitureCheckoutRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
@@ -646,6 +655,7 @@ export interface FileRouteTypes {
     | '/food/offers'
     | '/furniture/$id'
     | '/furniture/cart'
+    | '/furniture/checkout'
     | '/p/$id'
     | '/food/'
     | '/furniture/'
@@ -708,6 +718,7 @@ export interface FileRouteTypes {
     | '/food/offers'
     | '/furniture/$id'
     | '/furniture/cart'
+    | '/furniture/checkout'
     | '/p/$id'
     | '/food'
     | '/furniture'
@@ -774,6 +785,7 @@ export interface FileRouteTypes {
     | '/food/offers'
     | '/furniture/$id'
     | '/furniture/cart'
+    | '/furniture/checkout'
     | '/p/$id'
     | '/food/'
     | '/furniture/'
@@ -835,6 +847,7 @@ export interface RootRouteChildren {
   FoodOffersRoute: typeof FoodOffersRoute
   FurnitureIdRoute: typeof FurnitureIdRoute
   FurnitureCartRoute: typeof FurnitureCartRoute
+  FurnitureCheckoutRoute: typeof FurnitureCheckoutRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
   FurnitureIndexRoute: typeof FurnitureIndexRoute
@@ -933,6 +946,13 @@ declare module '@tanstack/react-router' {
       path: '/p/$id'
       fullPath: '/p/$id'
       preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/furniture/checkout': {
+      id: '/furniture/checkout'
+      path: '/furniture/checkout'
+      fullPath: '/furniture/checkout'
+      preLoaderRoute: typeof FurnitureCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/furniture/cart': {
@@ -1453,6 +1473,7 @@ const rootRouteChildren: RootRouteChildren = {
   FoodOffersRoute: FoodOffersRoute,
   FurnitureIdRoute: FurnitureIdRoute,
   FurnitureCartRoute: FurnitureCartRoute,
+  FurnitureCheckoutRoute: FurnitureCheckoutRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
   FurnitureIndexRoute: FurnitureIndexRoute,
@@ -1462,13 +1483,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
