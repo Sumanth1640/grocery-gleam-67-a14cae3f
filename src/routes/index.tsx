@@ -125,6 +125,11 @@ function HomePage() {
       {/* OFFER STRIP */}
       <OfferStrip />
 
+      {/* FURNITURE PROMO */}
+      <FurniturePromo />
+
+
+
 
       {/* TRENDING */}
       <section className="mx-auto max-w-7xl px-4 py-12">
