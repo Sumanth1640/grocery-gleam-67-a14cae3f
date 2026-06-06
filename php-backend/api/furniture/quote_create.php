@@ -17,7 +17,7 @@ $uid = null;
 try {
   $hdr = trim($_SERVER['HTTP_AUTHORIZATION'] ?? '');
   if (str_starts_with($hdr, 'Bearer ')) {
-    $payload = jwt_decode(substr($hdr, 7));
+    $payload = jwt_verify(substr($hdr, 7));
     if ($payload && !empty($payload['sub'])) $uid = $payload['sub'];
   }
 } catch (Throwable $e) { /* anonymous quote OK */ }
