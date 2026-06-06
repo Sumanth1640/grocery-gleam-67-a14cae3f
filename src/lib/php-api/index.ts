@@ -289,6 +289,7 @@ export const php = {
 
   // Public banners
   banners: () => request<unknown[]>("/banners/list.php"),
+  heroSlides: () => request<any[]>("/banners/hero_list.php"),
 
   // Refunds (user)
   createRefund: (payload: { order_id: string; reason: string; details?: string; amount?: number; proof_urls?: string[] }) =>
@@ -321,6 +322,10 @@ export const php = {
     listBanners: (_p?: unknown) => request<any[]>("/admin/banners/list.php"),
     saveBanner:  (p: any) => request<any>("/admin/banners/save.php", "POST", p),
     deleteBanner:(p: { id: string }) => request<{ ok: true }>("/admin/banners/delete.php", "POST", p),
+    // hero slides
+    listHeroSlides: (_p?: unknown) => request<any[]>("/admin/banners/hero_list.php"),
+    saveHeroSlide:  (p: any) => request<any>("/admin/banners/hero_save.php", "POST", p),
+    deleteHeroSlide:(p: { id: string }) => request<{ ok: true }>("/admin/banners/hero_delete.php", "POST", p),
     // orders
     listOrders: (_p?: unknown) => request<any[]>("/admin/orders/list.php"),
     updateOrderStatus: (p: { id: string; status: string }) =>
