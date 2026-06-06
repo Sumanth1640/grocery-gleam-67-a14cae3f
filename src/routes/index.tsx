@@ -504,7 +504,7 @@ function FurniturePromo() {
         const className = "group relative block overflow-hidden rounded-3xl border shadow-card transition hover:-translate-y-0.5 hover:shadow-soft";
         const style = { background: p.bg_gradient || "linear-gradient(135deg, oklch(0.93 0.04 60) 0%, oklch(0.82 0.08 40) 100%)" };
         return isInternal ? (
-          <Link key={p.id} to={p.cta_link} className={className} style={style}>{Inner}</Link>
+          <Link key={p.id} to={p.cta_link as string} className={className} style={style}>{Inner}</Link>
         ) : (
           <a key={p.id} href={p.cta_link} className={className} style={style}>{Inner}</a>
         );
