@@ -359,7 +359,7 @@ function HeroSection() {
     },
     staleTime: 60_000,
   });
-  const slides: HeroSlide[] = (data && data.length ? (data as any) : [FALLBACK_SLIDE]);
+  const slides: HeroSlide[] = Array.isArray(data) && data.length ? (data as HeroSlide[]) : [FALLBACK_SLIDE];
   const [i, setI] = useState(0);
   useEffect(() => {
     if (slides.length <= 1) return;
