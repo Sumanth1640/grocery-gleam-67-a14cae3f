@@ -60,6 +60,62 @@ export const adminDeleteBanner = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ---------- Hero slides (public read + admin CRUD) ----------
+export const listHeroSlides = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("hero_slides" as any).select("*").eq("is_active", true).order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as any[];
+});
+
+export const adminListHeroSlides = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data, error } = await supabaseAdmin.from("hero_slides" as any).select("*").order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as any[];
+  });
+
+const heroSlideInput = z.object({
+  id: z.string().uuid().optional(),
+  badge_text: z.string().trim().max(80).default(""),
+  title_line1: z.string().trim().min(1).max(120),
+  title_highlight: z.string().trim().max(120).default(""),
+  title_line3: z.string().trim().max(160).default(""),
+  description: z.string().trim().max(400).default(""),
+  primary_cta_label: z.string().trim().max(40).default("Shop now"),
+  primary_cta_link: z.string().trim().max(200).default("/"),
+  secondary_cta_label: z.string().trim().max(40).default(""),
+  secondary_cta_link: z.string().trim().max(200).default(""),
+  image: z.string().trim().max(500).default(""),
+  deal_label: z.string().trim().max(60).default(""),
+  deal_text: z.string().trim().max(120).default(""),
+  is_active: z.boolean().default(true),
+  sort_order: z.number().int().min(0).max(9999).default(0),
+});
+
+export const adminSaveHeroSlide = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => heroSlideInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data: row, error } = await supabaseAdmin.from("hero_slides" as any).upsert(data as any).select().single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const adminDeleteHeroSlide = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { error } = await supabaseAdmin.from("hero_slides" as any).delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 // ---------- Customers ----------
 export const adminListCustomers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
