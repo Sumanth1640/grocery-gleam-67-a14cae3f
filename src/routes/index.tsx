@@ -122,13 +122,8 @@ function HomePage() {
       </section>
 
       {/* OFFER STRIP */}
-      <section className="mx-auto max-w-7xl px-4">
-        <div className="grid gap-3 md:grid-cols-3">
-          <OfferTile title="Paan Corner" sub="Beverages, snacks & more" tint="oklch(0.92 0.12 30)" />
-          <OfferTile title="Dairy & Eggs" sub="Daily essentials" tint="oklch(0.93 0.1 95)" />
-          <OfferTile title="Fresh Veggies" sub="Hand-picked daily" tint="oklch(0.93 0.1 145)" />
-        </div>
-      </section>
+      <OfferStrip />
+
 
       {/* TRENDING */}
       <section className="mx-auto max-w-7xl px-4 py-12">
@@ -264,20 +259,48 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
   );
 }
 
-function OfferTile({ title, sub, tint }: { title: string; sub: string; tint: string }) {
+function OfferStrip() {
+  const { data } = useQuery({
+    queryKey: ["offer-tiles"],
+    queryFn: async () => {
+      if (USE_PHP) return await php.offerTiles();
+      return [
+        { id: "1", title: "Paan Corner",  subtitle: "Beverages, snacks & more", cta_label: "Shop", link_to: "/c/snacks",     tint: "oklch(0.92 0.12 30)" },
+        { id: "2", title: "Dairy & Eggs", subtitle: "Daily essentials",          cta_label: "Shop", link_to: "/c/dairy",      tint: "oklch(0.93 0.10 95)" },
+        { id: "3", title: "Fresh Veggies",subtitle: "Hand-picked daily",         cta_label: "Shop", link_to: "/c/vegetables", tint: "oklch(0.93 0.10 145)" },
+      ];
+    },
+    staleTime: 60_000,
+  });
+  const tiles = (data ?? []) as Array<{ id: string; title: string; subtitle: string; cta_label: string; link_to: string; tint: string }>;
+  if (tiles.length === 0) return null;
   return (
-    <div
-      className="flex items-center justify-between rounded-2xl border p-5 shadow-card"
+    <section className="mx-auto max-w-7xl px-4">
+      <div className="grid gap-3 md:grid-cols-3">
+        {tiles.map((t) => (
+          <OfferTile key={t.id} title={t.title} sub={t.subtitle} tint={t.tint} ctaLabel={t.cta_label || "Shop"} linkTo={t.link_to || "/"} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function OfferTile({ title, sub, tint, ctaLabel = "Shop", linkTo = "/" }: { title: string; sub: string; tint: string; ctaLabel?: string; linkTo?: string }) {
+  return (
+    <Link
+      to={linkTo}
+      className="flex items-center justify-between rounded-2xl border p-5 shadow-card transition hover:opacity-95"
       style={{ backgroundColor: tint }}
     >
       <div>
         <div className="font-display text-lg font-bold">{title}</div>
         <div className="text-xs text-foreground/70">{sub}</div>
       </div>
-      <div className="rounded-lg bg-background/70 px-2.5 py-1 text-xs font-bold backdrop-blur">Shop →</div>
-    </div>
+      <div className="rounded-lg bg-background/70 px-2.5 py-1 text-xs font-bold backdrop-blur">{ctaLabel} →</div>
+    </Link>
   );
 }
+
 
 type HeroSlide = {
   id: string;
