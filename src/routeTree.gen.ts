@@ -64,6 +64,7 @@ import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminOfferTilesRouteImport } from './routes/_authenticated/admin/offer-tiles'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin/inventory'
 import { Route as AuthenticatedAdminHeroSlidesRouteImport } from './routes/_authenticated/admin/hero-slides'
+import { Route as AuthenticatedAdminFurniturePromosRouteImport } from './routes/_authenticated/admin/furniture-promos'
 import { Route as AuthenticatedAdminFurnitureRouteImport } from './routes/_authenticated/admin/furniture'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin/coupons'
@@ -369,6 +370,12 @@ const AuthenticatedAdminHeroSlidesRoute =
     path: '/hero-slides',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFurniturePromosRoute =
+  AuthenticatedAdminFurniturePromosRouteImport.update({
+    id: '/furniture-promos',
+    path: '/furniture-promos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminFurnitureRoute =
   AuthenticatedAdminFurnitureRouteImport.update({
     id: '/furniture',
@@ -445,6 +452,7 @@ export interface FileRoutesByFullPath {
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/furniture': typeof AuthenticatedAdminFurnitureRoute
+  '/admin/furniture-promos': typeof AuthenticatedAdminFurniturePromosRoute
   '/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/offer-tiles': typeof AuthenticatedAdminOfferTilesRoute
@@ -505,6 +513,7 @@ export interface FileRoutesByTo {
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/furniture': typeof AuthenticatedAdminFurnitureRoute
+  '/admin/furniture-promos': typeof AuthenticatedAdminFurniturePromosRoute
   '/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/offer-tiles': typeof AuthenticatedAdminOfferTilesRoute
@@ -570,6 +579,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/furniture': typeof AuthenticatedAdminFurnitureRoute
+  '/_authenticated/admin/furniture-promos': typeof AuthenticatedAdminFurniturePromosRoute
   '/_authenticated/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/offer-tiles': typeof AuthenticatedAdminOfferTilesRoute
@@ -635,6 +645,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/furniture'
+    | '/admin/furniture-promos'
     | '/admin/hero-slides'
     | '/admin/inventory'
     | '/admin/offer-tiles'
@@ -695,6 +706,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/furniture'
+    | '/admin/furniture-promos'
     | '/admin/hero-slides'
     | '/admin/inventory'
     | '/admin/offer-tiles'
@@ -759,6 +771,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/furniture'
+    | '/_authenticated/admin/furniture-promos'
     | '/_authenticated/admin/hero-slides'
     | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/offer-tiles'
@@ -1203,6 +1216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHeroSlidesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/furniture-promos': {
+      id: '/_authenticated/admin/furniture-promos'
+      path: '/furniture-promos'
+      fullPath: '/admin/furniture-promos'
+      preLoaderRoute: typeof AuthenticatedAdminFurniturePromosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/furniture': {
       id: '/_authenticated/admin/furniture'
       path: '/furniture'
@@ -1262,6 +1282,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminFurnitureRoute: typeof AuthenticatedAdminFurnitureRoute
+  AuthenticatedAdminFurniturePromosRoute: typeof AuthenticatedAdminFurniturePromosRoute
   AuthenticatedAdminHeroSlidesRoute: typeof AuthenticatedAdminHeroSlidesRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminOfferTilesRoute: typeof AuthenticatedAdminOfferTilesRoute
@@ -1284,6 +1305,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminFurnitureRoute: AuthenticatedAdminFurnitureRoute,
+  AuthenticatedAdminFurniturePromosRoute:
+    AuthenticatedAdminFurniturePromosRoute,
   AuthenticatedAdminHeroSlidesRoute: AuthenticatedAdminHeroSlidesRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminOfferTilesRoute: AuthenticatedAdminOfferTilesRoute,
