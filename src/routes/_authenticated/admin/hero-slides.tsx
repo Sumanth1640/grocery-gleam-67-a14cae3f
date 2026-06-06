@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListHeroSlides, adminSaveHeroSlide, adminDeleteHeroSlide } from "@/lib/admin-extra.functions";
+import { USE_PHP } from "@/lib/dual-api";
+import { php } from "@/lib/php-api";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
