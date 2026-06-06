@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminListHeroSlides, adminSaveHeroSlide, adminDeleteHeroSlide } from "@/lib/admin-extra.functions";
+import { USE_PHP } from "@/lib/dual-api";
+import { php } from "@/lib/php-api";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -48,11 +50,14 @@ const empty: Slide = {
 
 function HeroSlidesPage() {
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ["admin-hero-slides"], queryFn: () => adminListHeroSlides() });
+  const q = useQuery({
+    queryKey: ["admin-hero-slides"],
+    queryFn: () => (USE_PHP ? php.admin.listHeroSlides() : adminListHeroSlides()),
+  });
   const [editing, setEditing] = useState<Slide | null>(null);
 
   const saveM = useMutation({
-    mutationFn: (s: Slide) => adminSaveHeroSlide({ data: s as any }),
+    mutationFn: (s: Slide) => (USE_PHP ? php.admin.saveHeroSlide(s) : adminSaveHeroSlide({ data: s as any })),
     onSuccess: () => {
       toast.success("Slide saved");
       setEditing(null);
@@ -62,7 +67,7 @@ function HeroSlidesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
   const delM = useMutation({
-    mutationFn: (id: string) => adminDeleteHeroSlide({ data: { id } }),
+    mutationFn: (id: string) => (USE_PHP ? php.admin.deleteHeroSlide({ id }) : adminDeleteHeroSlide({ data: { id } })),
     onSuccess: () => {
       toast.success("Slide deleted");
       qc.invalidateQueries({ queryKey: ["admin-hero-slides"] });
