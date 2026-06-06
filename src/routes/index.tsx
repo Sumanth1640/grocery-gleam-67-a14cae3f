@@ -278,7 +278,7 @@ function OfferStrip() {
     },
     staleTime: 60_000,
   });
-  const tiles = (data ?? []) as Array<{ id: string; title: string; subtitle: string; cta_label: string; link_to: string; tint: string }>;
+  const tiles = (Array.isArray(data) ? data : []) as Array<{ id: string; title: string; subtitle: string; cta_label: string; link_to: string; tint: string }>;
   if (tiles.length === 0) return null;
   return (
     <section className="mx-auto max-w-7xl px-4 py-8">
