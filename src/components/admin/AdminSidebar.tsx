@@ -35,7 +35,7 @@ const items = [
   { to: "/admin/hero-slides", label: "Hero slides", icon: ImageIcon, exact: false, adminOnly: true },
   { to: "/admin/offer-tiles", label: "Offer tiles", icon: ImageIcon, exact: false, adminOnly: true },
   { to: "/admin/furniture", label: "Furniture", icon: Sofa, exact: false, adminOnly: true },
-  { to: "/admin/furniture-quotes", label: "Furniture quotes", icon: Mail, exact: false, adminOnly: true },
+  
 ] as const;
 
 export function AdminSidebar({ isAdminUser = true }: { isAdminUser?: boolean }) {
