@@ -244,6 +244,93 @@ function HomePage() {
   );
 }
 
+function FurnitureShowcase() {
+  const q = useQuery({
+    queryKey: ["furniture", "home"],
+    queryFn: () => php.furniture(),
+    staleTime: 60_000,
+  });
+  const all: FurnitureItem[] = q.data && q.data.length > 0 ? (q.data as FurnitureItem[]) : fallbackFurniture;
+  const featured = all.slice(0, 6);
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 pt-12">
+      {/* Banner */}
+      <Link
+        to="/furniture"
+        className="group relative grid items-center gap-6 overflow-hidden rounded-3xl border p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft md:grid-cols-2 md:p-10"
+        style={{ background: "linear-gradient(135deg, oklch(0.93 0.04 60) 0%, oklch(0.88 0.06 50) 60%, oklch(0.82 0.08 40) 100%)" }}
+      >
+        <div>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-background/70 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur">
+            <Trees className="h-3.5 w-3.5" /> New · Solid wood
+          </div>
+          <h3 className="mt-3 font-display text-3xl font-extrabold leading-tight md:text-4xl">
+            Wooden furniture, <span className="text-primary">handcrafted</span> for life.
+          </h3>
+          <p className="mt-2 max-w-md text-sm text-foreground/75 md:text-base">
+            Teak, sheesham, mango, oak and walnut — joinery not screws, finished by hand.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-4 text-xs font-semibold text-foreground/80">
+            <span className="inline-flex items-center gap-1.5"><Hammer className="h-3.5 w-3.5 text-primary" /> Handcrafted</span>
+            <span className="inline-flex items-center gap-1.5"><Leaf className="h-3.5 w-3.5 text-primary" /> Natural finish</span>
+            <span className="inline-flex items-center gap-1.5"><Truck className="h-3.5 w-3.5 text-primary" /> White-glove delivery</span>
+          </div>
+          <span className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-foreground px-4 py-2 text-xs font-bold text-background">
+            Shop the collection <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+          </span>
+        </div>
+        <div className="relative hidden aspect-[4/3] overflow-hidden rounded-2xl border border-foreground/10 shadow-pop md:block">
+          <img src="https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=1000&auto=format&fit=crop" alt="Handcrafted wooden living room" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+      </Link>
+
+      {/* Category chips */}
+      <div className="mt-6 flex flex-wrap gap-2">
+        {furnitureCategories.map((c) => (
+          <Link
+            key={c.slug}
+            to="/furniture"
+            className="rounded-full border border-foreground/15 px-4 py-1.5 text-xs font-bold transition hover:-translate-y-0.5"
+            style={{ backgroundColor: c.tint }}
+          >
+            {c.name}
+          </Link>
+        ))}
+      </div>
+
+      {/* Featured pieces */}
+      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        {featured.map((it) => {
+          const off = Math.round(((it.mrp - it.price) / it.mrp) * 100);
+          return (
+            <Link
+              key={it.id}
+              to="/furniture/$id"
+              params={{ id: it.slug }}
+              className="group overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-1 hover:shadow-xl"
+            >
+              <div className="relative aspect-square overflow-hidden bg-secondary/60">
+                <img src={it.image} alt={it.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                {off > 0 && (
+                  <div className="absolute left-2 top-2 rounded-md bg-discount px-1.5 py-0.5 text-[10px] font-bold text-white">{off}% OFF</div>
+                )}
+                <div className="absolute bottom-2 left-2 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur">
+                  {it.wood}
+                </div>
+              </div>
+              <div className="p-2.5">
+                <div className="line-clamp-1 text-xs font-semibold leading-tight">{it.name}</div>
+                <div className="mt-1 text-sm font-extrabold">₹{it.price.toLocaleString("en-IN")}</div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function Stat({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div className="flex items-center gap-1.5 font-semibold text-foreground/80">
