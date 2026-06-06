@@ -19,7 +19,7 @@ export function BannerCarousel() {
   const { data } = useQuery({
     queryKey: ["banners"],
     queryFn: async () => {
-      if (USE_PHP) return [] as Banner[];
+      if (USE_PHP) return (await php.banners()) as Banner[];
       const { listBanners } = await import("@/lib/admin-extra.functions");
       return listBanners();
     },
