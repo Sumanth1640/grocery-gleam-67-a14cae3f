@@ -6,15 +6,37 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { dualApi } from "@/lib/dual-api";
 import {
+  CalendarClock,
   CheckCircle2,
   Circle,
   Loader2,
   MapPin,
   Package,
   PackageCheck,
+  Phone,
   Search,
+  Star,
   Truck,
+  User,
 } from "lucide-react";
+
+// Deterministic mock courier — until real rider assignment lands in DB.
+const COURIERS = [
+  { name: "Ravi Kumar", phone: "98XXXX4521", vehicle: "Tata Ace · DL 1A 4521", rating: 4.9 },
+  { name: "Arjun Mehta", phone: "98XXXX7733", vehicle: "Mahindra Bolero · HR 26 7733", rating: 4.8 },
+  { name: "Sanjay Verma", phone: "98XXXX1190", vehicle: "Eicher Pro · UP 14 1190", rating: 4.7 },
+  { name: "Imran Sheikh", phone: "98XXXX8842", vehicle: "Tata 407 · MH 12 8842", rating: 4.9 },
+];
+
+function pickCourier(orderId: string) {
+  let hash = 0;
+  for (let i = 0; i < orderId.length; i++) hash = (hash * 31 + orderId.charCodeAt(i)) >>> 0;
+  return COURIERS[hash % COURIERS.length];
+}
+
+function formatEta(d: Date) {
+  return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+}
 
 const searchSchema = z.object({ order: z.string().optional() });
 
