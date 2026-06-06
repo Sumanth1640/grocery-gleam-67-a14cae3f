@@ -222,8 +222,8 @@ function FurnitureOrderSuccessPage() {
             Continue shopping
           </Link>
           <Link
-            to="/orders/$id"
-            params={{ id: order.id }}
+            to="/furniture/track"
+            search={{ order: order.id }}
             className="rounded-xl border px-6 py-3 text-sm font-bold hover:bg-secondary"
           >
             Track order
