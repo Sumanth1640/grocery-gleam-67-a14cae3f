@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS wh_pincodes_public_read ON public.warehouse_pincodes;
