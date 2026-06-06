@@ -1,5 +1,6 @@
 -- ============================================================
--- Wooden Furniture — MySQL schema + seed data
+-- Fully Wooden Furniture — MySQL schema + seed data
+-- All images are 100% solid wood — no fabric, cushions, or upholstery.
 -- Tables: furniture_items, furniture_quotes
 -- Run on the same database as the rest of the app.
 -- ============================================================
@@ -43,24 +44,24 @@ CREATE TABLE IF NOT EXISTS furniture_quotes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- Seed: 18 pieces across 5 categories
+-- Seed: 18 solid-wood pieces across 5 categories
 -- ------------------------------------------------------------
 INSERT INTO furniture_items (id, slug, name, category, wood, price, mrp, image, blurb, dimensions, sort_order) VALUES
-(UUID(),'sheesham-coffee-table','Sheesham Coffee Table','living','Sheesham',8499,12999,'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=800&auto=format&fit=crop','Hand-finished solid sheesham — all wood, no fabric.','L 42" x W 24" x H 18"',10),
-(UUID(),'teak-side-table','Teak Side Table','living','Teak',6999,9999,'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&auto=format&fit=crop','Solid teak side table, hand-rubbed oil finish.','L 20" x W 20" x H 24"',20),
-(UUID(),'mango-wood-bed','Mango Wood Queen Bed','bedroom','Mango',24999,34999,'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&auto=format&fit=crop','Chunky mango wood frame with slatted wooden headboard.','L 84" x W 64" x H 42"',30),
-(UUID(),'oak-wardrobe','Oak 3-Door Wardrobe','storage','Oak',32499,44999,'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800&auto=format&fit=crop','Spacious all-wood wardrobe with soft-close oak doors.','L 60" x W 22" x H 78"',40),
-(UUID(),'sheesham-dining-table','Sheesham 6-Seater Dining Table','dining','Sheesham',38999,54999,'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800&auto=format&fit=crop','All-wood sheesham table with six matching wooden chairs.','L 72" x W 36" x H 30"',50),
-(UUID(),'walnut-study-desk','Walnut Study Desk','study','Walnut',14499,19999,'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&auto=format&fit=crop','Minimal solid walnut desk with cable channel and drawer.','L 48" x W 24" x H 30"',60),
-(UUID(),'teak-bookshelf','Teak Ladder Bookshelf','study','Teak',9999,13999,'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&auto=format&fit=crop','Five-tier solid teak leaning shelf in honey finish.','L 24" x W 16" x H 72"',70),
-(UUID(),'mango-tv-unit','Mango Wood TV Unit','living','Mango',18999,26999,'https://images.unsplash.com/photo-1616137422495-1e9e46e2aa77?w=800&auto=format&fit=crop','Rustic all-wood TV console in solid mango.','L 60" x W 16" x H 22"',80),
-(UUID(),'oak-nightstand','Oak Bedside Nightstand','bedroom','Oak',5499,7999,'https://images.unsplash.com/photo-1617104678098-de229db51175?w=800&auto=format&fit=crop','Compact two-drawer nightstand in natural solid oak.','L 18" x W 16" x H 24"',90),
-(UUID(),'sheesham-shoe-rack','Sheesham Shoe Rack','storage','Sheesham',6999,9499,'https://images.unsplash.com/photo-1581539250439-c96689b516dd?w=800&auto=format&fit=crop','Three-tier solid sheesham shoe rack — all wood.','L 36" x W 12" x H 20"',100),
-(UUID(),'teak-dining-chair','Teak Dining Chair','dining','Teak',4999,6999,'https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800&auto=format&fit=crop','Sculpted all-wood teak dining chair.','L 18" x W 20" x H 34"',110),
-(UUID(),'sheesham-king-bed','Sheesham King Bed','bedroom','Sheesham',34999,49999,'https://images.unsplash.com/photo-1617098650990-217c7cf9de83?w=800&auto=format&fit=crop','King-size solid sheesham bed with wooden storage drawers.','L 84" x W 78" x H 44"',120),
-(UUID(),'mango-bench','Mango Wood Dining Bench','dining','Mango',7499,10999,'https://images.unsplash.com/photo-1611464908623-07f19927264e?w=800&auto=format&fit=crop','Rustic solid mango wood bench, seats three.','L 60" x W 14" x H 18"',130),
-(UUID(),'walnut-sideboard','Walnut Sideboard','dining','Walnut',26999,36999,'https://images.unsplash.com/photo-1532372576444-dda954194ad0?w=800&auto=format&fit=crop','Mid-century all-wood walnut sideboard.','L 66" x W 18" x H 30"',140),
-(UUID(),'oak-bookshelf','Oak Wall Bookshelf','study','Oak',11499,15999,'https://images.unsplash.com/photo-1588279102080-4ef9d4a9c70c?w=800&auto=format&fit=crop','Floating-style solid oak shelves, six tiers.','L 36" x W 12" x H 60"',150),
-(UUID(),'sheesham-chest','Sheesham Chest of Drawers','bedroom','Sheesham',16999,22999,'https://images.unsplash.com/photo-1616627781807-12a4f44a3e3a?w=800&auto=format&fit=crop','Six-drawer solid sheesham chest with hand-carved details.','L 36" x W 18" x H 44"',160),
-(UUID(),'teak-coffee-table-round','Teak Round Coffee Table','living','Teak',9499,13499,'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800&auto=format&fit=crop','Round all-wood teak coffee table.','D 36" x H 16"',170),
-(UUID(),'mango-bar-cabinet','Mango Wood Bar Cabinet','storage','Mango',21999,29999,'https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&auto=format&fit=crop','Stand-up bar cabinet, solid mango wood.','L 36" x W 18" x H 60"',180);
+(UUID(),'sheesham-coffee-table','Sheesham Coffee Table','living','Sheesham',8499,12999,'/furniture/sheesham-coffee-table.jpg','Hand-finished solid sheesham — all wood, no fabric.','L 42" x W 24" x H 18"',10),
+(UUID(),'teak-side-table','Teak Side Table','living','Teak',6999,9999,'/furniture/teak-dining-table.jpg','Solid teak side table, hand-rubbed oil finish.','L 20" x W 20" x H 24"',20),
+(UUID(),'mango-wood-bed','Mango Wood Queen Bed','bedroom','Mango',24999,34999,'/furniture/mango-wood-bed.jpg','Chunky mango wood frame with slatted wooden headboard.','L 84" x W 64" x H 42"',30),
+(UUID(),'oak-wardrobe','Oak 3-Door Wardrobe','storage','Oak',32499,44999,'/furniture/oak-wardrobe.jpg','Spacious all-wood wardrobe with soft-close oak doors.','L 60" x W 22" x H 78"',40),
+(UUID(),'sheesham-dining-table','Sheesham 6-Seater Dining Table','dining','Sheesham',38999,54999,'/furniture/teak-dining-table.jpg','All-wood sheesham table with six matching wooden chairs.','L 72" x W 36" x H 30"',50),
+(UUID(),'walnut-study-desk','Walnut Study Desk','study','Walnut',14499,19999,'/furniture/walnut-study-desk.jpg','Minimal solid walnut desk with cable channel and drawer.','L 48" x W 24" x H 30"',60),
+(UUID(),'teak-bookshelf','Teak Ladder Bookshelf','study','Teak',9999,13999,'/furniture/teak-bookshelf.jpg','Five-tier solid teak leaning shelf in honey finish.','L 24" x W 16" x H 72"',70),
+(UUID(),'mango-tv-unit','Mango Wood TV Unit','living','Mango',18999,26999,'/furniture/mango-tv-unit.jpg','Rustic all-wood TV console in solid mango.','L 60" x W 16" x H 22"',80),
+(UUID(),'oak-nightstand','Oak Bedside Nightstand','bedroom','Oak',5499,7999,'/furniture/oak-nightstand.jpg','Compact two-drawer nightstand in natural solid oak.','L 18" x W 16" x H 24"',90),
+(UUID(),'sheesham-shoe-rack','Sheesham Shoe Rack','storage','Sheesham',6999,9499,'/furniture/sheesham-shoe-rack.jpg','Three-tier solid sheesham shoe rack — all wood.','L 36" x W 12" x H 20"',100),
+(UUID(),'teak-dining-chair','Teak Dining Chair','dining','Teak',4999,6999,'/furniture/teak-dining-chair.jpg','Sculpted all-wood teak dining chair.','L 18" x W 20" x H 34"',110),
+(UUID(),'sheesham-king-bed','Sheesham King Bed','bedroom','Sheesham',34999,49999,'/furniture/sheesham-king-bed.jpg','King-size solid sheesham bed with wooden storage drawers.','L 84" x W 78" x H 44"',120),
+(UUID(),'mango-bench','Mango Wood Dining Bench','dining','Mango',7499,10999,'/furniture/mango-bench.jpg','Rustic solid mango wood bench, seats three.','L 60" x W 14" x H 18"',130),
+(UUID(),'walnut-sideboard','Walnut Sideboard','dining','Walnut',26999,36999,'/furniture/walnut-sideboard.jpg','Mid-century all-wood walnut sideboard.','L 66" x W 18" x H 30"',140),
+(UUID(),'oak-bookshelf','Oak Wall Bookshelf','study','Oak',11499,15999,'/furniture/oak-bookshelf.jpg','Floating-style solid oak shelves, six tiers.','L 36" x W 12" x H 60"',150),
+(UUID(),'sheesham-chest','Sheesham Chest of Drawers','bedroom','Sheesham',16999,22999,'/furniture/sheesham-chest.jpg','Six-drawer solid sheesham chest with hand-carved details.','L 36" x W 18" x H 44"',160),
+(UUID(),'teak-coffee-table-round','Teak Round Coffee Table','living','Teak',9499,13499,'/furniture/sheesham-coffee-table.jpg','Round all-wood teak coffee table.','D 36" x H 16"',170),
+(UUID(),'mango-bar-cabinet','Mango Wood Bar Cabinet','storage','Mango',21999,29999,'/furniture/mango-bar-cabinet.jpg','Stand-up bar cabinet, solid mango wood.','L 36" x W 18" x H 60"',180);
