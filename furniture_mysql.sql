@@ -43,12 +43,6 @@ CREATE TABLE IF NOT EXISTS furniture_quotes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- Seed: furniture hero slide (table `n` — hero slides)
--- ------------------------------------------------------------
-INSERT INTO n (id, badge_text, title_line1, title_highlight, title_line3, description, primary_cta_label, primary_cta_link, secondary_cta_label, secondary_cta_link, image, deal_label, deal_text, is_active, sort_order)
-VALUES (UUID(),'Handcrafted · Solid wood','Wooden furniture,','built to last,','delivered to your home.','Teak, sheesham, mango, oak and walnut — handcrafted by artisans, finished by hand.','Shop furniture','/furniture','Browse collection','/furniture','https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=1200&auto=format&fit=crop','Limited offer','Up to 30% off select pieces',1,10);
-
--- ------------------------------------------------------------
 -- Seed: 18 pieces across 5 categories
 -- ------------------------------------------------------------
 INSERT INTO furniture_items (id, slug, name, category, wood, price, mrp, image, blurb, dimensions, sort_order) VALUES
