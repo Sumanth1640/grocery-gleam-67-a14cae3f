@@ -1,12 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { ChevronLeft, Trees, Hammer, Truck, ShieldCheck, ShoppingBag, Loader2 } from "lucide-react";
+import { ChevronLeft, Trees, Hammer, Truck, ShieldCheck, Loader2 } from "lucide-react";
 import { furnitureItems as fallbackItems, type FurnitureItem } from "@/lib/furniture-data";
 import { useQuery } from "@tanstack/react-query";
 import { php } from "@/lib/php-api";
-import { furnitureCart, useFurnitureCart, furnitureTotals } from "@/lib/furniture-cart-store";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/furniture/$id")({
   head: ({ params }) => ({
@@ -20,8 +18,6 @@ export const Route = createFileRoute("/furniture/$id")({
 
 function FurnitureDetail() {
   const { id } = Route.useParams();
-  const cart = useFurnitureCart();
-  const { count } = furnitureTotals(cart);
 
   const q = useQuery({
     queryKey: ["furniture-item", id],
@@ -58,16 +54,9 @@ function FurnitureDetail() {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="flex items-center justify-between">
-          <Link to="/furniture" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-4 w-4" /> Back to collection
-          </Link>
-          {count > 0 && (
-            <Link to="/furniture/cart" className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary">
-              <ShoppingBag className="h-3.5 w-3.5" /> {count} in wishlist
-            </Link>
-          )}
-        </div>
+        <Link to="/furniture" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="h-4 w-4" /> Back to collection
+        </Link>
 
         <div className="mt-6 grid gap-8 md:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border bg-secondary/40">
@@ -96,21 +85,6 @@ function FurnitureDetail() {
               <Spec k="Finish" v="Beeswax & linseed oil" />
               <Spec k="Assembly" v="White-glove, included" />
             </dl>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                onClick={() => {
-                  furnitureCart.add({ id: item.id, slug: item.slug, name: item.name, wood: item.wood, image: item.image, price: item.price });
-                  toast.success("Added to wishlist");
-                }}
-                className="inline-flex items-center gap-2 rounded-xl bg-foreground px-6 py-3 text-sm font-bold text-background shadow-pop transition hover:-translate-y-0.5"
-              >
-                <ShoppingBag className="h-4 w-4" /> Add to wishlist
-              </button>
-              <Link to="/furniture/cart" className="inline-flex items-center gap-2 rounded-xl border-2 border-foreground px-6 py-3 text-sm font-bold">
-                Request a quote
-              </Link>
-            </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               {[
