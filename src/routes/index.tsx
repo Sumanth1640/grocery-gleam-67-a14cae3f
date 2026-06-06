@@ -278,7 +278,7 @@ function OfferStrip() {
     },
     staleTime: 60_000,
   });
-  const tiles = (data ?? []) as Array<{ id: string; title: string; subtitle: string; cta_label: string; link_to: string; tint: string }>;
+  const tiles = (Array.isArray(data) ? data : []) as Array<{ id: string; title: string; subtitle: string; cta_label: string; link_to: string; tint: string }>;
   if (tiles.length === 0) return null;
   return (
     <section className="mx-auto max-w-7xl px-4 py-8">
@@ -359,7 +359,7 @@ function HeroSection() {
     },
     staleTime: 60_000,
   });
-  const slides: HeroSlide[] = (data && data.length ? (data as any) : [FALLBACK_SLIDE]);
+  const slides: HeroSlide[] = Array.isArray(data) && data.length ? (data as HeroSlide[]) : [FALLBACK_SLIDE];
   const [i, setI] = useState(0);
   useEffect(() => {
     if (slides.length <= 1) return;
