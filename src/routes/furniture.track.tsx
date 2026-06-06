@@ -269,6 +269,93 @@ function FurnitureTrackPage() {
               </div>
             )}
 
+            {!cancelled && (() => {
+              const placed = new Date(order.created_at);
+              const etaMin = new Date(placed.getTime() + 7 * 86400000);
+              const etaMax = new Date(placed.getTime() + 14 * 86400000);
+              const courier = pickCourier(order.id);
+              const courierVisible = status === "out_for_delivery" || status === "delivered";
+              const packedOrLater = activeIndex >= 1;
+
+              let etaLabel = `${formatEta(etaMin)} – ${formatEta(etaMax)}`;
+              let etaSub = "White-glove delivery window";
+              if (status === "out_for_delivery") {
+                etaLabel = "Arriving today";
+                etaSub = "Your courier is on the way";
+              } else if (status === "delivered") {
+                etaLabel = "Delivered";
+                etaSub = "Hope you love it!";
+              } else if (status === "packed") {
+                etaSub = "Packed — dispatching soon";
+              }
+
+              return (
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border bg-card p-5 shadow-card">
+                    <div className="flex items-center gap-2">
+                      <CalendarClock className="h-4 w-4 text-primary" />
+                      <h3 className="font-display text-base font-bold">Estimated delivery</h3>
+                    </div>
+                    <div className="mt-3 font-display text-xl font-extrabold">{etaLabel}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">{etaSub}</div>
+                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all"
+                        style={{ width: `${((activeIndex + (status === "delivered" ? 1 : 0.5)) / STEPS.length) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border bg-card p-5 shadow-card">
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-primary" />
+                      <h3 className="font-display text-base font-bold">
+                        {status === "delivered" ? "Delivered by" : "Your courier"}
+                      </h3>
+                    </div>
+                    {courierVisible || packedOrLater ? (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+                            <User className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-bold">{courier.name}</div>
+                            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                              <Star className="h-3 w-3 fill-current text-amber-500" />
+                              {courier.rating} · Verified partner
+                            </div>
+                          </div>
+                          {courierVisible && (
+                            <a
+                              href={`tel:+91${courier.phone.replace(/\D/g, "")}`}
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-pop hover:opacity-95"
+                            >
+                              <Phone className="h-3.5 w-3.5" /> Call
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          <span className="font-semibold text-foreground">Vehicle:</span> {courier.vehicle}
+                        </div>
+                        {!courierVisible && (
+                          <div className="text-[11px] text-muted-foreground">
+                            Contact details unlock once your order is out for delivery.
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-3 text-xs text-muted-foreground">
+                        We'll assign a white-glove courier as soon as your order is packed.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+
+
             {(address.line1 || address.full_name) && (
               <div className="mt-4 rounded-2xl border bg-card p-5 shadow-card">
                 <div className="flex items-center gap-2">
