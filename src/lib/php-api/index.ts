@@ -292,16 +292,11 @@ export const php = {
   heroSlides: () => request<any[]>("/banners/hero_list.php"),
   offerTiles: () => request<any[]>("/offers/list.php"),
 
-  // Public furniture catalog
+  // Public furniture catalog (display-only)
   furniture: (category?: string) =>
     request<any[]>(`/furniture/list.php${category && category !== "all" ? `?category=${encodeURIComponent(category)}` : ""}`),
   furnitureItem: (slug: string) =>
     request<any | null>(`/furniture/get.php?slug=${encodeURIComponent(slug)}`),
-  createFurnitureQuote: (payload: {
-    name: string; email: string; phone?: string; city?: string; pincode?: string; message?: string;
-    items: Array<{ id: string; slug: string; name: string; price: number; qty: number }>;
-    total: number;
-  }) => request<{ id: string }>("/furniture/quote_create.php", "POST", payload),
 
 
   // Refunds (user)
@@ -428,9 +423,6 @@ export const php = {
     listFurniture:   (_p?: unknown) => request<any[]>("/admin/furniture/list.php"),
     saveFurniture:   (p: any)       => request<any>("/admin/furniture/save.php", "POST", p),
     deleteFurniture: (p: { id: string }) => request<{ ok: true }>("/admin/furniture/delete.php", "POST", p),
-    listFurnitureQuotes: (_p?: unknown) => request<any[]>("/admin/furniture/quotes_list.php"),
-    updateFurnitureQuote: (p: { id: string; status: string; admin_note?: string }) =>
-      request<{ ok: true }>("/admin/furniture/quote_update.php", "POST", p),
   },
 };
 
