@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
@@ -9,8 +10,10 @@ import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { dualApi } from "@/lib/dual-api";
 import { MobileHome } from "@/components/native/MobileHome";
 import { useIsNative } from "@/lib/use-native";
+import { listHeroSlides } from "@/lib/admin-extra.functions";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,54 +50,9 @@ function HomePage() {
       <div className="min-h-screen bg-background">
       <Header />
 
-      {/* HERO */}
-      <section className="bg-aisle">
-        <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-16">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-brand-foreground shadow-pop">
-              <Clock className="h-3.5 w-3.5" /> Delivery in 11 minutes
-            </div>
-            <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.05] text-balance md:text-6xl">
-              Groceries.<br />
-              <span className="text-primary">At your door,</span><br />
-              before the kettle whistles.
-            </h1>
-            <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
-              From farm-fresh produce to late-night snacks — order anything, anytime. Hand-picked quality, lightning fast.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to="/c/$slug" params={{ slug: "fruits" }}
-                className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-pop transition hover:opacity-95"
-              >
-                Shop now
-              </Link>
-              <a href="#categories" className="rounded-xl border bg-background px-5 py-3 text-sm font-bold transition hover:bg-secondary">
-                Browse categories
-              </a>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-5 text-xs">
-              <Stat icon={<Truck className="h-4 w-4" />} text="Free delivery over ₹199" />
-              <Stat icon={<Leaf className="h-4 w-4" />} text="Farm-fresh quality" />
-              <Stat icon={<ShieldCheck className="h-4 w-4" />} text="Easy returns" />
-            </div>
-          </div>
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-brand-gradient blur-2xl opacity-60" />
-            <img
-              src={heroImg}
-              alt="Fresh groceries on yellow background"
-              width={1600}
-              height={1200}
-              className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-pop"
-            />
-            <div className="absolute -bottom-4 left-4 rounded-2xl border bg-card p-3 shadow-pop md:-left-6">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Today's deal</div>
-              <div className="text-sm font-bold">Up to 40% off fresh produce</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* HERO (managed via /admin/hero-slides) */}
+      <HeroSection />
+
 
       <BannerCarousel />
 
@@ -319,3 +277,127 @@ function OfferTile({ title, sub, tint }: { title: string; sub: string; tint: str
     </div>
   );
 }
+
+type HeroSlide = {
+  id: string;
+  badge_text: string;
+  title_line1: string;
+  title_highlight: string;
+  title_line3: string;
+  description: string;
+  primary_cta_label: string;
+  primary_cta_link: string;
+  secondary_cta_label: string;
+  secondary_cta_link: string;
+  image: string;
+  deal_label: string;
+  deal_text: string;
+};
+
+const FALLBACK_SLIDE: HeroSlide = {
+  id: "fallback",
+  badge_text: "Delivery in 11 minutes",
+  title_line1: "Groceries.",
+  title_highlight: "At your door,",
+  title_line3: "before the kettle whistles.",
+  description: "From farm-fresh produce to late-night snacks — order anything, anytime. Hand-picked quality, lightning fast.",
+  primary_cta_label: "Shop now",
+  primary_cta_link: "/c/fruits",
+  secondary_cta_label: "Browse categories",
+  secondary_cta_link: "#categories",
+  image: "",
+  deal_label: "Today's deal",
+  deal_text: "Up to 40% off fresh produce",
+};
+
+function HeroSection() {
+  const { data } = useQuery({
+    queryKey: ["hero-slides"],
+    queryFn: () => listHeroSlides(),
+    staleTime: 60_000,
+  });
+  const slides: HeroSlide[] = (data && data.length ? (data as any) : [FALLBACK_SLIDE]);
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const t = setInterval(() => setI((n) => (n + 1) % slides.length), 6000);
+    return () => clearInterval(t);
+  }, [slides.length]);
+
+  const s = slides[Math.min(i, slides.length - 1)];
+  const img = s.image || heroImg;
+
+  return (
+    <section className="bg-aisle">
+      <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-16">
+        <div>
+          {s.badge_text && (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-brand-foreground shadow-pop">
+              <Clock className="h-3.5 w-3.5" /> {s.badge_text}
+            </div>
+          )}
+          <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.05] text-balance md:text-6xl">
+            {s.title_line1}
+            {s.title_highlight && (<><br /><span className="text-primary">{s.title_highlight}</span></>)}
+            {s.title_line3 && (<><br />{s.title_line3}</>)}
+          </h1>
+          {s.description && (
+            <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">{s.description}</p>
+          )}
+          <div className="mt-6 flex flex-wrap gap-3">
+            {s.primary_cta_label && (
+              <a
+                href={s.primary_cta_link || "/"}
+                className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-pop transition hover:opacity-95"
+              >
+                {s.primary_cta_label}
+              </a>
+            )}
+            {s.secondary_cta_label && (
+              <a
+                href={s.secondary_cta_link || "#categories"}
+                className="rounded-xl border bg-background px-5 py-3 text-sm font-bold transition hover:bg-secondary"
+              >
+                {s.secondary_cta_label}
+              </a>
+            )}
+          </div>
+          <div className="mt-8 flex flex-wrap gap-5 text-xs">
+            <Stat icon={<Truck className="h-4 w-4" />} text="Free delivery over ₹199" />
+            <Stat icon={<Leaf className="h-4 w-4" />} text="Farm-fresh quality" />
+            <Stat icon={<ShieldCheck className="h-4 w-4" />} text="Easy returns" />
+          </div>
+        </div>
+        <div className="relative">
+          <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-brand-gradient blur-2xl opacity-60" />
+          <img
+            src={img}
+            alt={s.title_line1}
+            width={1600}
+            height={1200}
+            className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-pop"
+          />
+          {s.deal_text && (
+            <div className="absolute -bottom-4 left-4 rounded-2xl border bg-card p-3 shadow-pop md:-left-6">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{s.deal_label}</div>
+              <div className="text-sm font-bold">{s.deal_text}</div>
+            </div>
+          )}
+          {slides.length > 1 && (
+            <div className="absolute right-4 top-4 flex gap-1.5 rounded-full bg-background/80 p-1.5 backdrop-blur">
+              {slides.map((_, n) => (
+                <button
+                  key={n}
+                  aria-label={`Hero slide ${n + 1}`}
+                  onClick={() => setI(n)}
+                  className={`h-1.5 rounded-full transition-all ${n === i ? "w-6 bg-primary" : "w-1.5 bg-foreground/30"}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+

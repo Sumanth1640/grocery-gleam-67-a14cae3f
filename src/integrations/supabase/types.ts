@@ -223,6 +223,66 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_slides: {
+        Row: {
+          badge_text: string
+          created_at: string
+          deal_label: string
+          deal_text: string
+          description: string
+          id: string
+          image: string
+          is_active: boolean
+          primary_cta_label: string
+          primary_cta_link: string
+          secondary_cta_label: string
+          secondary_cta_link: string
+          sort_order: number
+          title_highlight: string
+          title_line1: string
+          title_line3: string
+          updated_at: string
+        }
+        Insert: {
+          badge_text?: string
+          created_at?: string
+          deal_label?: string
+          deal_text?: string
+          description?: string
+          id?: string
+          image?: string
+          is_active?: boolean
+          primary_cta_label?: string
+          primary_cta_link?: string
+          secondary_cta_label?: string
+          secondary_cta_link?: string
+          sort_order?: number
+          title_highlight?: string
+          title_line1?: string
+          title_line3?: string
+          updated_at?: string
+        }
+        Update: {
+          badge_text?: string
+          created_at?: string
+          deal_label?: string
+          deal_text?: string
+          description?: string
+          id?: string
+          image?: string
+          is_active?: boolean
+          primary_cta_label?: string
+          primary_cta_link?: string
+          secondary_cta_label?: string
+          secondary_cta_link?: string
+          sort_order?: number
+          title_highlight?: string
+          title_line1?: string
+          title_line3?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
