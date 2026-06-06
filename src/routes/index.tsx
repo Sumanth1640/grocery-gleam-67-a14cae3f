@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ProductGrid } from "@/components/site/ProductGrid";
@@ -9,8 +10,10 @@ import { RecentlyViewed } from "@/components/site/RecentlyViewed";
 import { dualApi } from "@/lib/dual-api";
 import { MobileHome } from "@/components/native/MobileHome";
 import { useIsNative } from "@/lib/use-native";
+import { listHeroSlides } from "@/lib/admin-extra.functions";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { Clock, Leaf, ShieldCheck, Truck, Utensils, ArrowRight, Star } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
