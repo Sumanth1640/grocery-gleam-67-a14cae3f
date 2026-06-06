@@ -19,8 +19,10 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FurnitureIndexRouteImport } from './routes/furniture/index'
 import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as FurnitureIdRouteImport } from './routes/furniture/$id'
 import { Route as FoodOffersRouteImport } from './routes/food/offers'
 import { Route as FoodFavouritesRouteImport } from './routes/food/favourites'
 import { Route as FoodDishesRouteImport } from './routes/food/dishes'
@@ -118,6 +120,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FurnitureIndexRoute = FurnitureIndexRouteImport.update({
+  id: '/furniture/',
+  path: '/furniture/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FoodIndexRoute = FoodIndexRouteImport.update({
   id: '/food/',
   path: '/food/',
@@ -126,6 +133,11 @@ const FoodIndexRoute = FoodIndexRouteImport.update({
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FurnitureIdRoute = FurnitureIdRouteImport.update({
+  id: '/furniture/$id',
+  path: '/furniture/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FoodOffersRoute = FoodOffersRouteImport.update({
@@ -416,8 +428,10 @@ export interface FileRoutesByFullPath {
   '/food/dishes': typeof FoodDishesRoute
   '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
+  '/furniture/$id': typeof FurnitureIdRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
+  '/furniture/': typeof FurnitureIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
@@ -473,8 +487,10 @@ export interface FileRoutesByTo {
   '/food/dishes': typeof FoodDishesRoute
   '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
+  '/furniture/$id': typeof FurnitureIdRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
+  '/furniture': typeof FurnitureIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
@@ -535,8 +551,10 @@ export interface FileRoutesById {
   '/food/dishes': typeof FoodDishesRoute
   '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
+  '/furniture/$id': typeof FurnitureIdRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
+  '/furniture/': typeof FurnitureIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
@@ -597,8 +615,10 @@ export interface FileRouteTypes {
     | '/food/dishes'
     | '/food/favourites'
     | '/food/offers'
+    | '/furniture/$id'
     | '/p/$id'
     | '/food/'
+    | '/furniture/'
     | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
@@ -654,8 +674,10 @@ export interface FileRouteTypes {
     | '/food/dishes'
     | '/food/favourites'
     | '/food/offers'
+    | '/furniture/$id'
     | '/p/$id'
     | '/food'
+    | '/furniture'
     | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
@@ -715,8 +737,10 @@ export interface FileRouteTypes {
     | '/food/dishes'
     | '/food/favourites'
     | '/food/offers'
+    | '/furniture/$id'
     | '/p/$id'
     | '/food/'
+    | '/furniture/'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/banners'
     | '/_authenticated/admin/categories'
@@ -771,8 +795,10 @@ export interface RootRouteChildren {
   FoodDishesRoute: typeof FoodDishesRoute
   FoodFavouritesRoute: typeof FoodFavouritesRoute
   FoodOffersRoute: typeof FoodOffersRoute
+  FurnitureIdRoute: typeof FurnitureIdRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
+  FurnitureIndexRoute: typeof FurnitureIndexRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   FoodRSlugRoute: typeof FoodRSlugRoute
 }
@@ -849,6 +875,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/furniture/': {
+      id: '/furniture/'
+      path: '/furniture'
+      fullPath: '/furniture/'
+      preLoaderRoute: typeof FurnitureIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/food/': {
       id: '/food/'
       path: '/food'
@@ -861,6 +894,13 @@ declare module '@tanstack/react-router' {
       path: '/p/$id'
       fullPath: '/p/$id'
       preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/furniture/$id': {
+      id: '/furniture/$id'
+      path: '/furniture/$id'
+      fullPath: '/furniture/$id'
+      preLoaderRoute: typeof FurnitureIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/food/offers': {
@@ -1346,8 +1386,10 @@ const rootRouteChildren: RootRouteChildren = {
   FoodDishesRoute: FoodDishesRoute,
   FoodFavouritesRoute: FoodFavouritesRoute,
   FoodOffersRoute: FoodOffersRoute,
+  FurnitureIdRoute: FurnitureIdRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
+  FurnitureIndexRoute: FurnitureIndexRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   FoodRSlugRoute: FoodRSlugRoute,
 }
