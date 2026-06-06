@@ -297,6 +297,9 @@ export const php = {
     request<any[]>(`/furniture/list.php${category && category !== "all" ? `?category=${encodeURIComponent(category)}` : ""}`),
   furnitureItem: (slug: string) =>
     request<any | null>(`/furniture/get.php?slug=${encodeURIComponent(slug)}`),
+  furniturePromos: () => request<any[]>("/furniture/promos_list.php"),
+
+
 
 
   // Refunds (user)
@@ -423,6 +426,11 @@ export const php = {
     listFurniture:   (_p?: unknown) => request<any[]>("/admin/furniture/list.php"),
     saveFurniture:   (p: any)       => request<any>("/admin/furniture/save.php", "POST", p),
     deleteFurniture: (p: { id: string }) => request<{ ok: true }>("/admin/furniture/delete.php", "POST", p),
+    // furniture promos (home page hero strips)
+    listFurniturePromos:   (_p?: unknown) => request<any[]>("/admin/furniture/promos_list.php"),
+    saveFurniturePromo:    (p: any) => request<any>("/admin/furniture/promo_save.php", "POST", p),
+    deleteFurniturePromo:  (p: { id: string }) => request<{ ok: true }>("/admin/furniture/promo_delete.php", "POST", p),
+
   },
 };
 
