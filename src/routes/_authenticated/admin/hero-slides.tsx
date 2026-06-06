@@ -50,11 +50,14 @@ const empty: Slide = {
 
 function HeroSlidesPage() {
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ["admin-hero-slides"], queryFn: () => adminListHeroSlides() });
+  const q = useQuery({
+    queryKey: ["admin-hero-slides"],
+    queryFn: () => (USE_PHP ? php.admin.listHeroSlides() : adminListHeroSlides()),
+  });
   const [editing, setEditing] = useState<Slide | null>(null);
 
   const saveM = useMutation({
-    mutationFn: (s: Slide) => adminSaveHeroSlide({ data: s as any }),
+    mutationFn: (s: Slide) => (USE_PHP ? php.admin.saveHeroSlide(s) : adminSaveHeroSlide({ data: s as any })),
     onSuccess: () => {
       toast.success("Slide saved");
       setEditing(null);
@@ -64,7 +67,7 @@ function HeroSlidesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
   const delM = useMutation({
-    mutationFn: (id: string) => adminDeleteHeroSlide({ data: { id } }),
+    mutationFn: (id: string) => (USE_PHP ? php.admin.deleteHeroSlide({ id }) : adminDeleteHeroSlide({ data: { id } })),
     onSuccess: () => {
       toast.success("Slide deleted");
       qc.invalidateQueries({ queryKey: ["admin-hero-slides"] });
