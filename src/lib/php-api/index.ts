@@ -292,16 +292,11 @@ export const php = {
   heroSlides: () => request<any[]>("/banners/hero_list.php"),
   offerTiles: () => request<any[]>("/offers/list.php"),
 
-  // Public furniture catalog
+  // Public furniture catalog (display-only)
   furniture: (category?: string) =>
     request<any[]>(`/furniture/list.php${category && category !== "all" ? `?category=${encodeURIComponent(category)}` : ""}`),
   furnitureItem: (slug: string) =>
     request<any | null>(`/furniture/get.php?slug=${encodeURIComponent(slug)}`),
-  createFurnitureQuote: (payload: {
-    name: string; email: string; phone?: string; city?: string; pincode?: string; message?: string;
-    items: Array<{ id: string; slug: string; name: string; price: number; qty: number }>;
-    total: number;
-  }) => request<{ id: string }>("/furniture/quote_create.php", "POST", payload),
 
 
   // Refunds (user)

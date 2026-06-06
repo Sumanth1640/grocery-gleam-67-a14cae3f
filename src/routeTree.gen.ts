@@ -22,7 +22,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FurnitureIndexRouteImport } from './routes/furniture/index'
 import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
-import { Route as FurnitureCartRouteImport } from './routes/furniture/cart'
 import { Route as FurnitureIdRouteImport } from './routes/furniture/$id'
 import { Route as FoodOffersRouteImport } from './routes/food/offers'
 import { Route as FoodFavouritesRouteImport } from './routes/food/favourites'
@@ -65,7 +64,6 @@ import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminOfferTilesRouteImport } from './routes/_authenticated/admin/offer-tiles'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin/inventory'
 import { Route as AuthenticatedAdminHeroSlidesRouteImport } from './routes/_authenticated/admin/hero-slides'
-import { Route as AuthenticatedAdminFurnitureQuotesRouteImport } from './routes/_authenticated/admin/furniture-quotes'
 import { Route as AuthenticatedAdminFurnitureRouteImport } from './routes/_authenticated/admin/furniture'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin/coupons'
@@ -136,11 +134,6 @@ const FoodIndexRoute = FoodIndexRouteImport.update({
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FurnitureCartRoute = FurnitureCartRouteImport.update({
-  id: '/furniture/cart',
-  path: '/furniture/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FurnitureIdRoute = FurnitureIdRouteImport.update({
@@ -376,12 +369,6 @@ const AuthenticatedAdminHeroSlidesRoute =
     path: '/hero-slides',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminFurnitureQuotesRoute =
-  AuthenticatedAdminFurnitureQuotesRouteImport.update({
-    id: '/furniture-quotes',
-    path: '/furniture-quotes',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminFurnitureRoute =
   AuthenticatedAdminFurnitureRouteImport.update({
     id: '/furniture',
@@ -449,7 +436,6 @@ export interface FileRoutesByFullPath {
   '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/furniture/$id': typeof FurnitureIdRoute
-  '/furniture/cart': typeof FurnitureCartRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
@@ -459,7 +445,6 @@ export interface FileRoutesByFullPath {
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/furniture': typeof AuthenticatedAdminFurnitureRoute
-  '/admin/furniture-quotes': typeof AuthenticatedAdminFurnitureQuotesRoute
   '/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/offer-tiles': typeof AuthenticatedAdminOfferTilesRoute
@@ -511,7 +496,6 @@ export interface FileRoutesByTo {
   '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/furniture/$id': typeof FurnitureIdRoute
-  '/furniture/cart': typeof FurnitureCartRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
   '/furniture': typeof FurnitureIndexRoute
@@ -521,7 +505,6 @@ export interface FileRoutesByTo {
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/furniture': typeof AuthenticatedAdminFurnitureRoute
-  '/admin/furniture-quotes': typeof AuthenticatedAdminFurnitureQuotesRoute
   '/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/offer-tiles': typeof AuthenticatedAdminOfferTilesRoute
@@ -578,7 +561,6 @@ export interface FileRoutesById {
   '/food/favourites': typeof FoodFavouritesRoute
   '/food/offers': typeof FoodOffersRoute
   '/furniture/$id': typeof FurnitureIdRoute
-  '/furniture/cart': typeof FurnitureCartRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
@@ -588,7 +570,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/furniture': typeof AuthenticatedAdminFurnitureRoute
-  '/_authenticated/admin/furniture-quotes': typeof AuthenticatedAdminFurnitureQuotesRoute
   '/_authenticated/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/offer-tiles': typeof AuthenticatedAdminOfferTilesRoute
@@ -645,7 +626,6 @@ export interface FileRouteTypes {
     | '/food/favourites'
     | '/food/offers'
     | '/furniture/$id'
-    | '/furniture/cart'
     | '/p/$id'
     | '/food/'
     | '/furniture/'
@@ -655,7 +635,6 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/furniture'
-    | '/admin/furniture-quotes'
     | '/admin/hero-slides'
     | '/admin/inventory'
     | '/admin/offer-tiles'
@@ -707,7 +686,6 @@ export interface FileRouteTypes {
     | '/food/favourites'
     | '/food/offers'
     | '/furniture/$id'
-    | '/furniture/cart'
     | '/p/$id'
     | '/food'
     | '/furniture'
@@ -717,7 +695,6 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/furniture'
-    | '/admin/furniture-quotes'
     | '/admin/hero-slides'
     | '/admin/inventory'
     | '/admin/offer-tiles'
@@ -773,7 +750,6 @@ export interface FileRouteTypes {
     | '/food/favourites'
     | '/food/offers'
     | '/furniture/$id'
-    | '/furniture/cart'
     | '/p/$id'
     | '/food/'
     | '/furniture/'
@@ -783,7 +759,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/furniture'
-    | '/_authenticated/admin/furniture-quotes'
     | '/_authenticated/admin/hero-slides'
     | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/offer-tiles'
@@ -834,7 +809,6 @@ export interface RootRouteChildren {
   FoodFavouritesRoute: typeof FoodFavouritesRoute
   FoodOffersRoute: typeof FoodOffersRoute
   FurnitureIdRoute: typeof FurnitureIdRoute
-  FurnitureCartRoute: typeof FurnitureCartRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
   FurnitureIndexRoute: typeof FurnitureIndexRoute
@@ -933,13 +907,6 @@ declare module '@tanstack/react-router' {
       path: '/p/$id'
       fullPath: '/p/$id'
       preLoaderRoute: typeof PIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/furniture/cart': {
-      id: '/furniture/cart'
-      path: '/furniture/cart'
-      fullPath: '/furniture/cart'
-      preLoaderRoute: typeof FurnitureCartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/furniture/$id': {
@@ -1236,13 +1203,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHeroSlidesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/furniture-quotes': {
-      id: '/_authenticated/admin/furniture-quotes'
-      path: '/furniture-quotes'
-      fullPath: '/admin/furniture-quotes'
-      preLoaderRoute: typeof AuthenticatedAdminFurnitureQuotesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/furniture': {
       id: '/_authenticated/admin/furniture'
       path: '/furniture'
@@ -1302,7 +1262,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminFurnitureRoute: typeof AuthenticatedAdminFurnitureRoute
-  AuthenticatedAdminFurnitureQuotesRoute: typeof AuthenticatedAdminFurnitureQuotesRoute
   AuthenticatedAdminHeroSlidesRoute: typeof AuthenticatedAdminHeroSlidesRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminOfferTilesRoute: typeof AuthenticatedAdminOfferTilesRoute
@@ -1325,8 +1284,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminFurnitureRoute: AuthenticatedAdminFurnitureRoute,
-  AuthenticatedAdminFurnitureQuotesRoute:
-    AuthenticatedAdminFurnitureQuotesRoute,
   AuthenticatedAdminHeroSlidesRoute: AuthenticatedAdminHeroSlidesRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminOfferTilesRoute: AuthenticatedAdminOfferTilesRoute,
@@ -1452,7 +1409,6 @@ const rootRouteChildren: RootRouteChildren = {
   FoodFavouritesRoute: FoodFavouritesRoute,
   FoodOffersRoute: FoodOffersRoute,
   FurnitureIdRoute: FurnitureIdRoute,
-  FurnitureCartRoute: FurnitureCartRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
   FurnitureIndexRoute: FurnitureIndexRoute,
@@ -1462,3 +1418,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
