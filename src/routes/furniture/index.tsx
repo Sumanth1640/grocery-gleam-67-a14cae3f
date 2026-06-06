@@ -156,26 +156,45 @@ function FurnitureCard({ item }: { item: FurnitureItem }) {
     <Link
       to="/furniture/$id"
       params={{ id: item.slug }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-1 hover:shadow-xl"
+      className="group relative block overflow-hidden rounded-3xl border bg-card shadow-card transition hover:-translate-y-1 hover:shadow-xl"
     >
-      <div className="relative block aspect-square overflow-hidden bg-secondary/60">
-        <img src={item.image} alt={item.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-        {off > 0 && (
-          <div className="absolute left-3 top-3 rounded-md bg-discount px-1.5 py-0.5 text-[10px] font-bold text-white">{off}% OFF</div>
-        )}
-        <div className="absolute bottom-3 left-3 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur">
-          {item.wood}
+      <div className="relative aspect-[4/5] overflow-hidden bg-secondary/60 sm:aspect-square">
+        <img
+          src={item.image}
+          alt={item.name}
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+
+        <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">
+          <span className="rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground backdrop-blur">
+            {item.wood}
+          </span>
+          {off > 0 && (
+            <span className="rounded-md bg-discount px-2 py-1 text-[10px] font-extrabold text-white shadow-pop">
+              {off}% OFF
+            </span>
+          )}
         </div>
-      </div>
-      <div className="flex flex-1 flex-col p-3">
-        <div className="line-clamp-2 text-sm font-semibold leading-tight">{item.name}</div>
-        <div className="mt-1 text-xs text-muted-foreground">{item.dimensions}</div>
-        <div className="mt-auto flex items-end justify-between pt-3">
-          <div>
-            <div className="text-base font-extrabold">₹{item.price.toLocaleString("en-IN")}</div>
-            {off > 0 && <div className="text-[11px] text-muted-foreground line-through">₹{item.mrp.toLocaleString("en-IN")}</div>}
+
+        <div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5">
+          <h3 className="font-display text-base font-extrabold leading-tight tracking-tight line-clamp-2 sm:text-lg md:text-xl">
+            {item.name}
+          </h3>
+          <p className="mt-1 line-clamp-1 text-[11px] font-medium text-white/75 sm:text-xs">
+            {item.dimensions}
+          </p>
+          <div className="mt-3 flex items-end gap-2">
+            <div className="text-lg font-extrabold sm:text-xl">
+              ₹{item.price.toLocaleString("en-IN")}
+            </div>
+            {off > 0 && (
+              <div className="pb-0.5 text-[11px] text-white/60 line-through sm:text-xs">
+                ₹{item.mrp.toLocaleString("en-IN")}
+              </div>
+            )}
           </div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-primary">View ›</span>
         </div>
       </div>
     </Link>
