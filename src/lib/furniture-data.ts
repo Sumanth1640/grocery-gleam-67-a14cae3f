@@ -35,7 +35,7 @@ export const furnitureItems: FurnitureItem[] = [
     wood: "Sheesham",
     price: 8499,
     mrp: 12999,
-    image: "https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=800&auto=format&fit=crop",
+    image: "/furniture/sheesham-coffee-table.jpg",
     blurb: "Hand-finished solid sheesham, all wood — no fabric.",
     dimensions: 'L 42" × W 24" × H 18"',
   },
