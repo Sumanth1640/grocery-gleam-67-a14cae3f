@@ -34,15 +34,15 @@ function HomePage() {
   const dishesQ = useQuery({ queryKey: ["home-dishes"], queryFn: () => dualApi.allDishes() });
 
 
-  const categories = catsQ.data ?? [];
-  const products = prodsQ.data ?? [];
+  const categories = Array.isArray(catsQ.data) ? catsQ.data : [];
+  const products = Array.isArray(prodsQ.data) ? prodsQ.data : [];
   const trending = products.slice(0, 10);
   const dairyAndBakery = [
     ...products.filter((p) => p.category_slug === "dairy"),
     ...products.filter((p) => p.category_slug === "bakery"),
   ].slice(0, 10);
-  const popularRestos = (restosQ.data ?? []).slice(0, 4);
-  const popularDishes = (dishesQ.data ?? []).slice(0, 5);
+  const popularRestos = Array.isArray(restosQ.data) ? restosQ.data.slice(0, 4) : [];
+  const popularDishes = Array.isArray(dishesQ.data) ? dishesQ.data.slice(0, 5) : [];
 
   const isNative = useIsNative();
   if (isNative) return <MobileHome />;
