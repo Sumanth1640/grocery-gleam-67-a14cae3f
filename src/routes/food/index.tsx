@@ -39,7 +39,7 @@ function FoodHome() {
   const partnerQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => partnerFn() });
 
   const allRestaurants = useMemo<Restaurant[]>(() => {
-    const partners: Restaurant[] = (partnerQ.data ?? []).map((r) => ({
+    const partners: Restaurant[] = (Array.isArray(partnerQ.data) ? partnerQ.data : []).map((r) => ({
       id: r.id,
       slug: r.slug,
       name: r.name,

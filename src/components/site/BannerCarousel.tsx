@@ -25,7 +25,9 @@ export function BannerCarousel() {
     },
     staleTime: 60_000,
   });
-  const banners: Banner[] = ((data ?? []) as any);
+  const banners: Banner[] = (Array.isArray(data) ? data : []).filter(
+    (banner): banner is Banner => !!banner && typeof banner === "object" && "id" in banner,
+  );
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
