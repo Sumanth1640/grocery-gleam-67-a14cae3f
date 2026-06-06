@@ -129,7 +129,7 @@ function FurnitureCheckoutPage() {
     onSuccess: (row) => {
       furnitureCart.clear();
       toast.success("Order placed!");
-      void navigate({ to: "/order-success", search: { order: row.id } });
+      void navigate({ to: "/furniture/order-success", search: { order: row.id } });
     },
     onError: (e: Error) => {
       toast.error(e.message || "Could not place order");

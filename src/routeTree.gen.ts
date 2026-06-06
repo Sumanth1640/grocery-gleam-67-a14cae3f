@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FurnitureIndexRouteImport } from './routes/furniture/index'
 import { Route as FoodIndexRouteImport } from './routes/food/index'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as FurnitureOrderSuccessRouteImport } from './routes/furniture.order-success'
 import { Route as FurnitureCheckoutRouteImport } from './routes/furniture/checkout'
 import { Route as FurnitureCartRouteImport } from './routes/furniture/cart'
 import { Route as FurnitureIdRouteImport } from './routes/furniture/$id'
@@ -137,6 +138,11 @@ const FoodIndexRoute = FoodIndexRouteImport.update({
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FurnitureOrderSuccessRoute = FurnitureOrderSuccessRouteImport.update({
+  id: '/furniture/order-success',
+  path: '/furniture/order-success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FurnitureCheckoutRoute = FurnitureCheckoutRouteImport.update({
@@ -457,6 +463,7 @@ export interface FileRoutesByFullPath {
   '/furniture/$id': typeof FurnitureIdRoute
   '/furniture/cart': typeof FurnitureCartRoute
   '/furniture/checkout': typeof FurnitureCheckoutRoute
+  '/furniture/order-success': typeof FurnitureOrderSuccessRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
@@ -520,6 +527,7 @@ export interface FileRoutesByTo {
   '/furniture/$id': typeof FurnitureIdRoute
   '/furniture/cart': typeof FurnitureCartRoute
   '/furniture/checkout': typeof FurnitureCheckoutRoute
+  '/furniture/order-success': typeof FurnitureOrderSuccessRoute
   '/p/$id': typeof PIdRoute
   '/food': typeof FoodIndexRoute
   '/furniture': typeof FurnitureIndexRoute
@@ -588,6 +596,7 @@ export interface FileRoutesById {
   '/furniture/$id': typeof FurnitureIdRoute
   '/furniture/cart': typeof FurnitureCartRoute
   '/furniture/checkout': typeof FurnitureCheckoutRoute
+  '/furniture/order-success': typeof FurnitureOrderSuccessRoute
   '/p/$id': typeof PIdRoute
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
@@ -656,6 +665,7 @@ export interface FileRouteTypes {
     | '/furniture/$id'
     | '/furniture/cart'
     | '/furniture/checkout'
+    | '/furniture/order-success'
     | '/p/$id'
     | '/food/'
     | '/furniture/'
@@ -719,6 +729,7 @@ export interface FileRouteTypes {
     | '/furniture/$id'
     | '/furniture/cart'
     | '/furniture/checkout'
+    | '/furniture/order-success'
     | '/p/$id'
     | '/food'
     | '/furniture'
@@ -786,6 +797,7 @@ export interface FileRouteTypes {
     | '/furniture/$id'
     | '/furniture/cart'
     | '/furniture/checkout'
+    | '/furniture/order-success'
     | '/p/$id'
     | '/food/'
     | '/furniture/'
@@ -848,6 +860,7 @@ export interface RootRouteChildren {
   FurnitureIdRoute: typeof FurnitureIdRoute
   FurnitureCartRoute: typeof FurnitureCartRoute
   FurnitureCheckoutRoute: typeof FurnitureCheckoutRoute
+  FurnitureOrderSuccessRoute: typeof FurnitureOrderSuccessRoute
   PIdRoute: typeof PIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
   FurnitureIndexRoute: typeof FurnitureIndexRoute
@@ -946,6 +959,13 @@ declare module '@tanstack/react-router' {
       path: '/p/$id'
       fullPath: '/p/$id'
       preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/furniture/order-success': {
+      id: '/furniture/order-success'
+      path: '/furniture/order-success'
+      fullPath: '/furniture/order-success'
+      preLoaderRoute: typeof FurnitureOrderSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/furniture/checkout': {
@@ -1474,6 +1494,7 @@ const rootRouteChildren: RootRouteChildren = {
   FurnitureIdRoute: FurnitureIdRoute,
   FurnitureCartRoute: FurnitureCartRoute,
   FurnitureCheckoutRoute: FurnitureCheckoutRoute,
+  FurnitureOrderSuccessRoute: FurnitureOrderSuccessRoute,
   PIdRoute: PIdRoute,
   FoodIndexRoute: FoodIndexRoute,
   FurnitureIndexRoute: FurnitureIndexRoute,
@@ -1483,3 +1504,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
