@@ -423,6 +423,7 @@ export const php = {
     listFurniture:   (_p?: unknown) => request<any[]>("/admin/furniture/list.php"),
     saveFurniture:   (p: any)       => request<any>("/admin/furniture/save.php", "POST", p),
     deleteFurniture: (p: { id: string }) => request<{ ok: true }>("/admin/furniture/delete.php", "POST", p),
+    deleteFurniture: (p: { id: string }) => request<{ ok: true }>("/admin/furniture/delete.php", "POST", p),
     listFurnitureQuotes: (_p?: unknown) => request<any[]>("/admin/furniture/quotes_list.php"),
     updateFurnitureQuote: (p: { id: string; status: string; admin_note?: string }) =>
       request<{ ok: true }>("/admin/furniture/quote_update.php", "POST", p),
