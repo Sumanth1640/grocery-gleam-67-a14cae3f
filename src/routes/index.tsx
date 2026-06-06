@@ -444,3 +444,105 @@ function HeroSection() {
   );
 }
 
+function FurniturePromo() {
+  const q = useQuery({
+    queryKey: ["furniture", "home"],
+    queryFn: () => php.furniture(),
+    staleTime: 60_000,
+  });
+  const all: FurnitureItem[] = q.data && q.data.length > 0 ? (q.data as FurnitureItem[]) : fallbackFurniture;
+  const items = all.slice(0, 4);
+  const hero = items[0];
+  if (!hero) return null;
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-12">
+      {/* Hero ad strip */}
+      <Link
+        to="/furniture"
+        className="group relative block overflow-hidden rounded-3xl border shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+        style={{ background: "linear-gradient(135deg, oklch(0.93 0.04 60) 0%, oklch(0.88 0.06 50) 60%, oklch(0.82 0.08 40) 100%)" }}
+      >
+        <div className="grid items-center gap-6 p-6 md:grid-cols-2 md:p-10">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-background/60 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur">
+              <Trees className="h-3.5 w-3.5" /> Solid wood collection
+            </div>
+            <h3 className="mt-3 font-display text-3xl font-extrabold leading-tight tracking-tight md:text-5xl">
+              Handcrafted wooden furniture,
+              <br />
+              <span className="text-primary">built for life.</span>
+            </h3>
+            <p className="mt-3 max-w-md text-sm text-foreground/75 md:text-base">
+              Teak, sheesham, mango and oak — shaped by master carpenters, finished by hand.
+            </p>
+            <span className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-foreground px-5 py-3 text-xs font-bold text-background shadow-pop">
+              Explore the collection <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </span>
+          </div>
+          <div className="relative aspect-[5/4] overflow-hidden rounded-2xl border border-foreground/10 shadow-pop">
+            <img
+              src={hero.image}
+              alt={hero.name}
+              loading="lazy"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            />
+          </div>
+        </div>
+      </Link>
+
+      {/* Featured pieces */}
+      <div className="mt-8 flex items-end justify-between gap-4">
+        <div>
+          <h2 className="font-display text-2xl font-bold md:text-3xl">Featured pieces</h2>
+          <p className="text-sm text-muted-foreground">Editor's picks from the wood workshop</p>
+        </div>
+        <Link to="/furniture" className="hidden text-xs font-semibold text-muted-foreground hover:text-foreground sm:inline-flex sm:items-center">
+          View all <ArrowRight className="ml-1 h-3 w-3" />
+        </Link>
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
+        {items.map((it) => {
+          const off = it.mrp > it.price ? Math.round(((it.mrp - it.price) / it.mrp) * 100) : 0;
+          return (
+            <Link
+              key={it.id}
+              to="/furniture/$id"
+              params={{ id: it.slug }}
+              className="group relative block overflow-hidden rounded-2xl border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden">
+                <img
+                  src={it.image}
+                  alt={it.name}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground shadow-pop backdrop-blur">
+                  <Trees className="h-3 w-3" /> {it.wood}
+                </div>
+                {off > 0 && (
+                  <div className="absolute right-3 top-3 rounded-full bg-discount px-2 py-1 text-[10px] font-extrabold text-white shadow-pop">
+                    {off}% OFF
+                  </div>
+                )}
+                <div className="absolute inset-x-3 bottom-3 text-white">
+                  <div className="line-clamp-2 font-display text-sm font-extrabold leading-tight md:text-base">{it.name}</div>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-base font-extrabold md:text-lg">₹{it.price.toLocaleString()}</span>
+                    {it.mrp > it.price && (
+                      <span className="text-[11px] text-white/70 line-through">₹{it.mrp.toLocaleString()}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+
