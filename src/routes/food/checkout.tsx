@@ -19,6 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import { DeliverySlotPicker } from "@/components/site/DeliverySlotPicker";
+import { useIsNative } from "@/lib/use-native";
+import { MobileFoodCheckout } from "@/components/native/MobileFoodCheckout";
 import {
   ArrowLeft,
   ArrowRight,
@@ -48,8 +50,15 @@ export const Route = createFileRoute("/food/checkout")({
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/login", search: { redirect: location.href } });
   },
-  component: FoodCheckoutPage,
+  component: FoodCheckoutRoute,
 });
+
+function FoodCheckoutRoute() {
+  const isNative = useIsNative();
+  const search = Route.useSearch();
+  if (isNative) return <MobileFoodCheckout couponCode={search.coupon} />;
+  return <FoodCheckoutPage />;
+}
 
 type Step = 1 | 2 | 3;
 
