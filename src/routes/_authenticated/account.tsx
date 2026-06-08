@@ -21,12 +21,21 @@ import { AddressDialog } from "@/components/site/AddressDialog";
 import { LogOut, MapPin, Package, Pencil, Plus, Star, Trash2, User as UserIcon, Loader2, Shield, Store } from "lucide-react";
 import { toast } from "sonner";
 
+import { useIsNative } from "@/lib/use-native";
+import { MobileAccount } from "@/components/native/MobileAccount";
+
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({ meta: [{ title: "Your account — hallifresh" }] }),
   component: AccountPage,
 });
 
 function AccountPage() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileAccount />;
+  return <WebAccountPage />;
+}
+
+function WebAccountPage() {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
