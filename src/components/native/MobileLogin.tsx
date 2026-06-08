@@ -32,7 +32,7 @@ export function MobileLogin({ redirect }: { redirect: string }) {
     };
     if (USE_PHP) {
       if (phpAuth.get()) {
-        void resolveDest(redirect).then((d) => active && navigate({ to: d, replace: true }));
+        void resolveDest(redirect).then((d) => { if (active) navigate({ to: d, replace: true }); });
       }
       return () => { active = false; };
     }
