@@ -9,6 +9,8 @@ import { listOrders } from "@/lib/account.functions";
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Package, Check } from "lucide-react";
+import { useIsNative } from "@/lib/use-native";
+import { MobileOrders } from "@/components/native/MobileOrders";
 
 
 const STATUS_STEPS = ["placed", "packed", "out_for_delivery", "delivered"] as const;
