@@ -4,6 +4,8 @@ import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { MobileOrderConfirmedDialog } from "@/components/native/MobileOrderConfirmedDialog";
+import { MobileOrderSuccess } from "@/components/native/MobileOrderSuccess";
+import { useIsNative } from "@/lib/use-native";
 import { useLastOrder, type Order } from "@/lib/order-store";
 import { dualApi } from "@/lib/dual-api";
 import { CheckCircle2, Clock, MapPin, Package, Receipt } from "lucide-react";
