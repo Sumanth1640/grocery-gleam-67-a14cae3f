@@ -70,9 +70,17 @@ const emptyAddress: Address = {
 };
 
 function CheckoutPage() {
+  const isNative = useIsNative();
+  const search = Route.useSearch();
+  if (isNative) return <MobileCheckout couponCode={search.coupon} />;
+  return <WebCheckoutPage />;
+}
+
+function WebCheckoutPage() {
   const cart = useCart();
   const baseTotals = cartTotals(cart);
-  const search = Route.useSearch();
+  const searchInner = Route.useSearch();
+  const search = searchInner;
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [address, setAddress] = useState<Address>(emptyAddress);
