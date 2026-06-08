@@ -82,6 +82,7 @@ export const Route = createFileRoute("/_authenticated/orders")({
 function OrdersPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const fetchOrders = useDualFn(listOrders, () => php.myOrders());
+  const isNative = useIsNative();
   const { session, user } = useAuth();
   const qc = useQueryClient();
   const userId = user?.id;
