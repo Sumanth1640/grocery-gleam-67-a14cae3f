@@ -111,6 +111,12 @@ function OrdersPage() {
     return <Outlet />;
   }
 
+  if (isNative) {
+    return <MobileOrders />;
+  }
+
+
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
