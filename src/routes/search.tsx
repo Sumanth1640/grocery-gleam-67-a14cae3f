@@ -14,6 +14,9 @@ const searchSchema = z.object({ q: z.string().optional().default("") });
 
 type Sort = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 
+import { useIsNative } from "@/lib/use-native";
+import { MobileSearch } from "@/components/native/MobileSearch";
+
 export const Route = createFileRoute("/search")({
   validateSearch: (s) => searchSchema.parse(s),
   head: ({ match }) => ({
@@ -25,6 +28,19 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const { q } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const isNative = useIsNative();
+  if (isNative) {
+    return (
+      <MobileSearch
+        q={q}
+        onQueryChange={(v) => navigate({ search: { q: v }, replace: true })}
+      />
+    );
+  }
+  return <WebSearchPage q={q} navigate={navigate} />;
+}
+
+function WebSearchPage({ q, navigate }: { q: string; navigate: ReturnType<typeof Route.useNavigate> }) {
   const query = q.trim();
 
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
