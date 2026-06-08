@@ -38,6 +38,9 @@ const STATUS_STEPS = [
   { id: "delivered", label: "Delivered", icon: CheckCircle2 },
 ] as const;
 
+import { useIsNative } from "@/lib/use-native";
+import { MobileOrderDetail } from "@/components/native/MobileOrderDetail";
+
 export const Route = createFileRoute("/_authenticated/orders/$id")({
   head: () => ({ meta: [{ title: "Order details — hallifresh" }] }),
   component: OrderDetailPage,
@@ -45,6 +48,12 @@ export const Route = createFileRoute("/_authenticated/orders/$id")({
 
 function OrderDetailPage() {
   const { id } = Route.useParams();
+  const isNative = useIsNative();
+  if (isNative) return <MobileOrderDetail id={id} />;
+  return <WebOrderDetailPage id={id} />;
+}
+
+function WebOrderDetailPage({ id }: { id: string }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();

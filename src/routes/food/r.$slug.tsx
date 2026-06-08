@@ -15,6 +15,8 @@ import { dualApi } from "@/lib/dual-api";
 import { listOutletsForRestaurant } from "@/lib/outlets.functions";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { useQuery } from "@tanstack/react-query";
+import { useIsNative } from "@/lib/use-native";
+import { MobileFoodRestaurant } from "@/components/native/MobileFoodRestaurant";
 
 export const Route = createFileRoute("/food/r/$slug")({
   head: ({ params }) => ({
@@ -84,6 +86,12 @@ const SAMPLE_REVIEWS = [
 
 function RestaurantPage() {
   const r = Route.useLoaderData() as Restaurant;
+  const isNative = useIsNative();
+  if (isNative) return <MobileFoodRestaurant r={r} />;
+  return <WebRestaurantPage r={r} />;
+}
+
+function WebRestaurantPage({ r }: { r: Restaurant }) {
   const [vegOnly, setVegOnly] = useState(false);
   const [openDish, setOpenDish] = useState<Dish | null>(null);
   const cart = useFoodCart();

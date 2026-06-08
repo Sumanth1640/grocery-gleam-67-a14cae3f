@@ -9,12 +9,21 @@ import { QtyStepper } from "@/components/site/DishCustomizeDialog";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Tag, Check, X, Trash2, Clock, Utensils } from "lucide-react";
 
+import { useIsNative } from "@/lib/use-native";
+import { MobileFoodCart } from "@/components/native/MobileFoodCart";
+
 export const Route = createFileRoute("/food/cart")({
   head: () => ({ meta: [{ title: "Your food cart — hallifresh" }] }),
   component: FoodCartPage,
 });
 
 function FoodCartPage() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileFoodCart />;
+  return <WebFoodCartPage />;
+}
+
+function WebFoodCartPage() {
   const cart = useFoodCart();
   const [code, setCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
