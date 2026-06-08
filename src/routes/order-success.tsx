@@ -74,6 +74,10 @@ function SuccessPage() {
   });
 
   const order = orderQ.data ? normalizeDbOrder(orderQ.data) : localOrder;
+  const isNative = useIsNative();
+  if (isNative && order) {
+    return <MobileOrderSuccess order={order} />;
+  }
 
   if (!order && orderQ.isLoading) {
     return (
