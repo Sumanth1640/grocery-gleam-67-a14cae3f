@@ -20,6 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { SavedAddressPicker } from "@/components/site/SavedAddressPicker";
 import { DeliverySlotPicker } from "@/components/site/DeliverySlotPicker";
 import { toast } from "sonner";
+import { useIsNative } from "@/lib/use-native";
+import { MobileCheckout } from "@/components/native/MobileCheckout";
 import {
   ArrowLeft,
   ArrowRight,
