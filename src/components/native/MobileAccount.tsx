@@ -59,7 +59,7 @@ export function MobileAccount() {
             <h2 className="truncate font-display text-base font-extrabold text-zinc-900">
               {profile?.full_name || "Welcome"}
             </h2>
-            <p className="truncate text-xs font-semibold text-zinc-500">{profile?.email}</p>
+            <p className="truncate text-xs font-semibold text-zinc-500">{email}</p>
             {profile?.phone && (
               <p className="truncate text-[11px] font-semibold text-zinc-400">{profile.phone}</p>
             )}
