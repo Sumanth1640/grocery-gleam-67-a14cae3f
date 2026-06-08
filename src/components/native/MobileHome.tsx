@@ -1,14 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { MapPin, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight, Star, Clock } from "lucide-react";
+import { Bell, ChevronDown, MapPin, Plus, Search, Sparkles, Star, Clock } from "lucide-react";
 import { dualApi } from "@/lib/dual-api";
-import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
+import { cartStore } from "@/lib/cart-store";
 import { foodCartStore } from "@/lib/food-cart-store";
 
+const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
+
 /**
- * Reference-style mobile home — shown on small viewports (and inside the
- * Capacitor native shell). Desktop web keeps the original layout.
+ * Premium dark-dock native home — used inside the Capacitor shell.
  */
 export function MobileHome() {
   const navigate = useNavigate();
@@ -16,268 +17,238 @@ export function MobileHome() {
   const prodsQ = useQuery({ queryKey: ["products"], queryFn: () => dualApi.listProducts() });
   const restosQ = useQuery({ queryKey: ["approved-restaurants"], queryFn: () => dualApi.restaurants() });
   const dishesQ = useQuery({ queryKey: ["public-all-dishes"], queryFn: () => dualApi.allDishes() });
-  const cart = useCart();
-  const { itemsCount } = cartTotals(cart);
   const [q, setQ] = useState("");
 
-  const categories = (catsQ.data ?? []).slice(0, 8);
-  const products = (prodsQ.data ?? []).slice(0, 8);
-  const restaurants = (restosQ.data ?? []).slice(0, 6);
+  const categories = (catsQ.data ?? []).slice(0, 10);
+  const products = (prodsQ.data ?? []).slice(0, 6);
+  const restaurants = (restosQ.data ?? []).slice(0, 4);
   const popularDishes = (dishesQ.data ?? []).slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-[oklch(0.985_0.005_145)] pb-32">
-      {/* Top: location + cart */}
-      <header className="flex items-start justify-between px-5 pb-2 pt-6">
-        <div>
-          <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-            <MapPin className="h-3 w-3 text-primary" /> Delivery to
+    <div className="min-h-screen bg-white pb-36" style={FONT}>
+      {/* Header */}
+      <header className="px-6 pt-10 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.55_0.16_145)]/10 text-[oklch(0.55_0.16_145)]">
+              <MapPin className="h-4 w-4" strokeWidth={2.5} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 leading-none mb-1">
+                Deliver to
+              </p>
+              <p className="flex items-center gap-1 text-xs font-extrabold text-zinc-900">
+                Bengaluru, India
+                <ChevronDown className="h-3 w-3 text-[oklch(0.55_0.16_145)]" strokeWidth={2.5} />
+              </p>
+            </div>
           </div>
-          <div className="mt-0.5 text-sm font-bold tracking-tight">Bengaluru, India</div>
+          <Link
+            to="/notifications"
+            aria-label="Notifications"
+            className="grid h-10 w-10 place-items-center rounded-2xl bg-zinc-100"
+          >
+            <Bell className="h-5 w-5 text-zinc-600" strokeWidth={2} />
+          </Link>
         </div>
-        <Link
-          to="/cart"
-          aria-label="Cart"
-          className="relative grid h-11 w-11 place-items-center rounded-full bg-card shadow-card"
+
+        {/* Search */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            navigate({ to: "/search", search: { q } });
+          }}
+          className="relative mt-4 flex items-center"
         >
-          <ShoppingBag className="h-5 w-5" />
-          {itemsCount > 0 && (
-            <span className="absolute -right-1 -top-1 grid h-5 min-w-[20px] place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
-              {itemsCount}
-            </span>
-          )}
-        </Link>
-      </header>
-
-      {/* Headline */}
-      <h1 className="px-5 pt-4 font-display text-[28px] font-extrabold leading-[1.15] tracking-tight">
-        Buy <span className="text-primary">Groceries</span> in a most easiest way.
-      </h1>
-
-      {/* Search + filter */}
-      <form
-        className="mt-5 flex items-center gap-2 px-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          navigate({ to: "/search", search: { q } });
-        }}
-      >
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-4 h-5 w-5 text-zinc-400" strokeWidth={2.5} />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search your products"
-            className="h-12 w-full rounded-2xl bg-card pl-11 pr-4 text-sm font-medium shadow-card outline-none focus:ring-2 focus:ring-primary/30"
+            placeholder="Search Groceries or Food..."
+            className="w-full rounded-2xl border-none bg-zinc-100 py-3.5 pl-12 pr-14 text-sm font-medium outline-none placeholder:text-zinc-400 focus:ring-2 focus:ring-[oklch(0.55_0.16_145)]/30"
           />
-        </div>
-        <button
-          type="button"
-          aria-label="Filter"
-          className="grid h-12 w-12 place-items-center rounded-2xl bg-[oklch(0.7_0.2_45)] text-white shadow-pop"
-        >
-          <SlidersHorizontal className="h-5 w-5" />
-        </button>
-      </form>
+          <button
+            type="submit"
+            aria-label="Filter"
+            className="absolute right-3 grid h-8 w-8 place-items-center rounded-xl bg-orange-500 text-white shadow-lg shadow-orange-200"
+          >
+            <Sparkles className="h-4 w-4" strokeWidth={2.5} />
+          </button>
+        </form>
+      </header>
 
-      {/* Category chips */}
-      <div className="mt-5 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {catsQ.isLoading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4 py-2.5 shadow-card"
-              >
-                <span className="h-7 w-24 animate-pulse rounded bg-muted" />
-              </div>
-            ))
-          : categories.map((c: any) => (
-              <Link
-                key={c.slug}
-                to="/c/$slug"
-                params={{ slug: c.slug }}
-                className="flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4 py-2.5 shadow-card"
-              >
-                <img src={c.image} alt="" className="h-7 w-7 rounded-full object-cover" />
-                <span className="text-sm font-bold">{c.name}</span>
-              </Link>
-            ))}
-      </div>
-
-      {/* Promo banner */}
-      <div className="mt-5 px-5">
+      <div className="space-y-8 px-6 pt-3">
+        {/* Promo */}
         <Link
           to="/c/$slug"
           params={{ slug: categories[0]?.slug ?? "fruits" }}
-          className="relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl bg-[oklch(0.5_0.22_25)] p-5 text-white shadow-pop"
+          className="relative block overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-600 to-rose-700 p-7 text-white shadow-xl shadow-red-100"
         >
-          <div className="relative z-10 max-w-[55%]">
-            <div className="text-[11px] font-semibold opacity-90">Hurry Up! Get 20% Off</div>
-            <div className="mt-1 font-display text-lg font-extrabold leading-tight">
-              Fresh food everyday from HalliFresh
-            </div>
-            <span className="mt-3 inline-flex rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground">
-              Shop Now
-            </span>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1546470427-227dbb7c1d2c?auto=format&fit=crop&w=400&q=70"
-            alt=""
-            className="pointer-events-none absolute -right-4 bottom-0 top-0 my-auto h-32 w-32 rounded-full object-cover opacity-95"
-          />
-        </Link>
-      </div>
-
-      {/* Popular */}
-      <div className="mt-7 flex items-end justify-between px-5">
-        <h2 className="font-display text-xl font-extrabold">Popular</h2>
-        <Link to="/c/$slug" params={{ slug: "fruits" }} className="inline-flex items-center text-xs font-semibold text-muted-foreground">
-          View all <ChevronRight className="h-3 w-3" />
-        </Link>
-      </div>
-
-      <div className="mt-3 grid grid-cols-2 gap-4 px-5">
-        {(prodsQ.isLoading ? Array.from({ length: 4 }) : products).map((p: any, i) => (
-          <MobileProductCard key={p?.id ?? i} product={p} />
-        ))}
-      </div>
-
-      {/* Popular dishes */}
-      <div className="mt-7 flex items-end justify-between px-5">
-        <h2 className="font-display text-xl font-extrabold">Popular dishes</h2>
-        <Link to="/food/dishes" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
-          View all <ChevronRight className="h-3 w-3" />
-        </Link>
-      </div>
-      <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {dishesQ.isLoading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="w-40 shrink-0 rounded-3xl bg-card p-3 shadow-card">
-                <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted" />
-                <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
-              </div>
-            ))
-          : popularDishes.map((d: any) => <MobileDishMiniCard key={d.id} dish={d} />)}
-      </div>
-
-      {/* Restaurants */}
-      <div className="mt-7 flex items-end justify-between px-5">
-        <h2 className="font-display text-xl font-extrabold">Restaurants</h2>
-        <Link to="/food" className="inline-flex items-center text-xs font-semibold text-muted-foreground">
-          View all <ChevronRight className="h-3 w-3" />
-        </Link>
-      </div>
-      <div className="mt-3 grid grid-cols-1 gap-4 px-5">
-        {restosQ.isLoading
-          ? Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="rounded-3xl bg-card p-3 shadow-card">
-                <div className="aspect-[16/10] w-full animate-pulse rounded-2xl bg-muted" />
-                <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
-              </div>
-            ))
-          : restaurants.map((r: any) => <MobileRestaurantRow key={r.id} r={r} />)}
-        {!restosQ.isLoading && restaurants.length === 0 && (
-          <div className="rounded-3xl bg-card p-6 text-center text-sm text-muted-foreground shadow-card">
-            No restaurants available yet.
-          </div>
-        )}
-      </div>
-
-
-      {/* Voucher banner */}
-      <div className="mt-7 px-5">
-        <div className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-[oklch(0.92_0.08_145)] p-5">
-          <div className="max-w-[60%]">
-            <h3 className="font-display text-base font-extrabold leading-tight">
-              Fresh fruit & vegetable everyday
-            </h3>
-            <p className="mt-1 text-[11px] text-muted-foreground">Hurry up! Grab your voucher</p>
-            <button className="mt-3 rounded-full bg-card px-4 py-1.5 text-xs font-bold text-primary shadow-card">
-              Grab Voucher
-            </button>
-          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Flash Offer</span>
+          <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight">
+            Get 20% Off<br />on your first order
+          </h2>
+          <span className="mt-4 inline-flex rounded-xl bg-white px-6 py-2 text-xs font-black uppercase tracking-wider text-rose-600 shadow-lg">
+            Shop Now
+          </span>
           <img
             src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=300&q=70"
             alt=""
-            className="h-24 w-28 rounded-2xl object-cover"
+            className="pointer-events-none absolute -right-4 -bottom-4 h-36 w-36 rounded-full object-cover opacity-25"
           />
+        </Link>
+
+        {/* Categories */}
+        <div className="flex gap-5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {catsQ.isLoading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex shrink-0 flex-col items-center gap-2">
+                  <div className="h-16 w-16 animate-pulse rounded-3xl bg-zinc-100" />
+                  <div className="h-3 w-12 animate-pulse rounded bg-zinc-100" />
+                </div>
+              ))
+            : categories.map((c: any, i: number) => {
+                const tints = [
+                  "bg-emerald-50 border-emerald-100",
+                  "bg-orange-50 border-orange-100",
+                  "bg-blue-50 border-blue-100",
+                  "bg-purple-50 border-purple-100",
+                  "bg-amber-50 border-amber-100",
+                  "bg-rose-50 border-rose-100",
+                ];
+                return (
+                  <Link
+                    key={c.slug}
+                    to="/c/$slug"
+                    params={{ slug: c.slug }}
+                    className="flex shrink-0 flex-col items-center gap-2"
+                  >
+                    <div
+                      className={`grid h-16 w-16 place-items-center overflow-hidden rounded-3xl border shadow-sm ${tints[i % tints.length]}`}
+                    >
+                      <img src={c.image} alt="" className="h-10 w-10 object-cover" />
+                    </div>
+                    <span className="text-[11px] font-bold text-zinc-700">{c.name}</span>
+                  </Link>
+                );
+              })}
         </div>
+
+        {/* Popular Items */}
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-xl font-extrabold text-zinc-900">Popular Items</h3>
+            <Link
+              to="/c/$slug"
+              params={{ slug: "fruits" }}
+              className="text-xs font-bold text-[oklch(0.55_0.16_145)]"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {(prodsQ.isLoading ? Array.from({ length: 4 }) : products).map((p: any, i: number) => (
+              <NativeProductCard key={p?.id ?? i} product={p} />
+            ))}
+          </div>
+        </section>
+
+        {/* Popular Dishes */}
+        {popularDishes.length > 0 && (
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-display text-xl font-extrabold text-zinc-900">Popular Dishes</h3>
+              <Link to="/food/dishes" className="text-xs font-bold text-orange-500">
+                View all
+              </Link>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {popularDishes.map((d: any) => (
+                <NativeDishMini key={d.id} dish={d} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Restaurants */}
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-xl font-extrabold text-zinc-900">Hot Restaurants</h3>
+            <Link to="/food" className="text-xs font-bold text-orange-500">
+              View all
+            </Link>
+          </div>
+          <div className="space-y-4">
+            {restosQ.isLoading
+              ? Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-white">
+                    <div className="h-44 animate-pulse bg-zinc-100" />
+                    <div className="p-5">
+                      <div className="h-4 w-1/2 animate-pulse rounded bg-zinc-100" />
+                    </div>
+                  </div>
+                ))
+              : restaurants.map((r: any) => <NativeRestaurantCard key={r.id} r={r} />)}
+            {!restosQ.isLoading && restaurants.length === 0 && (
+              <div className="rounded-[2.5rem] border border-zinc-100 bg-white p-8 text-center text-sm text-zinc-500">
+                No restaurants available yet.
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function MobileProductCard({ product }: { product: any }) {
+function NativeProductCard({ product }: { product: any }) {
   if (!product) {
     return (
-      <div className="rounded-3xl bg-card p-3 shadow-card">
-        <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted" />
-        <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
-        <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-muted" />
+      <div className="rounded-[2rem] border border-zinc-100 bg-white p-3">
+        <div className="h-32 w-full animate-pulse rounded-2xl bg-zinc-100" />
+        <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-zinc-100" />
       </div>
     );
   }
-  const off = product.mrp > product.price
-    ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
-    : 0;
+  const off = product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
   return (
-    <div className="relative flex flex-col rounded-3xl bg-card p-3 shadow-card">
-      {/* Shield badge */}
-      <div className="absolute left-3 top-3 z-10">
-        {off > 0 ? (
-          <ShieldBadge color="oklch(0.55 0.22 25)" label={`${off}%`} sub="OFF" />
-        ) : (
-          <ShieldBadge color="oklch(0.45 0.18 260)" label="Best" sub="sale" />
-        )}
-      </div>
+    <div className="flex flex-col rounded-[2rem] border border-zinc-100 bg-white p-3 shadow-sm">
       <Link
         to="/p/$id"
         params={{ id: product.slug }}
-        className="block aspect-square overflow-hidden rounded-2xl bg-[oklch(0.97_0.01_145)]"
+        className="relative block h-32 overflow-hidden rounded-2xl bg-zinc-50"
       >
         <img src={product.image} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
+        {off > 0 && (
+          <span className="absolute left-2 top-2 rounded-lg bg-rose-500 px-2 py-0.5 text-[9px] font-black text-white">
+            {off}% OFF
+          </span>
+        )}
       </Link>
-      <Link to="/p/$id" params={{ id: product.slug }} className="mt-3 line-clamp-1 text-sm font-bold">
-        {product.name}
-      </Link>
-      <div className="text-[11px] text-muted-foreground">{product.weight}</div>
-      <div className="mt-2 flex items-end justify-between">
-        <div>
-          <div className="text-base font-extrabold">₹{product.price}</div>
-          {off > 0 && (
-            <div className="text-[11px] text-muted-foreground line-through">₹{product.mrp}</div>
-          )}
+      <div className="px-1 pt-3">
+        <Link to="/p/$id" params={{ id: product.slug }} className="line-clamp-1 text-xs font-bold text-zinc-800">
+          {product.name}
+        </Link>
+        <p className="mb-2 text-[10px] font-semibold text-zinc-400">{product.weight}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-sm font-black text-zinc-900">₹{product.price}</span>
+            {off > 0 && <span className="ml-1 text-[10px] text-zinc-300 line-through">₹{product.mrp}</span>}
+          </div>
+          <button
+            onClick={() => cartStore.add(product)}
+            aria-label="Add to cart"
+            className="grid h-8 w-8 place-items-center rounded-xl bg-[oklch(0.55_0.16_145)] text-white shadow-lg shadow-emerald-100 transition active:scale-95"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
+          </button>
         </div>
-        <button
-          onClick={() => cartStore.add(product)}
-          aria-label="Add to cart"
-          className="grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95"
-        >
-          <Plus className="h-4 w-4" strokeWidth={3} />
-        </button>
       </div>
     </div>
   );
 }
 
-function ShieldBadge({ color, label, sub }: { color: string; label: string; sub: string }) {
-  return (
-    <div
-      className="grid h-11 w-9 place-items-center text-center text-white shadow-pop"
-      style={{
-        background: color,
-        clipPath: "polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%)",
-      }}
-    >
-      <div className="-mt-1 leading-none">
-        <div className="text-[10px] font-extrabold">{label}</div>
-        <div className="text-[8px] font-semibold uppercase opacity-90">{sub}</div>
-      </div>
-    </div>
-  );
-}
-
-function MobileDishMiniCard({ dish }: { dish: any }) {
+function NativeDishMini({ dish }: { dish: any }) {
   const restaurant = dish.restaurant ?? {};
   const mappedRestaurant = {
     id: restaurant.id,
@@ -313,38 +284,38 @@ function MobileDishMiniCard({ dish }: { dish: any }) {
     addons: dish.partner_dish_addons ?? [],
   };
   return (
-    <div className="w-40 shrink-0 rounded-3xl bg-card p-3 shadow-card">
+    <div className="w-40 shrink-0 rounded-[2rem] border border-zinc-100 bg-white p-3 shadow-sm">
       <Link
         to="/food/r/$slug"
         params={{ slug: mappedRestaurant.slug }}
-        className="block aspect-square overflow-hidden rounded-2xl bg-muted"
+        className="block h-32 overflow-hidden rounded-2xl bg-zinc-50"
       >
         <img src={mappedDish.image} alt={mappedDish.name} loading="lazy" className="h-full w-full object-cover" />
       </Link>
-      <div className="mt-2 line-clamp-1 text-sm font-bold">{mappedDish.name}</div>
-      <div className="line-clamp-1 text-[10px] text-muted-foreground">{mappedRestaurant.name}</div>
-      <div className="mt-2 flex items-end justify-between">
-        <div className="text-sm font-extrabold">₹{mappedDish.price}</div>
+      <div className="mt-3 line-clamp-1 text-xs font-bold text-zinc-800">{mappedDish.name}</div>
+      <div className="line-clamp-1 text-[10px] font-semibold text-zinc-400">{mappedRestaurant.name}</div>
+      <div className="mt-2 flex items-center justify-between">
+        <span className="text-sm font-black text-zinc-900">₹{mappedDish.price}</span>
         <button
           onClick={() => foodCartStore.add(mappedRestaurant as any, mappedDish as any)}
           aria-label="Add dish"
-          className="grid h-8 w-8 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95"
+          className="grid h-8 w-8 place-items-center rounded-xl bg-[oklch(0.55_0.16_145)] text-white shadow-lg shadow-emerald-100 transition active:scale-95"
         >
-          <Plus className="h-4 w-4" strokeWidth={3} />
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
         </button>
       </div>
     </div>
   );
 }
 
-function MobileRestaurantRow({ r }: { r: any }) {
+function NativeRestaurantCard({ r }: { r: any }) {
   return (
     <Link
       to="/food/r/$slug"
       params={{ slug: r.slug }}
-      className="block overflow-hidden rounded-3xl bg-card shadow-card"
+      className="block overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-white shadow-sm"
     >
-      <div className="relative aspect-[16/10] overflow-hidden">
+      <div className="relative h-44 overflow-hidden">
         <img
           src={r.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800"}
           alt={r.name}
@@ -352,29 +323,23 @@ function MobileRestaurantRow({ r }: { r: any }) {
           className="h-full w-full object-cover"
         />
         {r.offer && (
-          <div className="absolute left-3 top-3 rounded-md bg-[oklch(0.6_0.22_25)] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">
-            {r.offer}
+          <div className="absolute left-4 top-4 rounded-2xl bg-white/95 px-3 py-1.5 shadow-sm backdrop-blur-sm">
+            <span className="text-[10px] font-black tracking-tight text-orange-600">{r.offer}</span>
           </div>
         )}
+        <div className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-xl bg-emerald-500 px-3 py-1 text-xs font-black text-white shadow-xl">
+          {Number(r.rating ?? 4.5)} <Star className="h-3 w-3 fill-current" />
+        </div>
       </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display text-base font-extrabold">{r.name}</h3>
-          <div className="inline-flex items-center gap-0.5 rounded-md bg-[oklch(0.55_0.16_145)] px-1.5 py-0.5 text-[11px] font-bold text-white">
-            <Star className="h-3 w-3 fill-current" /> {Number(r.rating ?? 4.5)}
-          </div>
-        </div>
-        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-          {(r.cuisines ?? []).join(" · ")}
-        </div>
-        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" /> {r.eta_mins} min
+      <div className="p-5">
+        <div className="mb-1 flex items-start justify-between">
+          <h4 className="font-display text-lg font-extrabold text-zinc-900">{r.name}</h4>
+          <span className="text-[11px] font-bold text-zinc-400">
+            ₹{r.cost_for_two} · <span className="inline-flex items-center gap-0.5"><Clock className="h-3 w-3" /> {r.eta_mins}m</span>
           </span>
-          <span>₹{r.cost_for_two} for two</span>
         </div>
+        <p className="line-clamp-1 text-xs font-medium text-zinc-400">{(r.cuisines ?? []).join(" • ")}</p>
       </div>
     </Link>
   );
 }
-
