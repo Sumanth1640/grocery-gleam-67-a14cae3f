@@ -4,8 +4,16 @@ import { useCart, cartTotals } from "@/lib/cart-store";
 import { useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useAuth } from "@/lib/use-auth";
+import { useIsNative } from "@/lib/use-native";
+import { NativeBottomNav } from "@/components/native/NativeBottomNav";
 
 export function BottomNav() {
+  const isNative = useIsNative();
+  if (isNative) return <NativeBottomNav />;
+  return <WebBottomNav />;
+}
+
+function WebBottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const cart = useCart();
   const foodCart = useFoodCart();
