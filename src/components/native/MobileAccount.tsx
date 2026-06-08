@@ -17,15 +17,16 @@ import { php } from "@/lib/php-api";
 import { getProfile, listOrders } from "@/lib/account.functions";
 import { isAdmin } from "@/lib/catalog.functions";
 import { myManagedOutlets } from "@/lib/outlet-managers.functions";
-import { signOut } from "@/lib/use-auth";
+import { signOut, useAuth } from "@/lib/use-auth";
 import { NativeHeader } from "./MobileCart";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
 
 export function MobileAccount() {
   const navigate = useNavigate();
-  const profileFn = useDualFn(getProfile, php.profileGet);
-  const ordersFn = useDualFn(listOrders, php.ordersList);
+  const { user } = useAuth();
+  const profileFn = useDualFn(getProfile, php.getProfile);
+  const ordersFn = useDualFn(listOrders, php.myOrders);
   const adminFn = useDualFn(isAdmin, php.checkRole);
 
   const { data: profile } = useQuery({ queryKey: ["account-profile"], queryFn: () => profileFn() });
@@ -33,7 +34,8 @@ export function MobileAccount() {
   const { data: admin } = useQuery({ queryKey: ["is-admin"], queryFn: () => adminFn() });
   const { data: outlets } = useQuery({ queryKey: ["my-outlets"], queryFn: () => myManagedOutlets() });
 
-  const initials = (profile?.full_name || profile?.email || "U")
+  const email = user?.email ?? "";
+  const initials = (profile?.full_name || email || "U")
     .split(" ")
     .map((s: string) => s[0])
     .slice(0, 2)

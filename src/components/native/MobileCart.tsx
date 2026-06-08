@@ -37,7 +37,7 @@ export function MobileCart() {
       setCoupon(null);
       return;
     }
-    setCoupon(res.coupon);
+    setCoupon(res.coupon ?? null);
   };
 
   if (itemsCount === 0) {
