@@ -7,6 +7,8 @@ import { applyCoupon, couponDescription, type Coupon } from "@/lib/public-coupon
 import { useQuery } from "@tanstack/react-query";
 import { dualApi } from "@/lib/dual-api";
 import { Minus, Plus, Trash2, ShoppingBag, Clock, Tag, Check, X } from "lucide-react";
+import { useIsNative } from "@/lib/use-native";
+import { MobileCart } from "@/components/native/MobileCart";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Your cart — hallifresh" }] }),
@@ -14,6 +16,12 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileCart />;
+  return <WebCartPage />;
+}
+
+function WebCartPage() {
   const cart = useCart();
   const { items, itemsCount, subtotal, savings, delivery } = cartTotals(cart);
 
