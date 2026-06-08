@@ -84,6 +84,12 @@ const SAMPLE_REVIEWS = [
 
 function RestaurantPage() {
   const r = Route.useLoaderData() as Restaurant;
+  const isNative = useIsNative();
+  if (isNative) return <MobileFoodRestaurant r={r} />;
+  return <WebRestaurantPage r={r} />;
+}
+
+function WebRestaurantPage({ r }: { r: Restaurant }) {
   const [vegOnly, setVegOnly] = useState(false);
   const [openDish, setOpenDish] = useState<Dish | null>(null);
   const cart = useFoodCart();
