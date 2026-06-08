@@ -15,6 +15,8 @@ import { dualApi } from "@/lib/dual-api";
 import { listOutletsForRestaurant } from "@/lib/outlets.functions";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { useQuery } from "@tanstack/react-query";
+import { useIsNative } from "@/lib/use-native";
+import { MobileFoodRestaurant } from "@/components/native/MobileFoodRestaurant";
 
 export const Route = createFileRoute("/food/r/$slug")({
   head: ({ params }) => ({
