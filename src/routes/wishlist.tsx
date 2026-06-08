@@ -7,12 +7,21 @@ import { cartStore } from "@/lib/cart-store";
 import { Heart, Trash2, ShoppingCart, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useIsNative } from "@/lib/use-native";
+import { MobileWishlist } from "@/components/native/MobileWishlist";
+
 export const Route = createFileRoute("/wishlist")({
   head: () => ({ meta: [{ title: "Your wishlist — hallifresh" }] }),
   component: WishlistPage,
 });
 
 function WishlistPage() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileWishlist />;
+  return <WebWishlistPage />;
+}
+
+function WebWishlistPage() {
   const wishlist = useWishlist();
   const items = Object.values(wishlist);
 

@@ -12,6 +12,8 @@ import {
 } from "@/lib/notifications.functions";
 import { Bell, Check, CheckCheck, Loader2, Package, Tag, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useIsNative } from "@/lib/use-native";
+import { MobileNotifications } from "@/components/native/MobileNotifications";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({ meta: [{ title: "Notifications — hallifresh" }] }),
@@ -19,6 +21,12 @@ export const Route = createFileRoute("/_authenticated/notifications")({
 });
 
 function NotificationsPage() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileNotifications />;
+  return <WebNotificationsPage />;
+}
+
+function WebNotificationsPage() {
   const qc = useQueryClient();
   const list = useDualFn(listNotifications, () => php.notificationsList());
   const readFn = useDualFn(markRead, (d: any) => php.markNotificationRead(d));
