@@ -10,6 +10,8 @@ import { phpAuth, php } from "@/lib/php-api";
 import { isAdmin as isAdminFn } from "@/lib/catalog.functions";
 
 import { Eye, EyeOff, Loader2, Zap } from "lucide-react";
+import { useIsNative } from "@/lib/use-native";
+import { MobileLogin } from "@/components/native/MobileLogin";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
