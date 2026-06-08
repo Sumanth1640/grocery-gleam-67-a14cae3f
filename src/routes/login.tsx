@@ -25,8 +25,13 @@ export const Route = createFileRoute("/login")({
 type Mode = "signin" | "signup";
 
 function LoginPage() {
-  
   const { redirect } = useSearch({ from: "/login" });
+  const isNative = useIsNative();
+  if (isNative) return <MobileLogin redirect={redirect} />;
+  return <WebLoginPage redirect={redirect} />;
+}
+
+function WebLoginPage({ redirect }: { redirect: string }) {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
