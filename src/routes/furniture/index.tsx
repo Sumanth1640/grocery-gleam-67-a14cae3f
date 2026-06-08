@@ -16,8 +16,17 @@ export const Route = createFileRoute("/furniture/")({
       { property: "og:description", content: "Solid wood sofas, beds, dining sets and storage — handcrafted to order." },
     ],
   }),
-  component: FurnitureLanding,
+  component: FurnitureLandingPage,
 });
+
+import { useIsNative } from "@/lib/use-native";
+import { MobileFurniture } from "@/components/native/MobileFurniture";
+
+function FurnitureLandingPage() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileFurniture />;
+  return <FurnitureLanding />;
+}
 
 function FurnitureLanding() {
   const [cat, setCat] = useState<string>("all");

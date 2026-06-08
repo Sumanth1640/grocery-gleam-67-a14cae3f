@@ -42,8 +42,17 @@ export const Route = createFileRoute("/support")({
       },
     ],
   }),
-  component: SupportPage,
+  component: SupportRouter,
 });
+
+import { useIsNative } from "@/lib/use-native";
+import { MobileHelp } from "@/components/native/MobileHelp";
+
+function SupportRouter() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileHelp />;
+  return <SupportPage />;
+}
 
 const CATEGORIES = [
   { icon: Package, label: "Order issues", desc: "Missing, delayed or wrong items", href: "/orders" },
