@@ -13,8 +13,17 @@ export const Route = createFileRoute("/help")({
       { name: "description", content: "Get help with your orders, refunds, payments, deliveries and account." },
     ],
   }),
-  component: HelpPage,
+  component: HelpRouter,
 });
+
+import { useIsNative } from "@/lib/use-native";
+import { MobileHelp } from "@/components/native/MobileHelp";
+
+function HelpRouter() {
+  const isNative = useIsNative();
+  if (isNative) return <MobileHelp />;
+  return <HelpPage />;
+}
 
 const TOPICS = [
   { icon: Package, label: "Order issues", href: "/orders" },

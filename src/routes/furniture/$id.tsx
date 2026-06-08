@@ -13,8 +13,18 @@ export const Route = createFileRoute("/furniture/$id")({
       { name: "description", content: "Handcrafted solid wood piece from our collection." },
     ],
   }),
-  component: FurnitureDetail,
+  component: FurnitureDetailPage,
 });
+
+import { useIsNative } from "@/lib/use-native";
+import { MobileFurnitureDetail } from "@/components/native/MobileFurnitureDetail";
+
+function FurnitureDetailPage() {
+  const { id } = Route.useParams();
+  const isNative = useIsNative();
+  if (isNative) return <MobileFurnitureDetail id={id} />;
+  return <FurnitureDetail />;
+}
 
 function FurnitureDetail() {
   const { id } = Route.useParams();
