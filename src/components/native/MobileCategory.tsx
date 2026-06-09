@@ -99,8 +99,12 @@ export function MobileCategory({ slug }: { slug: string }) {
       {/* Popular */}
       <div className="mt-7 flex items-end justify-between px-5">
         <h2 className="font-display text-xl font-extrabold">Popular</h2>
-        <button className="inline-flex items-center text-xs font-semibold text-muted-foreground">
-          View all <ChevronRight className="h-3 w-3" />
+        <button
+          type="button"
+          onClick={() => setShowAllPopular((v) => !v)}
+          className="inline-flex items-center text-xs font-semibold text-muted-foreground"
+        >
+          {showAllPopular ? "Show less" : "View all"} <ChevronRight className="h-3 w-3" />
         </button>
       </div>
 
