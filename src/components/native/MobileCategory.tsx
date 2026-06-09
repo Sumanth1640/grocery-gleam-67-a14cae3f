@@ -16,11 +16,13 @@ export function MobileCategory({ slug }: { slug: string }) {
   const cart = useCart();
   const { itemsCount } = cartTotals(cart);
   const [q, setQ] = useState("");
+  const [showAllPopular, setShowAllPopular] = useState(false);
+  const [showAllNew, setShowAllNew] = useState(false);
 
   const categories = (catsQ.data ?? []).slice(0, 8);
   const products = itemsQ.data ?? [];
-  const popular = products.slice(0, 6);
-  const newArrivals = products.slice(6, 12);
+  const popular = showAllPopular ? products : products.slice(0, 6);
+  const newArrivals = showAllNew ? products.slice(6) : products.slice(6, 12);
 
   return (
     <div className="min-h-screen bg-[oklch(0.985_0.005_145)] pb-32">
@@ -97,8 +99,12 @@ export function MobileCategory({ slug }: { slug: string }) {
       {/* Popular */}
       <div className="mt-7 flex items-end justify-between px-5">
         <h2 className="font-display text-xl font-extrabold">Popular</h2>
-        <button className="inline-flex items-center text-xs font-semibold text-muted-foreground">
-          View all <ChevronRight className="h-3 w-3" />
+        <button
+          type="button"
+          onClick={() => setShowAllPopular((v) => !v)}
+          className="inline-flex items-center text-xs font-semibold text-muted-foreground"
+        >
+          {showAllPopular ? "Show less" : "View all"} <ChevronRight className="h-3 w-3" />
         </button>
       </div>
 
@@ -135,8 +141,12 @@ export function MobileCategory({ slug }: { slug: string }) {
         <>
           <div className="mt-7 flex items-end justify-between px-5">
             <h2 className="font-display text-xl font-extrabold">New arrival</h2>
-            <button className="inline-flex items-center text-xs font-semibold text-muted-foreground">
-              View all <ChevronRight className="h-3 w-3" />
+            <button
+              type="button"
+              onClick={() => setShowAllNew((v) => !v)}
+              className="inline-flex items-center text-xs font-semibold text-muted-foreground"
+            >
+              {showAllNew ? "Show less" : "View all"} <ChevronRight className="h-3 w-3" />
             </button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-4 px-5">
