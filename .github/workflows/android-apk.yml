@@ -28,13 +28,21 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps --no-audit --no-fund
 
-      - name: Create web assets shim
+      - name: Create hallifresh.in web assets shim
         run: |
           mkdir -p dist/client
           cat > dist/client/index.html <<'HTML'
           <!doctype html>
-          <html><head><meta charset="utf-8"><title>HalliFresh</title></head>
-          <body>Loading…</body></html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <meta http-equiv="refresh" content="0; url=https://hallifresh.in/?native=1">
+              <title>HalliFresh</title>
+              <script>window.location.replace("https://hallifresh.in/?native=1")</script>
+            </head>
+            <body>Opening HalliFresh…</body>
+          </html>
           HTML
 
       - name: Add Android platform
@@ -43,6 +51,12 @@ jobs:
             npx cap add android
           fi
           npx cap sync android
+
+      - name: Verify APK target website
+        run: |
+          test -f android/app/src/main/assets/capacitor.config.json
+          cat android/app/src/main/assets/capacitor.config.json
+          grep -q 'https://hallifresh.in/?native=1' android/app/src/main/assets/capacitor.config.json
 
       - name: Patch MainActivity to allow UPI / intent:// schemes
         run: |
