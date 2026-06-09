@@ -19,6 +19,7 @@ import { CUISINES, type Restaurant } from "@/lib/food-data";
 import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { foodCartStore, useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
+import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 
 type DbDish = Awaited<ReturnType<typeof listAllApprovedDishes>>[number];
 
