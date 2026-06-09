@@ -5,9 +5,8 @@ const config: CapacitorConfig = {
   appName: "HalliFresh",
   webDir: "dist/client",
   server: {
-    // WebView wrapper: the APK loads the live Lovable app over HTTPS.
-    // Requires internet. Publish the app in Lovable for this URL to serve content.
-    url: "https://grocery-gleam-67.lovable.app?native=1",
+    // WebView wrapper: the APK loads your hosted site over HTTPS.
+    url: "https://hallifresh.in/?native=1",
     cleartext: false,
     androidScheme: "https",
   },
