@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronLeft, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight } from "lucide-react";
 import { dualApi } from "@/lib/dual-api";
 import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
+import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 
 /** Reference-style mobile Product List screen for /c/$slug. */
 export function MobileCategory({ slug }: { slug: string }) {
