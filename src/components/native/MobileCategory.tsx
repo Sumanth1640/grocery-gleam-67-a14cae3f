@@ -141,8 +141,12 @@ export function MobileCategory({ slug }: { slug: string }) {
         <>
           <div className="mt-7 flex items-end justify-between px-5">
             <h2 className="font-display text-xl font-extrabold">New arrival</h2>
-            <button className="inline-flex items-center text-xs font-semibold text-muted-foreground">
-              View all <ChevronRight className="h-3 w-3" />
+            <button
+              type="button"
+              onClick={() => setShowAllNew((v) => !v)}
+              className="inline-flex items-center text-xs font-semibold text-muted-foreground"
+            >
+              {showAllNew ? "Show less" : "View all"} <ChevronRight className="h-3 w-3" />
             </button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-4 px-5">
