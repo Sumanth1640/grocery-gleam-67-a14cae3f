@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronLeft, Search, ShoppingBag, SlidersHorizontal, Plus, ChevronRight } from "lucide-react";
 import { dualApi } from "@/lib/dual-api";
 import { cartStore, useCart, cartTotals } from "@/lib/cart-store";
+import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 
 /** Reference-style mobile Product List screen for /c/$slug. */
 export function MobileCategory({ slug }: { slug: string }) {
@@ -114,27 +115,13 @@ export function MobileCategory({ slug }: { slug: string }) {
         ))}
       </div>
 
-      {/* Promo banner */}
+      {/* Dynamic auto-swapping banners (managed in Admin → Banners) */}
       {popular[0] && (
         <div className="mt-7 px-5">
-          <div className="relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl bg-[oklch(0.5_0.22_25)] p-5 text-white shadow-pop">
-            <div className="relative z-10 max-w-[60%]">
-              <div className="text-[11px] font-semibold opacity-90">Hurry Up! Get 20% Off</div>
-              <div className="mt-1 font-display text-lg font-extrabold leading-tight">
-                Fresh food everyday from HalliFresh
-              </div>
-              <span className="mt-3 inline-flex rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground">
-                Shop Now
-              </span>
-            </div>
-            <img
-              src="https://images.unsplash.com/photo-1546470427-227dbb7c1d2c?auto=format&fit=crop&w=400&q=70"
-              alt=""
-              className="pointer-events-none absolute -right-4 bottom-0 top-0 my-auto h-32 w-32 rounded-full object-cover opacity-95"
-            />
-          </div>
+          <NativeBannerCarousel />
         </div>
       )}
+
 
       {/* New arrival */}
       {newArrivals.length > 0 && (

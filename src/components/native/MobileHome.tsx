@@ -5,6 +5,7 @@ import { Bell, ChevronDown, MapPin, Plus, Search, Sparkles, Star, Clock } from "
 import { dualApi } from "@/lib/dual-api";
 import { cartStore } from "@/lib/cart-store";
 import { foodCartStore } from "@/lib/food-cart-store";
+import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
 
@@ -78,25 +79,9 @@ export function MobileHome() {
       </header>
 
       <div className="space-y-8 px-6 pt-3">
-        {/* Promo */}
-        <Link
-          to="/c/$slug"
-          params={{ slug: categories[0]?.slug ?? "fruits" }}
-          className="relative block overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-600 to-rose-700 p-7 text-white shadow-xl shadow-red-100"
-        >
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Flash Offer</span>
-          <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight">
-            Get 20% Off<br />on your first order
-          </h2>
-          <span className="mt-4 inline-flex rounded-xl bg-white px-6 py-2 text-xs font-black uppercase tracking-wider text-rose-600 shadow-lg">
-            Shop Now
-          </span>
-          <img
-            src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=300&q=70"
-            alt=""
-            className="pointer-events-none absolute -right-4 -bottom-4 h-36 w-36 rounded-full object-cover opacity-25"
-          />
-        </Link>
+        {/* Dynamic auto-swapping banners (managed in Admin → Banners) */}
+        <NativeBannerCarousel />
+
 
         {/* Categories */}
         <div className="flex gap-5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

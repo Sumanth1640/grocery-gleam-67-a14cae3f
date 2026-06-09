@@ -19,6 +19,7 @@ import { CUISINES, type Restaurant } from "@/lib/food-data";
 import { listAllApprovedDishes, listApprovedRestaurants } from "@/lib/partner-public.functions";
 import { foodCartStore, useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { restaurantFavsStore, useRestaurantFavs } from "@/lib/restaurant-favs-store";
+import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 
 type DbDish = Awaited<ReturnType<typeof listAllApprovedDishes>>[number];
 
@@ -150,28 +151,11 @@ export function MobileFood() {
         ))}
       </div>
 
-      {/* Promo banner */}
+      {/* Dynamic auto-swapping banners (managed in Admin → Banners) */}
       <div className="mt-5 px-5">
-        <Link
-          to="/food/offers"
-          className="relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl bg-[oklch(0.5_0.22_25)] p-5 text-white shadow-pop"
-        >
-          <div className="relative z-10 max-w-[60%]">
-            <div className="text-[11px] font-semibold opacity-90">Hurry Up! Get 20% Off</div>
-            <div className="mt-1 font-display text-lg font-extrabold leading-tight">
-              Fresh meals from your favourite kitchens
-            </div>
-            <span className="mt-3 inline-flex rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground">
-              See Offers
-            </span>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=70"
-            alt=""
-            className="pointer-events-none absolute -right-4 bottom-0 top-0 my-auto h-32 w-32 rounded-full object-cover opacity-95"
-          />
-        </Link>
+        <NativeBannerCarousel />
       </div>
+
 
       {/* Popular */}
       <div className="mt-7 flex items-end justify-between px-5">
