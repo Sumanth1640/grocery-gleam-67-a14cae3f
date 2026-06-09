@@ -5,6 +5,7 @@ import { Bell, ChevronDown, MapPin, Plus, Search, Sparkles, Star, Clock } from "
 import { dualApi } from "@/lib/dual-api";
 import { cartStore } from "@/lib/cart-store";
 import { foodCartStore } from "@/lib/food-cart-store";
+import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
 
