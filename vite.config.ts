@@ -14,20 +14,14 @@ export default defineConfig(
   SPA
     ? {
         tanstackStart: {
+          // Override TanStack's default client entry (which calls
+          // hydrateRoot(document) and throws "Invariant failed" against
+          // a static <div id="root"> shell) with a pure CSR entry.
+          client: { entry: "spa-entry" },
           spa: { enabled: true, prerender: { outputPath: "/index.html" } },
           server: { preset: "static" },
         },
-        vite: {
-          build: {
-            manifest: true,
-            rollupOptions: {
-              // Custom pure-CSR entry used by scripts/build-spa.mjs to bootstrap
-              // the static Hostinger build (avoids hydrateRoot(document) which
-              // throws "Invariant failed" against a plain <div id="root"> shell).
-              input: { "spa-entry": "src/spa-entry.tsx" },
-            },
-          },
-        },
+        vite: { build: { manifest: true } },
       }
     : {
         vite: { build: { manifest: true } },
