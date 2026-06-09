@@ -67,10 +67,7 @@ if (!existsSync(clientDir)) {
 }
 
 // ---- 3. Generate dist/client/index.html from the Vite manifest ----
-// We ALWAYS regenerate index.html (even if prerender wrote one) so the static
-// site is served by our custom CSR entry — the TanStack Start prerender uses
-// hydrateRoot(document) which throws "Invariant failed" on a static shell.
-{
+if (!existsSync(indexHtml)) {
   const manifestPath = join(clientDir, ".vite", "manifest.json");
   if (!existsSync(manifestPath)) {
     console.error("[build-spa] Missing dist/client/.vite/manifest.json — cannot generate index.html.");
@@ -78,9 +75,10 @@ if (!existsSync(clientDir)) {
     process.exit(1);
   }
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const entries = Object.values(manifest).filter((c) => c.isEntry);
   const entry =
-    Object.values(manifest).find((c) => c.isEntry && /spa-entry/.test(c.src || c.name || "")) ||
-    Object.values(manifest).find((c) => c.isEntry);
+    entries.find((c) => /client-entry|start|main/i.test((c.src || "") + (c.file || ""))) ||
+    entries[0];
   if (!entry) {
     console.error("[build-spa] Manifest has no entry chunk — cannot generate index.html.");
     process.exit(1);
@@ -104,7 +102,6 @@ ${cssLinks}
 `;
   writeFileSync(indexHtml, html, "utf8");
 }
-
 
 // ---- 4. SPA fallback so deep links work on Hostinger ----
 const notFound = join(clientDir, "404.html");
