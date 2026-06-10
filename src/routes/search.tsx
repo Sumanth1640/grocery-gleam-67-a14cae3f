@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -26,21 +26,37 @@ export const Route = createFileRoute("/search")({
 });
 
 function SearchPage() {
-  const { q } = Route.useSearch();
+  const { q: urlQ } = Route.useSearch();
   const navigate = Route.useNavigate();
   const isNative = useIsNative();
+
+  // Local input state, debounced into the URL. Updating the URL on every
+  // keystroke caused the input to lag/freeze because each character triggered
+  // a router navigation + full re-render + new query.
+  const [q, setQ] = useState(urlQ ?? "");
+  // Sync from URL when it changes externally (back/forward, links).
+  useEffect(() => {
+    setQ(urlQ ?? "");
+  }, [urlQ]);
+  // Debounce write-back to URL.
+  const lastWritten = useRef(urlQ ?? "");
+  useEffect(() => {
+    if (q === lastWritten.current) return;
+    const t = setTimeout(() => {
+      lastWritten.current = q;
+      navigate({ search: { q }, replace: true });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [q, navigate]);
+
   if (isNative) {
-    return (
-      <MobileSearch
-        q={q}
-        onQueryChange={(v) => navigate({ search: { q: v }, replace: true })}
-      />
-    );
+    return <MobileSearch q={q} onQueryChange={setQ} />;
   }
-  return <WebSearchPage q={q} navigate={navigate} />;
+  return <WebSearchPage q={q} onQueryChange={setQ} />;
 }
 
-function WebSearchPage({ q, navigate }: { q: string; navigate: ReturnType<typeof Route.useNavigate> }) {
+function WebSearchPage({ q, onQueryChange }: { q: string; onQueryChange: (v: string) => void }) {
+
   const query = q.trim();
 
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: () => dualApi.listCategories() });
@@ -108,7 +124,7 @@ function WebSearchPage({ q, navigate }: { q: string; navigate: ReturnType<typeof
           <input
             autoFocus
             value={q}
-            onChange={(e) => navigate({ search: { q: e.target.value }, replace: true })}
+            onChange={(e) => onQueryChange(e.target.value)}
             placeholder='Search "milk", "bananas", "chips"…'
             className="w-full rounded-xl border bg-secondary/40 py-3 pl-9 pr-3 text-sm outline-none focus:bg-background focus:ring-focus"
           />
