@@ -124,7 +124,7 @@ function WebSearchPage({ q, onQueryChange }: { q: string; onQueryChange: (v: str
           <input
             autoFocus
             value={q}
-            onChange={(e) => navigate({ search: { q: e.target.value }, replace: true })}
+            onChange={(e) => onQueryChange(e.target.value)}
             placeholder='Search "milk", "bananas", "chips"…'
             className="w-full rounded-xl border bg-secondary/40 py-3 pl-9 pr-3 text-sm outline-none focus:bg-background focus:ring-focus"
           />
