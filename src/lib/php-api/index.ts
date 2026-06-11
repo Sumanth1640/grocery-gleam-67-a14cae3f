@@ -45,26 +45,37 @@ async function request<T>(path: string, method: Method = "GET", body?: unknown):
   for (const base of baseCandidates()) {
     const url = `${base}${path}`;
     tried.push(url);
+    let res: Response;
     try {
-      const res = await fetch(url, {
+      res = await fetch(url, {
         method,
         headers,
         body: body !== undefined ? JSON.stringify(body) : undefined,
       });
-
-      const text = await res.text();
-      let data: unknown = null;
-      try {
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        throw new Error(`Invalid JSON from ${url}: ${text.slice(0, 120)}`);
-      }
-
-      if (!res.ok) throw new Error((data as { error?: string })?.error ?? `HTTP ${res.status}`);
-      return data as T;
     } catch (error) {
+      // Network / DNS / CORS failure — try next base candidate.
       lastError = error;
+      continue;
     }
+
+    const text = await res.text();
+    let data: unknown = null;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // Non-JSON response (e.g. raw PHP error HTML) — try next base.
+        lastError = new Error(`Invalid JSON from ${url}: ${text.slice(0, 120)}`);
+        continue;
+      }
+    }
+
+    if (!res.ok) {
+      // Server replied with a clean JSON error — surface it directly.
+      const msg = (data as { error?: string })?.error ?? `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    return data as T;
   }
 
   throw new Error(
