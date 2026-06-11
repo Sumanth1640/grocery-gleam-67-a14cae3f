@@ -8,7 +8,7 @@ import { cartStore } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
 import { USE_PHP } from "@/lib/dual-api";
 import type { Product } from "@/lib/catalog-types";
-import { ChevronLeft, CheckCircle2, Loader2, MapPin, Package, Phone, Repeat, Truck, XCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Download, Loader2, MapPin, Package, Phone, Repeat, Truck, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
@@ -222,6 +222,13 @@ export function MobileOrderDetail({ id }: { id: string }) {
       {/* Sticky actions */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-100 bg-white/95 px-5 py-3 backdrop-blur">
         <div className="flex gap-2">
+          <Link
+            to="/orders/$id/invoice"
+            params={{ id: order.id }}
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-zinc-100 py-3 text-sm font-bold text-zinc-900"
+          >
+            <Download className="h-4 w-4" /> Invoice
+          </Link>
           {canCancel && (
             <button
               onClick={() => {
