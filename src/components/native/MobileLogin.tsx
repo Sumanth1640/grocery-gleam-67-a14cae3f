@@ -22,14 +22,16 @@ export function MobileLogin({ redirect }: { redirect: string }) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+  const resolveDest = async (fallback: string) => {
+    try {
+      const role = USE_PHP ? await php.checkRole() : await isAdminFn();
+      if (role?.isAdmin || role?.isWarehouseManager) return "/admin";
+    } catch { /* ignore */ }
+    return fallback || "/";
+  };
+
+  useEffect(() => {
     let active = true;
-    const resolveDest = async (fallback: string) => {
-      try {
-        const role = USE_PHP ? await php.checkRole() : await isAdminFn();
-        if (role?.isAdmin || role?.isWarehouseManager) return "/admin";
-      } catch { /* ignore */ }
-      return fallback || "/";
-    };
     if (USE_PHP) {
       if (phpAuth.get()) {
         void resolveDest(redirect).then((d) => { if (active) navigate({ to: d, replace: true }); });
@@ -42,6 +44,7 @@ export function MobileLogin({ redirect }: { redirect: string }) {
       if (active) navigate({ to: d, replace: true });
     });
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, redirect]);
 
   const submit = async (e: FormEvent) => {
