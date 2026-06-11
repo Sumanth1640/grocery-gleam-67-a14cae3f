@@ -192,10 +192,10 @@ type KOTOrder = {
 
 function printKOT(x: KOTOrder) {
   const items = Array.isArray(x.items) ? x.items : [];
-  const rows = items.map((it) => `
+  const rows = items.map((it: any) => `
     <tr>
-      <td style="padding:4px 0;font-weight:700;width:38px;">${it.qty}×</td>
-      <td style="padding:4px 0;">${escapeHtml(it.name)}</td>
+      <td style="padding:4px 0;font-weight:700;width:38px;">${it?.qty ?? 1}×</td>
+      <td style="padding:4px 0;">${escapeHtml(it?.product?.name ?? it?.name ?? "Item")}</td>
     </tr>`).join("");
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>KOT #${x.id.slice(0, 8)}</title>
     <style>
