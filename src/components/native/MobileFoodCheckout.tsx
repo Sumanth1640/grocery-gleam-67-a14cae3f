@@ -103,12 +103,14 @@ export function MobileFoodCheckout({ couponCode }: { couponCode?: string }) {
   }, [savedAddrs, pickedSavedId, addingNew]);
 
   const restaurantId = totals.items[0]?.restaurantId;
+  const customerPincode = (address.pincode ?? "").replace(/\D+/g, "");
   const outletQ = useQuery({
-    queryKey: ["resolve-outlet", restaurantId],
-    queryFn: () => dualApi.resolveOutlet(restaurantId!),
+    queryKey: ["resolve-outlet", restaurantId, customerPincode],
+    queryFn: () => dualApi.resolveOutlet(restaurantId!, null, null, customerPincode || null),
     enabled: !!restaurantId,
     staleTime: 60_000,
   });
+
   const outlet = (outletQ.data as { outlet?: { id: string; name: string; area?: string | null; pincode?: string | null; eta_mins?: number } } | undefined)?.outlet;
   const eta = outlet?.eta_mins ?? 30;
 
