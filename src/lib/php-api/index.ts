@@ -456,6 +456,7 @@ export const php = {
 
     // partners (restaurant partner accounts overview)
     listPartners: (_p?: unknown) => request<any[]>("/admin/partners/list.php"),
+    getPartner:   (p: { id: string }) => request<any>(`/admin/partners/get.php?id=${encodeURIComponent(p.id)}`),
 
 
   },
