@@ -65,7 +65,7 @@ function notify_warehouse_managers_for_order(?string $warehouse_id, int $total, 
   } catch (Throwable $e) { /* ignore notification failures */ }
 }
 
-function notify_partner_for_order(?string $restaurant_id, int $total, string $order_id): void {
+function notify_partner_for_order(?string $restaurant_id, int $total, string $order_id, ?string $outlet_id = null): void {
   if (!$restaurant_id) return;
   try {
     $st = db()->prepare('SELECT owner_id, name FROM partner_restaurants WHERE id=?');
@@ -78,10 +78,16 @@ function notify_partner_for_order(?string $restaurant_id, int $total, string $or
         'A customer placed an order of ₹'.$total.' at '.($row['name'] ?? 'your restaurant').'.',
         '/partner/orders');
     }
-    // Also notify outlet managers for this restaurant.
+    // Notify outlet managers — ONLY those assigned to the resolved outlet.
     try {
-      $m = db()->prepare('SELECT DISTINCT user_id FROM partner_outlet_managers WHERE restaurant_id=?');
-      $m->execute([$restaurant_id]);
+      if ($outlet_id) {
+        $m = db()->prepare('SELECT DISTINCT user_id FROM partner_outlet_managers WHERE restaurant_id=? AND outlet_id=?');
+        $m->execute([$restaurant_id, $outlet_id]);
+      } else {
+        // No outlet resolved → fall back to all managers for the restaurant.
+        $m = db()->prepare('SELECT DISTINCT user_id FROM partner_outlet_managers WHERE restaurant_id=?');
+        $m->execute([$restaurant_id]);
+      }
       foreach ($m->fetchAll(PDO::FETCH_COLUMN) as $mgrId) {
         notify_user($mgrId, 'order', 'New order received',
           'A customer placed an order of ₹'.$total.'.', '/outlet/orders');
