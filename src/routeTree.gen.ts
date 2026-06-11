@@ -72,6 +72,7 @@ import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin/categories'
 import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authenticated/admin/banners'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
+import { Route as AuthenticatedAdminPartnersIndexRouteImport } from './routes/_authenticated/admin/partners.index'
 import { Route as AuthenticatedOrdersIdInvoiceRouteImport } from './routes/_authenticated/orders.$id.invoice'
 import { Route as AuthenticatedAdminPartnersIdRouteImport } from './routes/_authenticated/admin/partners.$id'
 
@@ -420,6 +421,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPartnersIndexRoute =
+  AuthenticatedAdminPartnersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminPartnersRoute,
+  } as any)
 const AuthenticatedOrdersIdInvoiceRoute =
   AuthenticatedOrdersIdInvoiceRouteImport.update({
     id: '/invoice',
@@ -498,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/partner/': typeof AuthenticatedPartnerIndexRoute
   '/admin/partners/$id': typeof AuthenticatedAdminPartnersIdRoute
   '/orders/$id/invoice': typeof AuthenticatedOrdersIdInvoiceRoute
+  '/admin/partners/': typeof AuthenticatedAdminPartnersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -534,7 +542,6 @@ export interface FileRoutesByTo {
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/offer-tiles': typeof AuthenticatedAdminOfferTilesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
-  '/admin/partners': typeof AuthenticatedAdminPartnersRouteWithChildren
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/refunds': typeof AuthenticatedAdminRefundsRoute
   '/admin/refunds-verify': typeof AuthenticatedAdminRefundsVerifyRoute
@@ -561,6 +568,7 @@ export interface FileRoutesByTo {
   '/partner': typeof AuthenticatedPartnerIndexRoute
   '/admin/partners/$id': typeof AuthenticatedAdminPartnersIdRoute
   '/orders/$id/invoice': typeof AuthenticatedOrdersIdInvoiceRoute
+  '/admin/partners': typeof AuthenticatedAdminPartnersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -629,6 +637,7 @@ export interface FileRoutesById {
   '/_authenticated/partner/': typeof AuthenticatedPartnerIndexRoute
   '/_authenticated/admin/partners/$id': typeof AuthenticatedAdminPartnersIdRoute
   '/_authenticated/orders/$id/invoice': typeof AuthenticatedOrdersIdInvoiceRoute
+  '/_authenticated/admin/partners/': typeof AuthenticatedAdminPartnersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -697,6 +706,7 @@ export interface FileRouteTypes {
     | '/partner/'
     | '/admin/partners/$id'
     | '/orders/$id/invoice'
+    | '/admin/partners/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -733,7 +743,6 @@ export interface FileRouteTypes {
     | '/admin/inventory'
     | '/admin/offer-tiles'
     | '/admin/orders'
-    | '/admin/partners'
     | '/admin/products'
     | '/admin/refunds'
     | '/admin/refunds-verify'
@@ -760,6 +769,7 @@ export interface FileRouteTypes {
     | '/partner'
     | '/admin/partners/$id'
     | '/orders/$id/invoice'
+    | '/admin/partners'
   id:
     | '__root__'
     | '/'
@@ -827,6 +837,7 @@ export interface FileRouteTypes {
     | '/_authenticated/partner/'
     | '/_authenticated/admin/partners/$id'
     | '/_authenticated/orders/$id/invoice'
+    | '/_authenticated/admin/partners/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1298,6 +1309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/partners/': {
+      id: '/_authenticated/admin/partners/'
+      path: '/'
+      fullPath: '/admin/partners/'
+      preLoaderRoute: typeof AuthenticatedAdminPartnersIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminPartnersRoute
+    }
     '/_authenticated/orders/$id/invoice': {
       id: '/_authenticated/orders/$id/invoice'
       path: '/invoice'
@@ -1317,11 +1335,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminPartnersRouteChildren {
   AuthenticatedAdminPartnersIdRoute: typeof AuthenticatedAdminPartnersIdRoute
+  AuthenticatedAdminPartnersIndexRoute: typeof AuthenticatedAdminPartnersIndexRoute
 }
 
 const AuthenticatedAdminPartnersRouteChildren: AuthenticatedAdminPartnersRouteChildren =
   {
     AuthenticatedAdminPartnersIdRoute: AuthenticatedAdminPartnersIdRoute,
+    AuthenticatedAdminPartnersIndexRoute: AuthenticatedAdminPartnersIndexRoute,
   }
 
 const AuthenticatedAdminPartnersRouteWithChildren =
