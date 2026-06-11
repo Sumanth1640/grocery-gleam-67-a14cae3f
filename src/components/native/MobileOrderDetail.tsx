@@ -55,7 +55,7 @@ export function MobileOrderDetail({ id }: { id: string }) {
     full_name: string; phone: string; line1: string; line2?: string | null; city: string; pincode: string; type: string;
   } | undefined;
 
-  const cancelRpc = useDualFn(cancelOrder, async ({ data: d }: { data: { id: string } }) => php.cancelOrder(d.id));
+  const cancelRpc = useDualFn(cancelOrder, async (d: { id: string }) => php.cancelOrder(d.id));
   const cancelM = useMutation({
     mutationFn: () => cancelRpc({ data: { id } }),
     onSuccess: () => {
