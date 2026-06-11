@@ -34,6 +34,6 @@ notify_user($uid, 'order', 'Order placed',
 
 // ---------- Notify warehouse managers / partner ----------
 notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
-notify_partner_for_order($restaurantId, (int)$total, $id);
+notify_partner_for_order($restaurantId, (int)$total, $id, $outletId);
 
 json_ok(['id' => $id, 'created_at' => date('c'), 'status' => 'placed', 'warehouse_id' => $warehouseId, 'restaurant_id' => $restaurantId, 'outlet_id' => $outletId], 201);

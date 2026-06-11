@@ -47,6 +47,6 @@ notify_user($uid, 'order', 'Order placed',
   'Your order of ₹'.$total.' has been placed successfully.',
   '/orders/'.$id);
 notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
-notify_partner_for_order($restaurantId, (int)$total, $id);
+notify_partner_for_order($restaurantId, (int)$total, $id, $outletId);
 
 json_ok(['id' => $id, 'created_at' => date('c'), 'warehouse_id' => $warehouseId, 'restaurant_id' => $restaurantId], 201);
