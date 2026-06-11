@@ -147,7 +147,8 @@ function AdminPartnersPage() {
                   <td className="px-4 py-3 text-right tabular-nums">{p.commission_rate}%</td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      to="/admin/restaurants"
+                      to="/admin/partners/$id"
+                      params={{ id: p.restaurant_id }}
                       className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold hover:bg-secondary"
                     >
                       Manage <ExternalLink className="h-3 w-3" />
