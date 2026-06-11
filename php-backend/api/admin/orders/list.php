@@ -7,7 +7,8 @@ $where = ''; $params = [];
 if (!$is_admin) {
   if (empty($wh_ids)) json_ok([]);
   $ph = implode(',', array_fill(0, count($wh_ids), '?'));
-  $where = "WHERE o.warehouse_id IN ($ph)";
+  // Warehouse managers only see grocery orders for their warehouses — never restaurant orders.
+  $where = "WHERE o.warehouse_id IN ($ph) AND o.restaurant_id IS NULL";
   $params = $wh_ids;
 }
 $sql = "SELECT o.*, u.full_name, u.phone AS user_phone, u.email,
