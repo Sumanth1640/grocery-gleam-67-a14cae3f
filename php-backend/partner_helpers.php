@@ -3,6 +3,7 @@
 // Shared helpers for partner & outlet-manager endpoints
 // ============================================================
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/notification_helpers.php';
 
 function partner_my_restaurant(string $uid): ?array {
   $s = db()->prepare('SELECT * FROM partner_restaurants WHERE owner_id = ? LIMIT 1');
@@ -55,12 +56,6 @@ function decode_order_row(array $r): array {
   $r['delivery'] = (int)$r['delivery'];
   $r['total']    = (int)$r['total'];
   return $r;
-}
-
-function notify_user(string $user_id, string $kind, string $title, string $body, string $link): void {
-  $stmt = db()->prepare('INSERT INTO notifications (id, user_id, kind, title, body, link, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, NOW())');
-  try { $stmt->execute([uuid_v4(), $user_id, $kind, $title, $body, $link]); } catch (Throwable $e) { /* ignore */ }
 }
 
 function notify_admins(string $kind, string $title, string $body, string $link): void {
