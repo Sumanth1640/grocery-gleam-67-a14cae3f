@@ -76,6 +76,20 @@ async function request<T>(path: string, method: Method = "GET", body?: unknown):
 
 import type { Product, Category } from "@/lib/catalog-types";
 
+type PhpNotification = Record<string, unknown> & { is_read?: boolean; read?: boolean };
+
+async function safeNotifications(): Promise<{ items: PhpNotification[]; unread: number }> {
+  try {
+    const r = await request<{ items?: PhpNotification[]; unread?: number }>("/notifications/list.php");
+    const items = Array.isArray(r.items)
+      ? r.items.map((n) => ({ ...n, read: n.read ?? n.is_read ?? false }))
+      : [];
+    return { items, unread: Number(r.unread ?? items.filter((n) => !n.read).length) || 0 };
+  } catch {
+    return { items: [], unread: 0 };
+  }
+}
+
 export const php = {
   // Auth
   signup: (email: string, password: string) =>
@@ -162,13 +176,10 @@ export const php = {
   }) => request<{ deleted: number }>("/reviews/delete.php", "POST", payload),
 
   // Notifications
-  notifications: () =>
-    request<{ items: Array<Record<string, unknown>>; unread: number }>("/notifications/list.php"),
+  notifications: () => safeNotifications(),
   notificationsList: async () => {
-    const r = await request<{ items: Array<Record<string, unknown> & { is_read?: boolean }>; unread: number }>(
-      "/notifications/list.php",
-    );
-    return r.items.map((n) => ({ ...n, read: n.is_read ?? false }));
+    const r = await safeNotifications();
+    return r.items;
   },
   markNotificationRead: (payload?: { id?: string | null; all?: boolean }) =>
     request<{ updated: number }>("/notifications/mark_read.php", "POST", {

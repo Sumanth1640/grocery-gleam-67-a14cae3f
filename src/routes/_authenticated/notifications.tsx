@@ -36,19 +36,20 @@ function WebNotificationsPage() {
 
   const readOne = useMutation({
     mutationFn: (id: string) => readFn({ data: { id } }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["notifications"] }); qc.invalidateQueries({ queryKey: ["notifications-unread"] }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["notifications"] }); qc.invalidateQueries({ queryKey: ["notifications", "unread"] }); qc.invalidateQueries({ queryKey: ["notifications-unread"] }); },
   });
   const readAll = useMutation({
     mutationFn: () => readFn({ data: { all: true } }),
     onSuccess: () => {
       toast.success("All marked as read");
       qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["notifications", "unread"] });
       qc.invalidateQueries({ queryKey: ["notifications-unread"] });
     },
   });
   const del = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["notifications"] }); qc.invalidateQueries({ queryKey: ["notifications-unread"] }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["notifications"] }); qc.invalidateQueries({ queryKey: ["notifications", "unread"] }); qc.invalidateQueries({ queryKey: ["notifications-unread"] }); },
   });
 
   const items = data ?? [];

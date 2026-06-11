@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php, phpUploads } from "@/lib/php-api";
 
@@ -48,6 +48,8 @@ export const Route = createFileRoute("/_authenticated/orders/$id")({
 
 function OrderDetailPage() {
   const { id } = Route.useParams();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (pathname.endsWith("/invoice")) return <Outlet />;
   const isNative = useIsNative();
   if (isNative) return <MobileOrderDetail id={id} />;
   return <WebOrderDetailPage id={id} />;
