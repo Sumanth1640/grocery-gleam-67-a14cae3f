@@ -141,12 +141,17 @@ function PartnerOrdersPage() {
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Items</div>
                     <ul className="mt-1 text-sm">
-                      {items.map((it, i) => (
-                        <li key={i} className="flex justify-between">
-                          <span>{it.qty}× {it.name}</span>
-                          <span className="text-muted-foreground">₹{it.price * it.qty}</span>
-                        </li>
-                      ))}
+                      {items.map((it: any, i) => {
+                        const name = it?.product?.name ?? it?.name ?? "Item";
+                        const price = Number(it?.product?.price ?? it?.price ?? 0);
+                        const qty = Number(it?.qty ?? 1);
+                        return (
+                          <li key={i} className="flex justify-between">
+                            <span>{qty}× {name}</span>
+                            <span className="text-muted-foreground">₹{price * qty}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                   <div>

@@ -17,4 +17,8 @@ if (!$ids) json_ok([]);
 $in = implode(',', array_fill(0, count($ids), '?'));
 $o = db()->prepare("SELECT * FROM orders WHERE outlet_id IN ($in) ORDER BY created_at DESC LIMIT 100");
 $o->execute($ids);
-json_ok(array_map('decode_order_row', $o->fetchAll()));
+$rows = array_map('decode_order_row', $o->fetchAll());
+foreach ($rows as &$r) {
+  if (isset($r['created_at'])) $r['created_at'] = to_iso_utc($r['created_at']);
+}
+json_ok($rows);
