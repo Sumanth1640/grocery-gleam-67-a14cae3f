@@ -36,9 +36,11 @@ if (!is_array($address))                       json_error('address required');
 if (!in_array($payment, ['upi','card'], true)) json_error('invalid payment');
 if (!is_int($subtotal) || !is_int($total))    json_error('subtotal/total must be integers');
 
-$warehouseId  = resolve_warehouse_id_for_address($address);
 $restaurantId = isset($order['restaurant_id']) && is_string($order['restaurant_id']) && $order['restaurant_id'] !== '' ? $order['restaurant_id'] : null;
 $outletId     = isset($order['outlet_id']) && is_string($order['outlet_id']) && $order['outlet_id'] !== '' ? $order['outlet_id'] : null;
+// Restaurant orders must NEVER carry a warehouse_id (would leak food orders
+// into warehouse-manager dashboards / notifications).
+$warehouseId  = $restaurantId ? null : resolve_warehouse_id_for_address($address);
 
 $id = uuid_v4();
 insert_order_row($id, $uid, $warehouseId, $restaurantId, $outletId, $items, $address, $payment, (int)$subtotal, (int)$delivery, (int)$total, 'paid');
@@ -46,7 +48,9 @@ insert_order_row($id, $uid, $warehouseId, $restaurantId, $outletId, $items, $add
 notify_user($uid, 'order', 'Order placed',
   'Your order of ₹'.$total.' has been placed successfully.',
   '/orders/'.$id);
-notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
+if (!$restaurantId) {
+  notify_warehouse_managers_for_order($warehouseId, (int)$total, $id);
+}
 notify_partner_for_order($restaurantId, (int)$total, $id, $outletId);
 
 json_ok(['id' => $id, 'created_at' => date('c'), 'warehouse_id' => $warehouseId, 'restaurant_id' => $restaurantId], 201);
