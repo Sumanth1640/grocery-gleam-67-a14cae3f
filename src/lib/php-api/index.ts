@@ -454,6 +454,10 @@ export const php = {
     saveFurniturePromo:    (p: any) => request<any>("/admin/furniture/promo_save.php", "POST", p),
     deleteFurniturePromo:  (p: { id: string }) => request<{ ok: true }>("/admin/furniture/promo_delete.php", "POST", p),
 
+    // partners (restaurant partner accounts overview)
+    listPartners: (_p?: unknown) => request<any[]>("/admin/partners/list.php"),
+
+
   },
 };
 

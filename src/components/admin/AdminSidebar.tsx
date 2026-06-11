@@ -28,6 +28,7 @@ const items = [
   { to: "/admin/refunds", label: "Refunds", icon: ReceiptText, exact: false, adminOnly: true },
   { to: "/admin/customers", label: "Customers", icon: Users, exact: false, adminOnly: true },
   { to: "/admin/restaurants", label: "Restaurants", icon: UtensilsCrossed, exact: false, adminOnly: true },
+  { to: "/admin/partners", label: "Partners", icon: Users, exact: false, adminOnly: true },
   { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse, exact: false, adminOnly: true },
   { to: "/admin/team", label: "Team & Roles", icon: ShieldCheck, exact: false, adminOnly: true },
   { to: "/admin/coupons", label: "Coupons", icon: TicketPercent, exact: false, adminOnly: true },
