@@ -108,15 +108,17 @@ function FoodCheckoutPage() {
   const saveAddressRpc = useDualFn(createAddress, (d) => php.addAddress(d));
   const createRpOrderRpc = useDualFn(createRazorpayOrder, (d: any) => php.createRazorpayOrder(d.amount));
   const verifyAndPlaceRpc = useDualFn(verifyAndPlaceOrder, (d: any) => php.verifyAndPlaceOrder(d));
-  const resolveOutletRpc = useDualFn(resolveOutletForRestaurant, (d: any) => php.resolveOutlet(d.restaurant_id, d.lat, d.lng));
+  const resolveOutletRpc = useDualFn(resolveOutletForRestaurant, (d: any) => php.resolveOutlet(d.restaurant_id, d.lat, d.lng, d.pincode));
 
   const restaurantId = totals.items[0]?.restaurantId;
+  const customerPincode = (address.pincode ?? "").replace(/\D+/g, "");
   const outletQ = useQuery({
-    queryKey: ["resolve-outlet", restaurantId],
-    queryFn: () => resolveOutletRpc({ data: { restaurant_id: restaurantId! } }),
+    queryKey: ["resolve-outlet", restaurantId, customerPincode],
+    queryFn: () => resolveOutletRpc({ data: { restaurant_id: restaurantId!, pincode: customerPincode || null } as any }),
     enabled: !!restaurantId,
     staleTime: 60_000,
   });
+
 
   if (totals.itemsCount === 0) {
     return (

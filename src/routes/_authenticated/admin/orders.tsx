@@ -40,7 +40,12 @@ type OrderRow = {
   created_at: string;
   warehouse_id?: string | null;
   warehouse?: { name: string; code: string } | null;
+  restaurant_id?: string | null;
+  restaurant?: { name: string } | null;
+  outlet_id?: string | null;
+  outlet?: { name: string; pincode?: string | null } | null;
 };
+
 
 const statusTint: Record<Status, string> = {
   placed: "bg-primary/10 text-primary",
@@ -164,11 +169,23 @@ function OrdersAdmin() {
                         >
                           🏬 {o.warehouse.code}
                         </span>
+                      ) : o.outlet ? (
+                        <span
+                          className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground"
+                          title={`${o.restaurant?.name ?? ""} · ${o.outlet.name}${o.outlet.pincode ? " · " + o.outlet.pincode : ""}`}
+                        >
+                          🍽️ {o.outlet.name}{o.outlet.pincode ? ` · ${o.outlet.pincode}` : ""}
+                        </span>
+                      ) : o.restaurant ? (
+                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground">
+                          🍽️ {o.restaurant.name}
+                        </span>
                       ) : (
                         <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
                           No warehouse
                         </span>
                       )}
+
                     </div>
                     <div className="mt-0.5 line-clamp-1 text-sm font-semibold">
                       {addr.full_name ?? "—"} · {items.length} item{items.length !== 1 ? "s" : ""}
@@ -204,10 +221,17 @@ function OrdersAdmin() {
                         <div className="mt-1 text-sm font-semibold">
                           {o.warehouse ? (
                             `${o.warehouse.name} (${o.warehouse.code})`
+                          ) : o.outlet || o.restaurant ? (
+                            <>
+                              {o.restaurant?.name ?? "Restaurant"}
+                              {o.outlet ? ` — ${o.outlet.name}` : ""}
+                              {o.outlet?.pincode ? ` (${o.outlet.pincode})` : ""}
+                            </>
                           ) : (
                             <span className="text-destructive">No warehouse assigned</span>
                           )}
                         </div>
+
                         <div className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                           Update status
                         </div>

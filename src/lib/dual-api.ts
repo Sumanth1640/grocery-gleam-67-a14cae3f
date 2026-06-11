@@ -197,11 +197,12 @@ export const dualApi = {
     return resolveWarehouseForPincode({ data: { pincode } });
   },
 
-  async resolveOutlet(restaurant_id: string, lat?: number | null, lng?: number | null) {
-    if (USE_PHP) return php.resolveOutlet(restaurant_id, lat, lng);
+  async resolveOutlet(restaurant_id: string, lat?: number | null, lng?: number | null, pincode?: string | null) {
+    if (USE_PHP) return php.resolveOutlet(restaurant_id, lat, lng, pincode);
     const { resolveOutletForRestaurant } = await import("@/lib/fulfillment.functions");
     return resolveOutletForRestaurant({ data: { restaurant_id, lat: lat ?? null, lng: lng ?? null } });
   },
+
 
   // ============ PAYMENTS ============
   async createRazorpayOrder(amount: number) {

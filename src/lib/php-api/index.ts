@@ -194,12 +194,13 @@ export const php = {
       "POST",
       { pincode },
     ),
-  resolveOutlet: (restaurant_id: string, lat?: number | null, lng?: number | null) =>
+  resolveOutlet: (restaurant_id: string, lat?: number | null, lng?: number | null, pincode?: string | null) =>
     request<{ outlet: { id: string; name: string; area: string | null; pincode: string | null; eta_mins: number | null } | null }>(
       "/fulfillment/resolve_outlet.php",
       "POST",
-      { restaurant_id, lat: lat ?? null, lng: lng ?? null },
+      { restaurant_id, lat: lat ?? null, lng: lng ?? null, pincode: pincode ?? null },
     ),
+
 
   // Partner (legacy raw helpers — used by older code paths)
   partnerOrders: () => request<unknown[]>("/partner/orders.php"),
