@@ -21,7 +21,7 @@ export function MobileLogin({ redirect }: { redirect: string }) {
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
+  
   const resolveDest = async (fallback: string) => {
     try {
       const role = USE_PHP ? await php.checkRole() : await isAdminFn();
