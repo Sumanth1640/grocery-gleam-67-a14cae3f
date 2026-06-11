@@ -66,10 +66,16 @@ export function AdminOrderAlerts() {
         invalidateAll();
         try {
           const rows = (await php.admin.listOrders()) as Array<{ id: string; total: number; created_at: string }>;
-          if (!Array.isArray(rows) || rows.length === 0) return;
-          const fresh = rows.filter((r) => r.id && !seenIds.has(r.id));
-          rows.forEach((r) => { if (r.id) seenIds.add(r.id); });
-          if (!primed) { primed = true; return; }
+          const list = Array.isArray(rows) ? rows : [];
+          if (!primed) {
+            // Prime seen IDs from whatever exists right now (even if empty),
+            // so the FIRST genuinely new order after page load triggers a toast.
+            list.forEach((r) => { if (r.id) seenIds.add(r.id); });
+            primed = true;
+            return;
+          }
+          const fresh = list.filter((r) => r.id && !seenIds.has(r.id));
+          list.forEach((r) => { if (r.id) seenIds.add(r.id); });
           for (const r of fresh) {
             if (soundRef.current) playAlert("admin_order");
             toast.success(`New product order — ₹${r.total}`, {
