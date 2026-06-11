@@ -130,7 +130,7 @@ function WebOrderDetailPage({ id }: { id: string }) {
     navigate({ to: "/cart" });
   };
 
-  const cancelRpc = useDualFn(cancelOrder, async ({ data: d }: { data: { id: string } }) => php.cancelOrder(d.id));
+  const cancelRpc = useDualFn(cancelOrder, async (d: { id: string }) => php.cancelOrder(d.id));
   const cancelM = useMutation({
     mutationFn: () => cancelRpc({ data: { id } }),
     onSuccess: () => {
