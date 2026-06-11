@@ -83,8 +83,8 @@ function notify_partner_for_order(?string $restaurant_id, int $total, string $or
       $m = db()->prepare('SELECT DISTINCT user_id FROM partner_outlet_managers WHERE restaurant_id=?');
       $m->execute([$restaurant_id]);
       foreach ($m->fetchAll(PDO::FETCH_COLUMN) as $mgrId) {
-        notify_user($mgrId, 'order', 'New food order',
-          'A customer placed an order of ₹'.$total.'.', '/partner/orders');
+        notify_user($mgrId, 'order', 'New order received',
+          'A customer placed an order of ₹'.$total.'.', '/outlet/orders');
       }
     } catch (Throwable $e) { /* ignore */ }
   } catch (Throwable $e) { /* ignore */ }
