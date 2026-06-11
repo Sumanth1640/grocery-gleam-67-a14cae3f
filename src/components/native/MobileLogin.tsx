@@ -61,7 +61,8 @@ export function MobileLogin({ redirect }: { redirect: string }) {
         const { error } = await dualApi.signin(email.trim(), password);
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate({ to: redirect || "/" });
+        const dest = await resolveDest(redirect);
+        navigate({ to: dest });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
