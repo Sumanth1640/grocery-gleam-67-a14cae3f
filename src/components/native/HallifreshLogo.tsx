@@ -1,28 +1,18 @@
-import { Leaf } from "lucide-react";
+import logoAsset from "@/assets/hallifresh-logo.png.asset.json";
 
 /**
- * HalliFresh wordmark used in the native header and splash.
- * Swap the icon/text with an uploaded brand asset when ready.
+ * HalliFresh logo — official brand mark.
+ * Used in the native header and animated splash.
  */
 export function HallifreshLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const text =
-    size === "lg"
-      ? "text-4xl"
-      : size === "sm"
-      ? "text-base"
-      : "text-xl";
-  const icon =
-    size === "lg" ? "h-10 w-10" : size === "sm" ? "h-4 w-4" : "h-5 w-5";
-  const pad = size === "lg" ? "px-5 py-3" : "px-3 py-1.5";
+  const dim =
+    size === "lg" ? "h-40 w-40" : size === "sm" ? "h-8 w-8" : "h-14 w-14";
   return (
-    <div
-      className={`inline-flex items-center gap-2 rounded-full bg-[oklch(0.55_0.16_145)]/10 ${pad}`}
-      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-    >
-      <Leaf className={`${icon} text-[oklch(0.55_0.16_145)]`} strokeWidth={2.6} />
-      <span className={`${text} font-black tracking-tight text-zinc-900`}>
-        halli<span className="text-[oklch(0.55_0.16_145)]">fresh</span>
-      </span>
-    </div>
+    <img
+      src={logoAsset.url}
+      alt="HalliFresh"
+      className={`${dim} object-contain drop-shadow-sm`}
+      draggable={false}
+    />
   );
 }
