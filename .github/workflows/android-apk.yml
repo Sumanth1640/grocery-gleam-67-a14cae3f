@@ -125,7 +125,8 @@ jobs:
           );
           NODE
           npm install --no-save --no-audit --no-fund sharp
-          node /tmp/apply-logo.mjs
+          NODE_PATH="$(pwd)/node_modules" node /tmp/apply-logo.mjs
+
 
 
       - name: Verify APK target website
