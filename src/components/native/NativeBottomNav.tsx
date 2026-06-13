@@ -19,6 +19,7 @@ export function NativeBottomNav() {
   
 
   if (path.startsWith("/p/")) return null;
+  if (path === "/checkout" || path.startsWith("/checkout/") || path === "/food/checkout" || path.startsWith("/food/checkout/")) return null;
 
   const items = [
     { to: "/", icon: Home, label: "Home", match: (p: string) => p === "/" },
