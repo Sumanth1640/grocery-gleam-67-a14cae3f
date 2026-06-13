@@ -13,6 +13,10 @@ const SPA = process.env.BUILD_SPA === "1";
 export default defineConfig(
   SPA
     ? {
+        // Disable the Cloudflare/nitro deploy plugin for the static Hostinger
+        // build — otherwise Vite tries to bundle a Worker entry
+        // (`#tanstack-start-entry`) that doesn't exist in SPA mode.
+        nitro: false,
         tanstackStart: {
           spa: { enabled: true, prerender: { outputPath: "/index.html" } },
           server: { preset: "static" },
