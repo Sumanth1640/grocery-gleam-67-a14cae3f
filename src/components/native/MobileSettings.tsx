@@ -260,7 +260,7 @@ function ProfileBlock() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const initials = (data?.full_name || data?.email || "U")
+  const initials = (data?.full_name || user?.email || "U")
     .split(" ")
     .map((s: string) => s[0])
     .slice(0, 2)
