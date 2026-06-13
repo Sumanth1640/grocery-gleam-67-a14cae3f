@@ -27,25 +27,8 @@ const STATUS_COLOR: Record<string, string> = {
 export function MobileOrders() {
   const navigate = useNavigate();
   const fetchOrders = useDualFn(listOrders, () => php.myOrders());
-  const { session, user } = useAuth();
-  const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["orders"], queryFn: () => fetchOrders() });
 
-  useEffect(() => {
-    if (!user?.id) return;
-    if (!session?.access_token) {
-      const t = setInterval(() => qc.invalidateQueries({ queryKey: ["orders"] }), 15_000);
-      return () => clearInterval(t);
-    }
-    try { supabase.realtime.setAuth(session.access_token); } catch { /* ignore */ }
-    const ch = supabase
-      .channel(`user-orders-${user.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => {
-        qc.invalidateQueries({ queryKey: ["orders"] });
-      })
-      .subscribe();
-    return () => { void supabase.removeChannel(ch); };
-  }, [user?.id, session?.access_token, qc]);
 
   return (
     <div className="min-h-screen bg-white pb-32" style={FONT}>
