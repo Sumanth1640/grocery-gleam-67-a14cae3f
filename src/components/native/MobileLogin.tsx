@@ -2,8 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { dualApi, USE_PHP } from "@/lib/dual-api";
-import { phpAuth, php } from "@/lib/php-api";
-import { isAdmin as isAdminFn } from "@/lib/catalog.functions";
+import { phpAuth } from "@/lib/php-api";
 import { Eye, EyeOff, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,27 +20,16 @@ export function MobileLogin({ redirect }: { redirect: string }) {
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  
-  const resolveDest = async (fallback: string) => {
-    try {
-      const role = USE_PHP ? await php.checkRole() : await isAdminFn();
-      if (role?.isAdmin || role?.isWarehouseManager) return "/admin";
-    } catch { /* ignore */ }
-    return fallback || "/";
-  };
-
   useEffect(() => {
     let active = true;
+    const dest = redirect || "/";
     if (USE_PHP) {
-      if (phpAuth.get()) {
-        void resolveDest(redirect).then((d) => { if (active) navigate({ to: d, replace: true }); });
-      }
+      if (phpAuth.get() && active) navigate({ to: dest, replace: true });
       return () => { active = false; };
     }
-    supabase.auth.getSession().then(async ({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!active || !data.session) return;
-      const d = await resolveDest(redirect);
-      if (active) navigate({ to: d, replace: true });
+      navigate({ to: dest, replace: true });
     });
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,8 +52,7 @@ export function MobileLogin({ redirect }: { redirect: string }) {
         const { error } = await dualApi.signin(email.trim(), password);
         if (error) throw error;
         toast.success("Welcome back!");
-        const dest = await resolveDest(redirect);
-        navigate({ to: dest });
+        navigate({ to: redirect || "/" });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
