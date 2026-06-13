@@ -1,11 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
 import { listOrders } from "@/lib/account.functions";
-import { useAuth } from "@/lib/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, Loader2, Package } from "lucide-react";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
