@@ -59,7 +59,7 @@ export async function initNativeNotifications() {
     }
 
     // Forward taps to subscribers
-    await plugin.addListener("localNotificationActionPerformed", (event) => {
+    await plugin.addListener("localNotificationActionPerformed", (event: any) => {
       const extra = event.notification?.extra as Record<string, unknown> | undefined;
       listeners.forEach((fn) => fn(extra));
     });
