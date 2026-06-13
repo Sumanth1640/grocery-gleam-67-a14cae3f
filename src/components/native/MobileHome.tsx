@@ -8,7 +8,6 @@ import { foodCartStore } from "@/lib/food-cart-store";
 import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 import { NativeAddressPicker } from "@/components/native/NativeAddressPicker";
 import { NativeFurniturePromos } from "@/components/native/NativeFurniturePromos";
-import { HallifreshLogo } from "@/components/native/HallifreshLogo";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
 
