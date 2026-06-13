@@ -232,6 +232,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 }
 
 function ProfileBlock() {
+  const { user } = useAuth();
   const fetchProfile = useDualFn(getProfile, () => php.getProfile());
   const updateFn = useDualFn(updateProfile, (d: any) => php.updateProfile(d));
   const qc = useQueryClient();
@@ -280,7 +281,7 @@ function ProfileBlock() {
               {isLoading ? "…" : data?.full_name || "Add your name"}
             </div>
             <div className="truncate text-[11px] font-semibold text-zinc-400">
-              {data?.email}
+              {user?.email}
             </div>
             {data?.phone && (
               <div className="truncate text-[11px] font-semibold text-zinc-400">
