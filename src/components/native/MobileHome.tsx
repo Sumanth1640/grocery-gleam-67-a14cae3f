@@ -8,7 +8,6 @@ import { foodCartStore } from "@/lib/food-cart-store";
 import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
 import { NativeAddressPicker } from "@/components/native/NativeAddressPicker";
 import { NativeFurniturePromos } from "@/components/native/NativeFurniturePromos";
-import { HallifreshLogo } from "@/components/native/HallifreshLogo";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
 
@@ -32,10 +31,8 @@ export function MobileHome() {
     <div className="min-h-screen bg-white pb-36" style={FONT}>
       {/* Header */}
       <header className="px-6 pt-10 pb-3">
-        {/* Centered logo */}
-        <div className="mb-4 flex justify-center">
-          <HallifreshLogo size="md" />
-        </div>
+
+
 
         <div className="flex items-center justify-between">
           <NativeAddressPicker />
