@@ -54,7 +54,7 @@ jobs:
 
       - name: Apply HalliFresh logo to Android splash and launcher icons
         run: |
-          cat > /tmp/apply-logo.mjs <<'NODE'
+          cat > apply-logo.mjs <<'NODE'
           import fs from 'fs/promises';
           import path from 'path';
           import sharp from 'sharp';
@@ -125,7 +125,8 @@ jobs:
           );
           NODE
           npm install --no-save --no-audit --no-fund sharp
-          NODE_PATH="$(pwd)/node_modules" node /tmp/apply-logo.mjs
+          node apply-logo.mjs
+          rm -f apply-logo.mjs
 
 
 
