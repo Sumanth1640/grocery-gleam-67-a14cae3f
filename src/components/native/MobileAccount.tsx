@@ -7,6 +7,7 @@ import {
   LogOut,
   MapPin,
   Package,
+  Settings,
   Shield,
   Store,
   User as UserIcon,
