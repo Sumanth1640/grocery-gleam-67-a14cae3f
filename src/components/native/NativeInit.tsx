@@ -85,6 +85,65 @@ export function NativeInit() {
           }
         });
         cleanups.push(() => urlHandle.remove());
+
+        // ---- Local notifications (native only) ----
+        await initNativeNotifications();
+
+        // Tap a notification -> route to the relevant page if extra.route is set
+        cleanups.push(
+          onNotificationTap((extra) => {
+            const route = (extra?.route as string | undefined) ?? "/notifications";
+            try {
+              window.location.assign(route);
+            } catch {
+              // ignore
+            }
+          }),
+        );
+
+        // Fire a notification whenever a new order is placed
+        let lastOrderId: string | null = orderStore.getSnapshot()?.id ?? null;
+        const unsubOrder = orderStore.subscribe(() => {
+          const o = orderStore.getSnapshot();
+          if (!o || o.id === lastOrderId) return;
+          lastOrderId = o.id;
+          notify({
+            title: "Order placed 🎉",
+            body: `Order #${o.id.slice(-6).toUpperCase()} • ₹${o.total} • ETA ${o.eta}`,
+            extra: { route: "/orders" },
+          });
+        });
+        cleanups.push(unsubOrder);
+
+        // Subscribe to backend notifications (order status, offers, reminders)
+        const { data: userData } = await supabase.auth.getUser();
+        const uid = userData.user?.id;
+        if (uid) {
+          const channel = supabase
+            .channel(`native-notifications-${uid}`)
+            .on(
+              "postgres_changes",
+              { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${uid}` },
+              (payload) => {
+                const row = payload.new as {
+                  title?: string;
+                  body?: string;
+                  message?: string;
+                  type?: string;
+                  data?: Record<string, unknown>;
+                };
+                notify({
+                  title: row.title ?? "Hallifresh",
+                  body: row.body ?? row.message ?? "",
+                  extra: { route: "/notifications", ...(row.data ?? {}) },
+                });
+              },
+            )
+            .subscribe();
+          cleanups.push(() => {
+            supabase.removeChannel(channel);
+          });
+        }
       } catch {
         // not a native shell — ignore
       }
