@@ -3,7 +3,6 @@ import { Heart, Home, ShoppingBag, User, Utensils } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
-import { useAuth } from "@/lib/use-auth";
 
 /**
  * Premium dark-dock bottom navigation used in the Capacitor native shell.
@@ -17,7 +16,7 @@ export function NativeBottomNav() {
   const { itemsCount } = cartTotals(cart);
   const foodCount = foodCartTotals(foodCart).itemsCount;
   const wishCount = Object.keys(wishlist).length;
-  const { user } = useAuth();
+  
 
   if (path.startsWith("/p/")) return null;
 
@@ -27,10 +26,10 @@ export function NativeBottomNav() {
     { to: "/wishlist", icon: Heart, label: "Wish", match: (p: string) => p.startsWith("/wishlist"), badge: wishCount },
     { to: "/cart", icon: ShoppingBag, label: "Cart", match: (p: string) => p.startsWith("/cart"), badge: itemsCount },
     {
-      to: user ? "/account" : "/login",
+      to: "/settings",
       icon: User,
       label: "Me",
-      match: (p: string) => p.startsWith("/account") || p.startsWith("/login"),
+      match: (p: string) => p.startsWith("/settings") || p.startsWith("/account") || p.startsWith("/login"),
     },
   ] as const;
 
