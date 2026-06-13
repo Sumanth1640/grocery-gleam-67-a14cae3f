@@ -21,6 +21,28 @@ if (!in_array($type, ['Home','Work','Other'], true)) $type = 'Home';
 $pdo = db();
 $pdo->beginTransaction();
 try {
+  // Dedupe: if the same user already has an address with matching
+  // line1 + pincode + phone, return that id instead of inserting a duplicate.
+  // This protects against the checkout "save address" running on every order.
+  $dup = $pdo->prepare('
+    SELECT id FROM addresses
+     WHERE user_id = ? AND line1 = ? AND pincode = ? AND phone = ?
+     LIMIT 1
+  ');
+  $dup->execute([$uid, $line1, $pincode, $phone]);
+  $existingId = $dup->fetchColumn();
+
+  if ($existingId) {
+    // Optionally bump it to default if the client asked for that.
+    if ($is_default) {
+      $pdo->prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?')->execute([$uid]);
+      $pdo->prepare('UPDATE addresses SET is_default = 1 WHERE id = ? AND user_id = ?')
+          ->execute([$existingId, $uid]);
+    }
+    $pdo->commit();
+    json_ok(['id' => $existingId, 'deduped' => 1], 200);
+  }
+
   if ($is_default) {
     $pdo->prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?')->execute([$uid]);
   }
