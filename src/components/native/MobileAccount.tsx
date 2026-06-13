@@ -7,6 +7,7 @@ import {
   LogOut,
   MapPin,
   Package,
+  Settings,
   Shield,
   Store,
   User as UserIcon,
@@ -92,6 +93,8 @@ export function MobileAccount() {
 
         <MenuGroup>
           <MenuItem to="/settings" icon={UserIcon} label="Edit profile" />
+          <MenuItem to="/settings" icon={Settings} label="Settings" sub="Preferences, notifications, language" />
+          <MenuItem to="/help" icon={Bell} label="Help & support" />
         </MenuGroup>
 
         <button
