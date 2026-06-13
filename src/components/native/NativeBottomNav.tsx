@@ -26,10 +26,10 @@ export function NativeBottomNav() {
     { to: "/wishlist", icon: Heart, label: "Wish", match: (p: string) => p.startsWith("/wishlist"), badge: wishCount },
     { to: "/cart", icon: ShoppingBag, label: "Cart", match: (p: string) => p.startsWith("/cart"), badge: itemsCount },
     {
-      to: "/settings",
+      to: "/account",
       icon: User,
       label: "Me",
-      match: (p: string) => p.startsWith("/settings") || p.startsWith("/account") || p.startsWith("/login"),
+      match: (p: string) => p.startsWith("/account") || p.startsWith("/settings") || p.startsWith("/login"),
     },
   ] as const;
 
