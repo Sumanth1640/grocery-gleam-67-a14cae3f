@@ -78,7 +78,7 @@ export function MobileAccount() {
       <div className="mt-5 space-y-3 px-5">
         <MenuGroup>
           <MenuItem to="/orders" icon={Package} label="My orders" sub={`${orderCount} order${orderCount === 1 ? "" : "s"}`} />
-          <MenuItem to="/account" icon={MapPin} label="Saved addresses" sub="Home, Work…" />
+          <MenuItem to="/settings" icon={MapPin} label="Saved addresses" sub="Home, Work…" />
           <MenuItem to="/wishlist" icon={Heart} label="Wishlist" />
           <MenuItem to="/notifications" icon={Bell} label="Notifications" />
         </MenuGroup>
@@ -91,7 +91,7 @@ export function MobileAccount() {
         )}
 
         <MenuGroup>
-          <MenuItem to="/account" icon={UserIcon} label="Edit profile" />
+          <MenuItem to="/settings" icon={UserIcon} label="Edit profile" />
         </MenuGroup>
 
         <button
