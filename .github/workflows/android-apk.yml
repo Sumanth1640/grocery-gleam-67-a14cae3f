@@ -54,10 +54,11 @@ jobs:
 
       - name: Apply HalliFresh logo to Android splash and launcher icons
         run: |
-          node - <<'NODE'
-          const fs = require('fs/promises');
-          const path = require('path');
-          const sharp = require('sharp');
+          cat > /tmp/apply-logo.mjs <<'NODE'
+          import fs from 'fs/promises';
+          import path from 'path';
+          import sharp from 'sharp';
+
 
           const logo = path.resolve('public/hallifresh-logo.png');
           const res = path.resolve('android/app/src/main/res');
