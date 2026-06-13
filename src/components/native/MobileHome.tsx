@@ -1,11 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Bell, ChevronDown, MapPin, Plus, Search, Sparkles, Star, Clock } from "lucide-react";
+import { Bell, Plus, Search, Sparkles, Star, Clock } from "lucide-react";
 import { dualApi } from "@/lib/dual-api";
 import { cartStore } from "@/lib/cart-store";
 import { foodCartStore } from "@/lib/food-cart-store";
 import { NativeBannerCarousel } from "@/components/native/NativeBannerCarousel";
+import { NativeAddressPicker } from "@/components/native/NativeAddressPicker";
+import { HallifreshLogo } from "@/components/native/HallifreshLogo";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
 
@@ -29,21 +31,13 @@ export function MobileHome() {
     <div className="min-h-screen bg-white pb-36" style={FONT}>
       {/* Header */}
       <header className="px-6 pt-10 pb-3">
+        {/* Centered logo */}
+        <div className="mb-4 flex justify-center">
+          <HallifreshLogo size="md" />
+        </div>
+
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.55_0.16_145)]/10 text-[oklch(0.55_0.16_145)]">
-              <MapPin className="h-4 w-4" strokeWidth={2.5} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 leading-none mb-1">
-                Deliver to
-              </p>
-              <p className="flex items-center gap-1 text-xs font-extrabold text-zinc-900">
-                Bengaluru, India
-                <ChevronDown className="h-3 w-3 text-[oklch(0.55_0.16_145)]" strokeWidth={2.5} />
-              </p>
-            </div>
-          </div>
+          <NativeAddressPicker />
           <Link
             to="/notifications"
             aria-label="Notifications"
@@ -52,6 +46,7 @@ export function MobileHome() {
             <Bell className="h-5 w-5 text-zinc-600" strokeWidth={2} />
           </Link>
         </div>
+
 
         {/* Search */}
         <form
@@ -109,9 +104,9 @@ export function MobileHome() {
                     className="flex shrink-0 flex-col items-center gap-2"
                   >
                     <div
-                      className={`grid h-16 w-16 place-items-center overflow-hidden rounded-3xl border shadow-sm ${tints[i % tints.length]}`}
+                      className={`h-16 w-16 overflow-hidden rounded-3xl border shadow-sm ${tints[i % tints.length]}`}
                     >
-                      <img src={c.image} alt="" className="h-10 w-10 object-cover" />
+                      <img src={c.image} alt="" className="h-full w-full object-cover" />
                     </div>
                     <span className="text-[11px] font-bold text-zinc-700">{c.name}</span>
                   </Link>
