@@ -24,11 +24,6 @@ export default defineConfig(
         vite: {
           build: {
             manifest: true,
-            rollupOptions: {
-              // Capacitor native plugins are only present inside the Android
-              // wrapper; exclude them from the web/SPA bundle.
-              external: [/^@capacitor\//],
-            },
           },
         },
       }

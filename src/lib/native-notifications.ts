@@ -22,9 +22,10 @@ async function getPlugin() {
   try {
     const { Capacitor } = await import("@capacitor/core");
     if (!Capacitor.isNativePlatform()) return null;
-    const mod = await import(/* @vite-ignore */ ("@capacitor/local-notifications" as string));
+    const mod = await import("@capacitor/local-notifications");
     return mod.LocalNotifications;
-  } catch {
+  } catch (e) {
+    console.warn("[native-notifications] plugin load failed", e);
     return null;
   }
 }
