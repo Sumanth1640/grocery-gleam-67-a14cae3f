@@ -15,15 +15,46 @@ type NotifyOptions = {
   extra?: Record<string, unknown>;
 };
 
+type PermissionState = "prompt" | "prompt-with-rationale" | "granted" | "denied";
+type LocalNotificationsPlugin = {
+  checkPermissions: () => Promise<{ display: PermissionState }>;
+  requestPermissions: () => Promise<{ display: PermissionState }>;
+  createChannel: (options: {
+    id: string;
+    name: string;
+    description?: string;
+    importance?: number;
+    visibility?: number;
+    sound?: string;
+    vibration?: boolean;
+    lights?: boolean;
+  }) => Promise<void>;
+  addListener: (
+    eventName: "localNotificationActionPerformed",
+    listenerFunc: (event: { notification?: { extra?: Record<string, unknown> } }) => void,
+  ) => Promise<{ remove: () => Promise<void> }>;
+  schedule: (options: {
+    notifications: Array<{
+      id: number;
+      title: string;
+      body: string;
+      channelId?: string;
+      smallIcon?: string;
+      schedule?: { at: Date; allowWhileIdle?: boolean };
+      extra?: Record<string, unknown>;
+    }>;
+  }) => Promise<void>;
+  cancel: (options: { notifications: Array<{ id: number }> }) => Promise<void>;
+};
+
 let permissionGranted: boolean | null = null;
 const listeners: Array<(payload: Record<string, unknown> | undefined) => void> = [];
 
 async function getPlugin() {
   try {
-    const { Capacitor } = await import("@capacitor/core");
+    const { Capacitor, registerPlugin } = await import("@capacitor/core");
     if (!Capacitor.isNativePlatform()) return null;
-    const mod = await import("@capacitor/local-notifications");
-    return mod.LocalNotifications;
+    return registerPlugin<LocalNotificationsPlugin>("LocalNotifications");
   } catch (e) {
     console.warn("[native-notifications] plugin load failed", e);
     return null;
@@ -60,7 +91,7 @@ export async function initNativeNotifications() {
     }
 
     // Forward taps to subscribers
-    await plugin.addListener("localNotificationActionPerformed", (event: any) => {
+    await plugin.addListener("localNotificationActionPerformed", (event) => {
       const extra = event.notification?.extra as Record<string, unknown> | undefined;
       listeners.forEach((fn) => fn(extra));
     });
