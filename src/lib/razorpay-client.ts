@@ -59,6 +59,43 @@ export function loadRazorpay(): Promise<void> {
 export async function openRazorpayCheckout(options: RazorpayOptions): Promise<void> {
   await loadRazorpay();
   if (!window.Razorpay) throw new Error("Razorpay unavailable");
-  const rp = new window.Razorpay(options);
+
+  // Default: surface UPI (GPay / PhonePe / Paytm / BHIM) prominently,
+  // followed by cards, netbanking and wallets. Caller can override via
+  // `options.method` / `options.config`.
+  const merged: RazorpayOptions = {
+    ...options,
+    currency: options.currency || "INR",
+    method: options.method ?? {
+      upi: true,
+      card: true,
+      netbanking: true,
+      wallet: true,
+    },
+    config: options.config ?? {
+      display: {
+        blocks: {
+          upi_block: {
+            name: "Pay using UPI",
+            instruments: [
+              { method: "upi", flows: ["intent", "collect", "qr"] },
+            ],
+          },
+          other_block: {
+            name: "Other payment methods",
+            instruments: [
+              { method: "card" },
+              { method: "netbanking" },
+              { method: "wallet" },
+            ],
+          },
+        },
+        sequence: ["block.upi_block", "block.other_block"],
+        preferences: { show_default_blocks: false },
+      },
+    },
+  };
+
+  const rp = new window.Razorpay(merged);
   rp.open();
 }
