@@ -21,7 +21,16 @@ export default defineConfig(
           spa: { enabled: true, prerender: { outputPath: "/index.html" } },
           server: { preset: "static" },
         },
-        vite: { build: { manifest: true } },
+        vite: {
+          build: {
+            manifest: true,
+            rollupOptions: {
+              // Capacitor native plugins are only present inside the Android
+              // wrapper; exclude them from the web/SPA bundle.
+              external: [/^@capacitor\//],
+            },
+          },
+        },
       }
     : {
         vite: { build: { manifest: true } },
