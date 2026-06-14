@@ -166,3 +166,143 @@ export const adminDecideRider = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+// ---------- Outlet manager: assignment ----------
+
+// Riders available to assign for a given outlet that the manager owns.
+export const outletListAvailableRiders = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ outlet_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: mine } = await supabase
+      .from("partner_outlet_managers").select("outlet_id").eq("user_id", userId).eq("outlet_id", data.outlet_id).maybeSingle();
+    if (!mine) throw new Error("Not your outlet");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: links } = await supabaseAdmin
+      .from("rider_outlets").select("rider_id").eq("outlet_id", data.outlet_id);
+    const ids = (links ?? []).map((l) => l.rider_id);
+    if (!ids.length) return [];
+    const { data: riders } = await supabaseAdmin
+      .from("riders").select("id, name, phone, vehicle, vehicle_no, is_active, status").in("id", ids)
+      .eq("status", "approved").eq("is_active", true);
+    if (!riders?.length) return [];
+
+    // Active load per rider
+    const { data: active } = await supabaseAdmin
+      .from("order_assignments").select("rider_id, status").in("rider_id", riders.map((r) => r.id))
+      .in("status", ["assigned", "picked_up"]);
+    const load = new Map<string, number>();
+    (active ?? []).forEach((a) => load.set(a.rider_id, (load.get(a.rider_id) ?? 0) + 1));
+    return riders.map((r) => ({ ...r, active_orders: load.get(r.id) ?? 0 }))
+      .sort((a, b) => a.active_orders - b.active_orders);
+  });
+
+// Manager assigns or reassigns a rider to one of their outlet's orders.
+export const outletAssignOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ order_id: z.string().uuid(), rider_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: order } = await supabaseAdmin
+      .from("orders").select("id, outlet_id, status").eq("id", data.order_id).maybeSingle();
+    if (!order?.outlet_id) throw new Error("Order has no outlet");
+    const { data: mine } = await supabase
+      .from("partner_outlet_managers").select("outlet_id").eq("user_id", userId).eq("outlet_id", order.outlet_id).maybeSingle();
+    if (!mine) throw new Error("Not your outlet");
+
+    // Verify rider is linked to this outlet and active.
+    const { data: link } = await supabaseAdmin
+      .from("rider_outlets").select("rider_id").eq("outlet_id", order.outlet_id).eq("rider_id", data.rider_id).maybeSingle();
+    if (!link) throw new Error("Rider not linked to this outlet");
+    const { data: rider } = await supabaseAdmin
+      .from("riders").select("status, is_active").eq("id", data.rider_id).maybeSingle();
+    if (!rider || rider.status !== "approved" || !rider.is_active) throw new Error("Rider unavailable");
+
+    const { data: existing } = await supabaseAdmin
+      .from("order_assignments").select("id, status").eq("order_id", data.order_id).maybeSingle();
+    if (existing) {
+      if (existing.status === "delivered") throw new Error("Order already delivered");
+      const { error } = await supabaseAdmin.from("order_assignments")
+        .update({ rider_id: data.rider_id, status: "assigned", assigned_at: new Date().toISOString(), picked_up_at: null })
+        .eq("id", existing.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin.from("order_assignments")
+        .insert({ order_id: data.order_id, rider_id: data.rider_id, status: "assigned" });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+// Read current assignment for an order (for the outlet manager UI).
+export const outletGetOrderAssignment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: a } = await supabaseAdmin
+      .from("order_assignments")
+      .select("id, status, rider_id, assigned_at, picked_up_at, delivered_at, riders(name, phone, vehicle, vehicle_no)")
+      .eq("order_id", data.order_id).maybeSingle();
+    return a ?? null;
+  });
+
+// ---------- Admin: manage rider <-> outlets/pincodes ----------
+
+export const adminListOutletsForRider = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("partner_outlets").select("id, name, area, pincode, restaurant_id, partner_restaurants(name)")
+      .eq("is_active", true).order("name");
+    return data ?? [];
+  });
+
+export const adminGetRiderAreas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ rider_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: o }, { data: p }] = await Promise.all([
+      supabaseAdmin.from("rider_outlets").select("outlet_id").eq("rider_id", data.rider_id),
+      supabaseAdmin.from("rider_pincodes").select("pincode").eq("rider_id", data.rider_id),
+    ]);
+    return {
+      outlet_ids: (o ?? []).map((r) => r.outlet_id),
+      pincodes: (p ?? []).map((r) => r.pincode),
+    };
+  });
+
+export const adminSetRiderAreas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    rider_id: z.string().uuid(),
+    outlet_ids: z.array(z.string().uuid()).default([]),
+    pincodes: z.array(z.string().trim().regex(/^\d{6}$/)).default([]),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Replace sets atomically (simple delete + insert).
+    await supabaseAdmin.from("rider_outlets").delete().eq("rider_id", data.rider_id);
+    await supabaseAdmin.from("rider_pincodes").delete().eq("rider_id", data.rider_id);
+    if (data.outlet_ids.length) {
+      const { error } = await supabaseAdmin.from("rider_outlets")
+        .insert(data.outlet_ids.map((outlet_id) => ({ rider_id: data.rider_id, outlet_id })));
+      if (error) throw new Error(error.message);
+    }
+    if (data.pincodes.length) {
+      const { error } = await supabaseAdmin.from("rider_pincodes")
+        .insert(Array.from(new Set(data.pincodes)).map((pincode) => ({ rider_id: data.rider_id, pincode })));
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
