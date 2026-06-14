@@ -92,6 +92,7 @@ function RidersPage() {
                   </div>
                   <div className="flex gap-1">
                     <button onClick={() => setEditing(r)} className="rounded-lg border px-2 py-1 text-xs hover:bg-secondary">Edit</button>
+                    <button onClick={() => setAreasFor(r)} className="rounded-lg border px-2 py-1 text-xs hover:bg-secondary"><MapPin className="h-3.5 w-3.5" /></button>
                     <button onClick={() => { if (confirm("Delete rider?")) delM.mutate(r.id); }} className="rounded-lg border border-destructive/30 px-2 py-1 text-xs text-destructive hover:bg-destructive/5"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>
