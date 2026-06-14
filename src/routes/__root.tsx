@@ -169,6 +169,12 @@ function RootComponent() {
   );
 }
 
+function BottomNavGate() {
+  const path = useRouterState({ select: (r) => r.location.pathname });
+  if (path.startsWith("/rider")) return null;
+  return <BottomNav />;
+}
+
 const CUSTOMER_BLOCKED = ["/cart", "/checkout", "/search", "/account", "/wishlist", "/orders", "/c/", "/p/"];
 
 function AdminGuard({ isAdmin }: { isAdmin: boolean }) {
