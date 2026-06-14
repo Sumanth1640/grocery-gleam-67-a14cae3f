@@ -60,40 +60,13 @@ export async function openRazorpayCheckout(options: RazorpayOptions): Promise<vo
   await loadRazorpay();
   if (!window.Razorpay) throw new Error("Razorpay unavailable");
 
-  // Default: surface UPI (GPay / PhonePe / Paytm / BHIM) prominently,
-  // followed by cards, netbanking and wallets. Caller can override via
-  // `options.method` / `options.config`.
+  // Let Razorpay show every payment method enabled on the merchant account.
+  // Forcing a custom display block with only UPI hides UPI entirely when
+  // UPI isn't enabled on the key/account — which is why only Cards / Netbanking
+  // / Wallet were showing up in the checkout sheet.
   const merged: RazorpayOptions = {
     ...options,
     currency: options.currency || "INR",
-    method: options.method ?? {
-      upi: true,
-      card: true,
-      netbanking: true,
-      wallet: true,
-    },
-    config: options.config ?? {
-      display: {
-        blocks: {
-          upi_block: {
-            name: "Pay using UPI",
-            instruments: [
-              { method: "upi", flows: ["intent", "collect", "qr"] },
-            ],
-          },
-          other_block: {
-            name: "Other payment methods",
-            instruments: [
-              { method: "card" },
-              { method: "netbanking" },
-              { method: "wallet" },
-            ],
-          },
-        },
-        sequence: ["block.upi_block", "block.other_block"],
-        preferences: { show_default_blocks: false },
-      },
-    },
   };
 
   const rp = new window.Razorpay(merged);
