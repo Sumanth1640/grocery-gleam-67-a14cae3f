@@ -35,6 +35,21 @@ export function MobileLogin({ redirect }: { redirect: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, redirect]);
 
+  const resolveDest = async (): Promise<string> => {
+    if (redirect) return redirect;
+    if (USE_PHP) return "/";
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return "/";
+      const { data: roles } = await supabase
+        .from("user_roles").select("role").eq("user_id", u.user.id);
+      const list = (roles ?? []).map((r) => r.role);
+      if (list.includes("rider")) return "/rider";
+      if (list.includes("admin")) return "/admin";
+    } catch { /* ignore */ }
+    return "/";
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
@@ -52,7 +67,8 @@ export function MobileLogin({ redirect }: { redirect: string }) {
         const { error } = await dualApi.signin(email.trim(), password);
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate({ to: redirect || "/" });
+        const dest = await resolveDest();
+        navigate({ to: dest });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");

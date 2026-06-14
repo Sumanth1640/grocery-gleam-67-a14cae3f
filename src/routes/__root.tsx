@@ -163,10 +163,16 @@ function RootComponent() {
       <div className="pb-24 md:pb-0">
         <Outlet />
       </div>
-      {!isAdmin && <BottomNav />}
+      {!isAdmin && <BottomNavGate />}
       <Toaster />
     </QueryClientProvider>
   );
+}
+
+function BottomNavGate() {
+  const path = useRouterState({ select: (r) => r.location.pathname });
+  if (path.startsWith("/rider")) return null;
+  return <BottomNav />;
 }
 
 const CUSTOMER_BLOCKED = ["/cart", "/checkout", "/search", "/account", "/wishlist", "/orders", "/c/", "/p/"];
