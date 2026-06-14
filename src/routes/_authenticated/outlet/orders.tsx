@@ -168,6 +168,7 @@ function OutletOrdersPage() {
                       {STATUS_LABEL[s]}
                     </button>
                   ))}
+                  <AssignRiderButton orderId={x.id} outletId={x.outlet_id} />
                   <button
                     onClick={() => printKOT(x)}
                     className="ml-auto inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary"
