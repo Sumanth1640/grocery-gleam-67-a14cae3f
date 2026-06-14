@@ -36,8 +36,41 @@ function RidersPage() {
   const assignM = useMutation({ mutationFn: (v: { order_id: string; rider_id: string }) => assignFn({ data: v }), onSuccess: () => { toast.success("Assigned"); qc.invalidateQueries({ queryKey: ["admin-assignable"] }); qc.invalidateQueries({ queryKey: ["admin-riders"] }); }, onError: (e: Error) => toast.error(e.message) });
   const updateM = useMutation({ mutationFn: (v: any) => updateFn({ data: v }), onSuccess: () => { toast.success("Updated"); qc.invalidateQueries({ queryKey: ["admin-assignable"] }); qc.invalidateQueries({ queryKey: ["admin-riders"] }); }, onError: (e: Error) => toast.error(e.message) });
 
+  const pending = useQuery({ queryKey: ["admin-pending-riders"], queryFn: () => adminListPendingRiders(), refetchInterval: 30_000 });
+  const decideM = useMutation({
+    mutationFn: (v: { rider_id: string; approve: boolean; reason?: string }) => adminDecideRider({ data: { ...v, reason: v.reason ?? "" } }),
+    onSuccess: () => { toast.success("Updated"); qc.invalidateQueries({ queryKey: ["admin-pending-riders"] }); qc.invalidateQueries({ queryKey: ["admin-riders"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div className="space-y-6">
+      {(pending.data ?? []).length > 0 && (
+        <section>
+          <h2 className="font-display text-xl font-bold">Pending rider applications ({(pending.data ?? []).length})</h2>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            {(pending.data ?? []).map((r: any) => (
+              <div key={r.id} className="rounded-2xl border bg-card p-4 shadow-card">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Bike className="h-4 w-4 text-amber-600" />
+                      <span className="font-semibold">{r.name}</span>
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700">Pending</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{r.phone} · {r.vehicle} {r.vehicle_no}</div>
+                    {r.notes && <div className="mt-1 text-xs italic text-muted-foreground">"{r.notes}"</div>}
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => decideM.mutate({ rider_id: r.id, approve: true })} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2 py-1 text-xs font-bold text-white"><Check className="h-3.5 w-3.5" /> Approve</button>
+                    <button onClick={() => { const reason = prompt("Reason for rejection?") ?? ""; decideM.mutate({ rider_id: r.id, approve: false, reason }); }} className="inline-flex items-center gap-1 rounded-lg border border-destructive/30 px-2 py-1 text-xs font-bold text-destructive"><X className="h-3.5 w-3.5" /></button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
       <section>
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl font-bold">Delivery riders</h2>
