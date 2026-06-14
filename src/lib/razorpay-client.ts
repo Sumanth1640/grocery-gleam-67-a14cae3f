@@ -19,12 +19,20 @@ export interface RazorpayOptions {
   order_id: string;
   prefill?: { name?: string; email?: string; contact?: string };
   theme?: { color?: string };
-  method?: { upi?: boolean; card?: boolean; netbanking?: boolean; wallet?: boolean };
+  method?: {
+    upi?: boolean;
+    card?: boolean;
+    netbanking?: boolean;
+    wallet?: boolean;
+    emi?: boolean;
+    paylater?: boolean;
+  };
+  webview_intent?: boolean;
   config?: {
     display?: {
       blocks?: Record<
         string,
-        { name: string; instruments: Array<{ method: string; flows?: string[] }> }
+        { name: string; instruments: Array<string | { method: string; flows?: string[] }> }
       >;
       sequence?: string[];
       preferences?: { show_default_blocks?: boolean };
@@ -60,27 +68,25 @@ export async function openRazorpayCheckout(options: RazorpayOptions): Promise<vo
   await loadRazorpay();
   if (!window.Razorpay) throw new Error("Razorpay unavailable");
 
-  // Pin UPI to the top of the checkout. The instruments MUST be objects
-  // ({ method: "upi", flows: [...] }) — passing plain strings made the
-  // block render empty so Razorpay silently fell back to Card/Netbanking/Wallet.
-  // `show_default_blocks: true` keeps all other enabled methods visible below.
+  // WebView-based Android checkouts need `webview_intent` for UPI intent support.
+  // Keep Razorpay's own UPI block, but move it first instead of using a custom
+  // UPI-only block that can render empty on some account/device combinations.
   const merged: RazorpayOptions = {
     ...options,
     currency: options.currency || "INR",
-    method: { upi: true, card: true, netbanking: true, wallet: true, ...(options.method ?? {}) },
+    webview_intent: options.webview_intent ?? true,
+    method: {
+      upi: true,
+      card: true,
+      netbanking: true,
+      wallet: true,
+      emi: true,
+      paylater: true,
+      ...(options.method ?? {}),
+    },
     config: options.config ?? {
       display: {
-        blocks: {
-          upi_block: {
-            name: "Pay using UPI",
-            instruments: [
-              { method: "upi", flows: ["intent"] },
-              { method: "upi", flows: ["collect"] },
-              { method: "upi", flows: ["qr"] },
-            ],
-          },
-        },
-        sequence: ["block.upi_block"],
+        sequence: ["upi", "card", "emi", "netbanking", "wallet", "paylater"],
         preferences: { show_default_blocks: true },
       },
     },
