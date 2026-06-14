@@ -163,7 +163,7 @@ function RootComponent() {
       <div className="pb-24 md:pb-0">
         <Outlet />
       </div>
-      {!isAdmin && <BottomNav />}
+      {!isAdmin && <BottomNavGate />}
       <Toaster />
     </QueryClientProvider>
   );
