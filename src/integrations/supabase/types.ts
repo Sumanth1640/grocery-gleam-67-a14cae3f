@@ -1029,6 +1029,65 @@ export type Database = {
         }
         Relationships: []
       }
+      rider_outlets: {
+        Row: {
+          created_at: string
+          outlet_id: string
+          rider_id: string
+        }
+        Insert: {
+          created_at?: string
+          outlet_id: string
+          rider_id: string
+        }
+        Update: {
+          created_at?: string
+          outlet_id?: string
+          rider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_outlets_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_outlets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_outlets_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rider_pincodes: {
+        Row: {
+          created_at: string
+          pincode: string
+          rider_id: string
+        }
+        Insert: {
+          created_at?: string
+          pincode: string
+          rider_id: string
+        }
+        Update: {
+          created_at?: string
+          pincode?: string
+          rider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_pincodes_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riders: {
         Row: {
           created_at: string
@@ -1037,6 +1096,8 @@ export type Database = {
           name: string
           notes: string
           phone: string
+          preferred_outlets: string[] | null
+          preferred_pincodes: string[] | null
           rejection_reason: string | null
           status: string
           updated_at: string
@@ -1051,6 +1112,8 @@ export type Database = {
           name: string
           notes?: string
           phone: string
+          preferred_outlets?: string[] | null
+          preferred_pincodes?: string[] | null
           rejection_reason?: string | null
           status?: string
           updated_at?: string
@@ -1065,6 +1128,8 @@ export type Database = {
           name?: string
           notes?: string
           phone?: string
+          preferred_outlets?: string[] | null
+          preferred_pincodes?: string[] | null
           rejection_reason?: string | null
           status?: string
           updated_at?: string
