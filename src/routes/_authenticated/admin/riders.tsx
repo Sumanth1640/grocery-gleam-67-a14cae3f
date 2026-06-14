@@ -30,6 +30,7 @@ function RidersPage() {
   const riders = useQuery({ queryKey: ["admin-riders"], queryFn: () => listFn() });
   const orders = useQuery({ queryKey: ["admin-assignable"], queryFn: () => assignableFn(), refetchInterval: 10_000 });
   const [editing, setEditing] = useState<any | null>(null);
+  const [areasFor, setAreasFor] = useState<any | null>(null);
 
   const saveM = useMutation({ mutationFn: (r: any) => saveFn({ data: r }), onSuccess: () => { toast.success("Saved"); setEditing(null); qc.invalidateQueries({ queryKey: ["admin-riders"] }); }, onError: (e: Error) => toast.error(e.message) });
   const delM = useMutation({ mutationFn: (id: string) => delFn({ data: { id } }), onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["admin-riders"] }); }, onError: (e: Error) => toast.error(e.message) });
