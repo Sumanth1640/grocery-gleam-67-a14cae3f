@@ -342,3 +342,27 @@ const input = "w-full rounded-2xl border-none bg-zinc-100 px-4 py-3.5 text-sm fo
 function shortId(id?: string) { return (id ?? "").slice(0, 8); }
 function fmtDate(s?: string | null) { if (!s) return ""; try { return new Date(s).toLocaleString(); } catch { return ""; } }
 function isToday(s?: string | null) { if (!s) return false; const d = new Date(s); const n = new Date(); return d.toDateString() === n.toDateString(); }
+
+function playChime() {
+  try {
+    const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = "sine"; o.frequency.value = 880;
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    o.start(); o.stop(ctx.currentTime + 0.5);
+    setTimeout(() => {
+      const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination); o2.type = "sine"; o2.frequency.value = 1320;
+      g2.gain.setValueAtTime(0.001, ctx.currentTime);
+      g2.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.02);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      o2.start(); o2.stop(ctx.currentTime + 0.45);
+    }, 180);
+  } catch {}
+}
