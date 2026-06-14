@@ -91,7 +91,7 @@ export const riderUpdateAssignmentStatus = createServerFn({ method: "POST" })
       .from("order_assignments").select("id, order_id, rider_id").eq("id", data.assignment_id).maybeSingle();
     if (!a || a.rider_id !== rider.id) throw new Error("Assignment not found");
 
-    const patch: Record<string, unknown> = { status: data.status };
+    const patch: { status: string; picked_up_at?: string; delivered_at?: string } = { status: data.status };
     if (data.status === "picked_up") patch.picked_up_at = new Date().toISOString();
     if (data.status === "delivered") patch.delivered_at = new Date().toISOString();
     const { error } = await supabaseAdmin
