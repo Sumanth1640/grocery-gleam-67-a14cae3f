@@ -60,13 +60,30 @@ export async function openRazorpayCheckout(options: RazorpayOptions): Promise<vo
   await loadRazorpay();
   if (!window.Razorpay) throw new Error("Razorpay unavailable");
 
-  // Let Razorpay show every payment method enabled on the merchant account.
-  // Forcing a custom display block with only UPI hides UPI entirely when
-  // UPI isn't enabled on the key/account — which is why only Cards / Netbanking
-  // / Wallet were showing up in the checkout sheet.
+  // Pin UPI to the top of the checkout. The instruments MUST be objects
+  // ({ method: "upi", flows: [...] }) — passing plain strings made the
+  // block render empty so Razorpay silently fell back to Card/Netbanking/Wallet.
+  // `show_default_blocks: true` keeps all other enabled methods visible below.
   const merged: RazorpayOptions = {
     ...options,
     currency: options.currency || "INR",
+    method: { upi: true, card: true, netbanking: true, wallet: true, ...(options.method ?? {}) },
+    config: options.config ?? {
+      display: {
+        blocks: {
+          upi_block: {
+            name: "Pay using UPI",
+            instruments: [
+              { method: "upi", flows: ["intent"] },
+              { method: "upi", flows: ["collect"] },
+              { method: "upi", flows: ["qr"] },
+            ],
+          },
+        },
+        sequence: ["block.upi_block"],
+        preferences: { show_default_blocks: true },
+      },
+    },
   };
 
   const rp = new window.Razorpay(merged);
