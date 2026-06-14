@@ -41,6 +41,26 @@ function RiderHome() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Play a soft chime when a new active assignment appears.
+  const prevActiveRef = useRef<number | null>(null);
+  useEffect(() => {
+    const list = assignQ.data ?? [];
+    const activeCount = list.filter((a: any) => a.status === "assigned").length;
+    if (prevActiveRef.current !== null && activeCount > prevActiveRef.current) {
+      playChime();
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        new Notification("New delivery assigned", { body: "Open the rider app to view details." });
+      }
+    }
+    prevActiveRef.current = activeCount;
+  }, [assignQ.data]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+  }, []);
+
   if (meQ.isLoading) {
     return <div className="grid min-h-screen place-items-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-600" /></div>;
   }
