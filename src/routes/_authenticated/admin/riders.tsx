@@ -7,7 +7,7 @@ import {
   adminListRiders, adminSaveRider, adminDeleteRider,
   adminAssignableOrders, adminAssignRider, adminUpdateAssignment,
 } from "@/lib/admin-extra.functions";
-import { adminListPendingRiders, adminDecideRider } from "@/lib/rider.functions";
+import { adminListPendingRiders, adminDecideRider, adminListOutletsForRider, adminGetRiderAreas, adminSetRiderAreas } from "@/lib/rider.functions";
 import { Loader2, Plus, Trash2, Bike, MapPin, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
