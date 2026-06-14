@@ -172,6 +172,64 @@ function RidersPage() {
           </div>
         </div>
       )}
+      {areasFor && <AreasDialog rider={areasFor} onClose={() => setAreasFor(null)} />}
+    </div>
+  );
+}
+
+function AreasDialog({ rider, onClose }: { rider: any; onClose: () => void }) {
+  const qc = useQueryClient();
+  const outlets = useQuery({ queryKey: ["admin-outlets-for-rider"], queryFn: () => adminListOutletsForRider() });
+  const current = useQuery({ queryKey: ["admin-rider-areas", rider.id], queryFn: () => adminGetRiderAreas({ data: { rider_id: rider.id } }) });
+  const [selOutlets, setSelOutlets] = useState<Set<string>>(new Set());
+  const [pincodes, setPincodes] = useState<string>("");
+  const [loaded, setLoaded] = useState(false);
+  if (current.data && !loaded) {
+    setSelOutlets(new Set(current.data.outlet_ids));
+    setPincodes(current.data.pincodes.join(", "));
+    setLoaded(true);
+  }
+  const saveM = useMutation({
+    mutationFn: () => adminSetRiderAreas({ data: {
+      rider_id: rider.id,
+      outlet_ids: Array.from(selOutlets),
+      pincodes: pincodes.split(/[,\s]+/).map((s) => s.trim()).filter((s) => /^\d{6}$/.test(s)),
+    } }),
+    onSuccess: () => { toast.success("Areas saved"); qc.invalidateQueries({ queryKey: ["admin-rider-areas", rider.id] }); onClose(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const toggle = (id: string) => {
+    const n = new Set(selOutlets);
+    n.has(id) ? n.delete(id) : n.add(id);
+    setSelOutlets(n);
+  };
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 p-4" onClick={onClose}>
+      <div className="w-full max-w-lg rounded-2xl border bg-card p-5 shadow-pop" onClick={(e) => e.stopPropagation()}>
+        <h3 className="font-display text-lg font-bold">Coverage for {rider.name}</h3>
+        <p className="mt-1 text-xs text-muted-foreground">Outlet managers only see riders linked to their outlet. Pincodes are used for product/warehouse deliveries.</p>
+        <div className="mt-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Outlets ({selOutlets.size})</div>
+          <div className="mt-2 max-h-56 space-y-1 overflow-auto rounded-xl border p-2">
+            {outlets.isLoading && <Loader2 className="m-4 h-4 w-4 animate-spin" />}
+            {(outlets.data ?? []).map((o: any) => (
+              <label key={o.id} className="flex cursor-pointer items-center gap-2 rounded-lg p-1.5 text-sm hover:bg-secondary">
+                <input type="checkbox" checked={selOutlets.has(o.id)} onChange={() => toggle(o.id)} />
+                <span className="flex-1">{o.name} <span className="text-xs text-muted-foreground">· {o.partner_restaurants?.name} · {o.area} {o.pincode}</span></span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Pincodes (comma-separated, 6-digit)</div>
+          <textarea value={pincodes} onChange={(e) => setPincodes(e.target.value)} rows={2}
+            placeholder="560001, 560002" className="mt-2 w-full rounded-lg border bg-background px-3 py-2 text-sm" />
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <button onClick={onClose} className="rounded-lg border px-3 py-1.5 text-xs">Cancel</button>
+          <button disabled={saveM.isPending} onClick={() => saveM.mutate()} className="rounded-lg bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground shadow-pop disabled:opacity-50">{saveM.isPending ? "Saving…" : "Save coverage"}</button>
+        </div>
+      </div>
     </div>
   );
 }
