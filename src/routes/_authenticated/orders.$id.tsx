@@ -101,6 +101,13 @@ function WebOrderDetailPage({ id }: { id: string }) {
             qc.refetchQueries({ queryKey: ["order", id], type: "active" });
           },
         )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "order_assignments", filter: `order_id=eq.${id}` },
+          () => {
+            qc.invalidateQueries({ queryKey: ["order-rider", id] });
+          },
+        )
         .subscribe();
     };
 
