@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3, Image as ImageIcon, Users, ReceiptText, AlertTriangle, Bike, LineChart, ShieldCheck, Sofa, Trees } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingBag, LogOut, Store, UtensilsCrossed, Warehouse, TicketPercent, BarChart3, Image as ImageIcon, Users, ReceiptText, AlertTriangle, Bike, LineChart, ShieldCheck, Sofa, Trees, Wallet } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +24,7 @@ const items = [
   { to: "/admin/inventory", label: "Inventory", icon: AlertTriangle, exact: false, adminOnly: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false, adminOnly: false },
   { to: "/admin/riders", label: "Riders", icon: Bike, exact: false, adminOnly: true },
+  { to: "/admin/payouts", label: "Rider payouts", icon: Wallet, exact: false, adminOnly: true },
   { to: "/admin/refunds-verify", label: "Verify Refunds", icon: ShieldCheck, exact: false, adminOnly: false },
   { to: "/admin/refunds", label: "Refunds", icon: ReceiptText, exact: false, adminOnly: true },
   { to: "/admin/customers", label: "Customers", icon: Users, exact: false, adminOnly: true },

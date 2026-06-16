@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import {
-  ChevronLeft, Bike, Package, MapPin, Phone, CheckCircle2, Truck, Clock, LogOut, Loader2,
+  ChevronLeft, Bike, Package, MapPin, Phone, CheckCircle2, Truck, Clock, LogOut, Loader2, Wallet,
 } from "lucide-react";
 import { riderMe, riderMyAssignments, riderUpdateAssignmentStatus, riderApply, riderListOutletsForSignup } from "@/lib/rider.functions";
+import { riderMyEarnings } from "@/lib/earnings.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 
@@ -165,6 +166,9 @@ function RiderHome() {
           </div>
         </section>
       )}
+
+      <EarningsSection />
+
 
       <div className="px-5 pt-6">
         <Link to="/" className="block text-center text-xs font-bold text-zinc-500">← Customer view</Link>
@@ -395,6 +399,66 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 const input = "w-full rounded-2xl border-none bg-zinc-100 px-4 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-[oklch(0.55_0.16_145)]/30";
+
+function EarningsSection() {
+  const q = useQuery({ queryKey: ["rider-my-earnings"], queryFn: () => riderMyEarnings(), refetchInterval: 30_000 });
+  const d = q.data;
+  if (q.isLoading) return null;
+  if (!d || (d.rows.length === 0 && d.summary.today === 0 && d.summary.pending === 0)) {
+    return (
+      <section className="px-5 pt-6">
+        <h2 className="text-sm font-extrabold text-zinc-900 inline-flex items-center gap-2"><Wallet className="h-4 w-4 text-emerald-600" /> Earnings</h2>
+        <div className="mt-3 rounded-2xl border border-dashed border-zinc-200 bg-white p-6 text-center text-xs font-semibold text-zinc-500">
+          You'll earn per delivered order. Numbers appear here after your first delivery.
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section className="px-5 pt-6">
+      <h2 className="text-sm font-extrabold text-zinc-900 inline-flex items-center gap-2"><Wallet className="h-4 w-4 text-emerald-600" /> Earnings</h2>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <Money label="Today" v={d.summary.today} />
+        <Money label="7 days" v={d.summary.week} />
+        <Money label="Month" v={d.summary.month} />
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="rounded-2xl bg-amber-50 p-3 text-center">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Pending payout</div>
+          <div className="font-display text-xl font-black text-amber-900">₹{d.summary.pending.toFixed(2)}</div>
+        </div>
+        <div className="rounded-2xl bg-emerald-50 p-3 text-center">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Paid out</div>
+          <div className="font-display text-xl font-black text-emerald-900">₹{d.summary.paid.toFixed(2)}</div>
+        </div>
+      </div>
+      <div className="mt-3 space-y-2">
+        {d.rows.slice(0, 8).map((r: any) => (
+          <div key={r.id} className="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm">
+            <div className="min-w-0">
+              <div className="text-xs font-extrabold text-zinc-900">Order #{shortId(r.order_id)}</div>
+              <div className="text-[11px] text-zinc-500">{fmtDate(r.earned_at)}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm font-extrabold text-zinc-900">₹{Number(r.total).toFixed(2)}</div>
+              <div className={`text-[10px] font-bold uppercase tracking-wider ${r.status === "paid" ? "text-emerald-600" : "text-amber-600"}`}>{r.status}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Money({ label, v }: { label: string; v: number }) {
+  return (
+    <div className="rounded-2xl bg-white p-3 text-center shadow-sm">
+      <div className="font-display text-lg font-black text-zinc-900">₹{v.toFixed(0)}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{label}</div>
+    </div>
+  );
+}
+
 
 function shortId(id?: string) { return (id ?? "").slice(0, 8); }
 function fmtDate(s?: string | null) { if (!s) return ""; try { return new Date(s).toLocaleString(); } catch { return ""; } }

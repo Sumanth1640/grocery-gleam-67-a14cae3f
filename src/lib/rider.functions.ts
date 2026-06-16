@@ -201,9 +201,13 @@ export const adminDecideRider = createServerFn({ method: "POST" })
 // ---------- Outlet manager: assignment ----------
 
 // Riders available to assign for a given outlet that the manager owns.
+// Optionally ranked by delivery pincode match.
 export const outletListAvailableRiders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ outlet_id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => z.object({
+    outlet_id: z.string().uuid(),
+    delivery_pincode: z.string().trim().regex(/^\d{6}$/).optional(),
+  }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: mine } = await supabase
@@ -220,14 +224,30 @@ export const outletListAvailableRiders = createServerFn({ method: "POST" })
       .eq("status", "approved").eq("is_active", true);
     if (!riders?.length) return [];
 
-    // Active load per rider
+    // Active load
     const { data: active } = await supabaseAdmin
       .from("order_assignments").select("rider_id, status").in("rider_id", riders.map((r) => r.id))
       .in("status", ["assigned", "picked_up"]);
     const load = new Map<string, number>();
     (active ?? []).forEach((a) => load.set(a.rider_id, (load.get(a.rider_id) ?? 0) + 1));
-    return riders.map((r) => ({ ...r, active_orders: load.get(r.id) ?? 0 }))
-      .sort((a, b) => a.active_orders - b.active_orders);
+
+    // Pincode coverage for ranking
+    let pinMatch = new Set<string>();
+    if (data.delivery_pincode) {
+      const { data: pins } = await supabaseAdmin
+        .from("rider_pincodes").select("rider_id").in("rider_id", riders.map((r) => r.id))
+        .eq("pincode", data.delivery_pincode);
+      pinMatch = new Set((pins ?? []).map((p) => p.rider_id));
+    }
+
+    return riders.map((r) => ({
+      ...r,
+      active_orders: load.get(r.id) ?? 0,
+      pincode_match: pinMatch.has(r.id),
+    })).sort((a, b) => {
+      if (a.pincode_match !== b.pincode_match) return a.pincode_match ? -1 : 1;
+      return a.active_orders - b.active_orders;
+    });
   });
 
 // Manager assigns or reassigns a rider to one of their outlet's orders.
@@ -337,3 +357,20 @@ export const adminSetRiderAreas = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+
+// ---------- Customer: see assigned rider for own order ----------
+export const customerGetOrderRider = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order } = await supabaseAdmin
+      .from("orders").select("id, user_id").eq("id", data.order_id).maybeSingle();
+    if (!order || order.user_id !== userId) return null;
+    const { data: a } = await supabaseAdmin
+      .from("order_assignments")
+      .select("status, assigned_at, picked_up_at, delivered_at, riders(name, phone, vehicle, vehicle_no)")
+      .eq("order_id", data.order_id).maybeSingle();
+    return a ?? null;
+  });
