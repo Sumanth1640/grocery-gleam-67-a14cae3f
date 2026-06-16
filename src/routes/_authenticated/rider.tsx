@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import {
   ChevronLeft, Bike, Package, MapPin, Phone, CheckCircle2, Truck, Clock, LogOut, Loader2,
 } from "lucide-react";
-import { riderMe, riderMyAssignments, riderUpdateAssignmentStatus, riderApply } from "@/lib/rider.functions";
+import { riderMe, riderMyAssignments, riderUpdateAssignmentStatus, riderApply, riderListOutletsForSignup } from "@/lib/rider.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 
