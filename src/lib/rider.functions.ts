@@ -27,6 +27,8 @@ const applyInput = z.object({
   vehicle: z.enum(["bike", "scooter", "bicycle", "car"]).default("bike"),
   vehicle_no: z.string().trim().max(20).default(""),
   notes: z.string().trim().max(500).default(""),
+  preferred_outlet_ids: z.array(z.string().uuid()).max(20).default([]),
+  preferred_pincodes: z.array(z.string().trim().regex(/^\d{6}$/)).max(40).default([]),
 });
 
 export const riderApply = createServerFn({ method: "POST" })
@@ -49,10 +51,24 @@ export const riderApply = createServerFn({ method: "POST" })
         notes: data.notes,
         is_active: false,
         status: "pending",
-      })
+        preferred_outlets: data.preferred_outlet_ids,
+        preferred_pincodes: Array.from(new Set(data.preferred_pincodes)),
+      } as any)
       .select().single();
     if (error) throw new Error(error.message);
     return row;
+  });
+
+// Outlets shown to applicants on the rider signup form (any signed-in user).
+export const riderListOutletsForSignup = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("partner_outlets")
+      .select("id, name, area, pincode, partner_restaurants(name)")
+      .eq("is_active", true).order("name");
+    return data ?? [];
   });
 
 export const riderMyAssignments = createServerFn({ method: "GET" })
