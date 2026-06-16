@@ -61,6 +61,14 @@ function RidersPage() {
                     </div>
                     <div className="text-xs text-muted-foreground">{r.phone} · {r.vehicle} {r.vehicle_no}</div>
                     {r.notes && <div className="mt-1 text-xs italic text-muted-foreground">"{r.notes}"</div>}
+                    {((r.preferred_outlets?.length ?? 0) > 0 || (r.preferred_pincodes?.length ?? 0) > 0) && (
+                      <div className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
+                        <div className="font-bold">Requested coverage</div>
+                        {r.preferred_outlets?.length > 0 && <div>{r.preferred_outlets.length} outlet(s)</div>}
+                        {r.preferred_pincodes?.length > 0 && <div>Pincodes: {r.preferred_pincodes.join(", ")}</div>}
+                        <div className="mt-0.5 text-amber-700/80">Auto-attached on approval.</div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-1">
                     <button onClick={() => decideM.mutate({ rider_id: r.id, approve: true })} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2 py-1 text-xs font-bold text-white"><Check className="h-3.5 w-3.5" /> Approve</button>
