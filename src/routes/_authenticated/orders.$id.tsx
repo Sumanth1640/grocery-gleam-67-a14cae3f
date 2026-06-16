@@ -28,6 +28,8 @@ import {
 
 import { upsertReview } from "@/lib/reviews.functions";
 import { createRefundRequest, myRefundForOrder } from "@/lib/admin-extra.functions";
+import { customerGetOrderRider } from "@/lib/rider.functions";
+import { Bike, Phone as PhoneIcon } from "lucide-react";
 
 type OrderItem = { product: Product; qty: number };
 
