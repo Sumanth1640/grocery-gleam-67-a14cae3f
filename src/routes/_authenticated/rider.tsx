@@ -167,6 +167,9 @@ function RiderHome() {
         </section>
       )}
 
+      <EarningsSection />
+
+
       <div className="px-5 pt-6">
         <Link to="/" className="block text-center text-xs font-bold text-zinc-500">← Customer view</Link>
       </div>
