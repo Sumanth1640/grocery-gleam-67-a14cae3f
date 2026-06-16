@@ -357,3 +357,20 @@ export const adminSetRiderAreas = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+
+// ---------- Customer: see assigned rider for own order ----------
+export const customerGetOrderRider = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order } = await supabaseAdmin
+      .from("orders").select("id, user_id").eq("id", data.order_id).maybeSingle();
+    if (!order || order.user_id !== userId) return null;
+    const { data: a } = await supabaseAdmin
+      .from("order_assignments")
+      .select("status, assigned_at, picked_up_at, delivered_at, riders(name, phone, vehicle, vehicle_no)")
+      .eq("order_id", data.order_id).maybeSingle();
+    return a ?? null;
+  });
