@@ -305,7 +305,11 @@ function AssignRiderButton({ orderId, outletId, deliveryPincode }: { orderId: st
                   className="flex w-full items-center justify-between gap-3 rounded-xl border bg-background p-3 text-left hover:bg-secondary disabled:opacity-60"
                 >
                   <div>
-                    <div className="text-sm font-semibold">{r.name} {r.id === a?.rider_id && <span className="ml-1 text-[10px] text-emerald-600">· current</span>}</div>
+                    <div className="flex items-center gap-1.5 text-sm font-semibold">
+                      {r.name}
+                      {r.pincode_match && <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-amber-700">⭐ Best match</span>}
+                      {r.id === a?.rider_id && <span className="text-[10px] text-emerald-600">· current</span>}
+                    </div>
                     <div className="text-xs text-muted-foreground">{r.phone} · {r.vehicle} {r.vehicle_no}</div>
                   </div>
                   <div className="text-right">
