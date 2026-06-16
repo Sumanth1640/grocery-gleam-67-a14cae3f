@@ -235,7 +235,7 @@ function escapeHtml(s: string) {
 }
 
 
-function AssignRiderButton({ orderId, outletId }: { orderId: string; outletId: string }) {
+function AssignRiderButton({ orderId, outletId, deliveryPincode }: { orderId: string; outletId: string; deliveryPincode?: string }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const current = useQuery({
@@ -244,8 +244,8 @@ function AssignRiderButton({ orderId, outletId }: { orderId: string; outletId: s
     refetchInterval: 20_000,
   });
   const riders = useQuery({
-    queryKey: ["outlet-available-riders", outletId],
-    queryFn: () => outletListAvailableRiders({ data: { outlet_id: outletId } }),
+    queryKey: ["outlet-available-riders", outletId, deliveryPincode ?? ""],
+    queryFn: () => outletListAvailableRiders({ data: { outlet_id: outletId, delivery_pincode: deliveryPincode && /^\d{6}$/.test(deliveryPincode) ? deliveryPincode : undefined } }),
     enabled: open,
   });
   const assign = useMutation({
