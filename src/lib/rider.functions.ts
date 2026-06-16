@@ -27,6 +27,8 @@ const applyInput = z.object({
   vehicle: z.enum(["bike", "scooter", "bicycle", "car"]).default("bike"),
   vehicle_no: z.string().trim().max(20).default(""),
   notes: z.string().trim().max(500).default(""),
+  preferred_outlet_ids: z.array(z.string().uuid()).max(20).default([]),
+  preferred_pincodes: z.array(z.string().trim().regex(/^\d{6}$/)).max(40).default([]),
 });
 
 export const riderApply = createServerFn({ method: "POST" })
@@ -49,10 +51,24 @@ export const riderApply = createServerFn({ method: "POST" })
         notes: data.notes,
         is_active: false,
         status: "pending",
-      })
+        preferred_outlets: data.preferred_outlet_ids,
+        preferred_pincodes: Array.from(new Set(data.preferred_pincodes)),
+      } as any)
       .select().single();
     if (error) throw new Error(error.message);
     return row;
+  });
+
+// Outlets shown to applicants on the rider signup form (any signed-in user).
+export const riderListOutletsForSignup = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("partner_outlets")
+      .select("id, name, area, pincode, partner_restaurants(name)")
+      .eq("is_active", true).order("name");
+    return data ?? [];
   });
 
 export const riderMyAssignments = createServerFn({ method: "GET" })
@@ -133,7 +149,7 @@ export const adminDecideRider = createServerFn({ method: "POST" })
     await ensureAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rider } = await supabaseAdmin
-      .from("riders").select("id, user_id").eq("id", data.rider_id).maybeSingle();
+      .from("riders").select("id, user_id, preferred_outlets, preferred_pincodes").eq("id", data.rider_id).maybeSingle();
     if (!rider) throw new Error("Rider not found");
 
     if (data.approve) {
@@ -149,6 +165,21 @@ export const adminDecideRider = createServerFn({ method: "POST" })
           user_id: rider.user_id, kind: "system",
           title: "You're approved 🎉", body: "You can now start accepting deliveries.", link: "/rider",
         });
+      }
+      // Auto-attach the rider's requested coverage if admin hasn't set any yet.
+      const { count: outletLinks } = await supabaseAdmin
+        .from("rider_outlets").select("rider_id", { count: "exact", head: true }).eq("rider_id", data.rider_id);
+      if (!outletLinks && (rider.preferred_outlets ?? []).length) {
+        await supabaseAdmin.from("rider_outlets").insert(
+          (rider.preferred_outlets as string[]).map((outlet_id) => ({ rider_id: data.rider_id, outlet_id })),
+        );
+      }
+      const { count: pinLinks } = await supabaseAdmin
+        .from("rider_pincodes").select("rider_id", { count: "exact", head: true }).eq("rider_id", data.rider_id);
+      if (!pinLinks && (rider.preferred_pincodes ?? []).length) {
+        await supabaseAdmin.from("rider_pincodes").insert(
+          Array.from(new Set(rider.preferred_pincodes as string[])).map((pincode) => ({ rider_id: data.rider_id, pincode })),
+        );
       }
     } else {
       const { error } = await supabaseAdmin.from("riders")
