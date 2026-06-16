@@ -141,6 +141,14 @@ function WebOrderDetailPage({ id }: { id: string }) {
     navigate({ to: "/cart" });
   };
 
+  const riderQ = useQuery({
+    queryKey: ["order-rider", id],
+    queryFn: () => customerGetOrderRider({ data: { order_id: id } }),
+    enabled: !USE_PHP && !!order && (order.status === "out_for_delivery" || order.status === "delivered"),
+    refetchInterval: 30_000,
+  });
+
+
   const cancelRpc = useDualFn(cancelOrder, async (d: { id: string }) => php.cancelOrder(d.id));
   const cancelM = useMutation({
     mutationFn: () => cancelRpc({ data: { id } }),
