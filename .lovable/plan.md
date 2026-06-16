@@ -1,38 +1,41 @@
-# PHP parity for Admin / Warehouse / Restaurant Partner
+Build out the remaining rider/delivery features in order, one focused migration + code pass per feature.
 
-You asked for full PHP parity across all three surfaces. That's 90+ server functions today, plus 14 new MySQL tables, role enforcement, signed file URLs, and rewiring ~30 React pages. I'll deliver in 4 phases so each phase is reviewable and ships working features.
+## 1. Rider signup — preferred outlets/pincodes
+- Extend `src/components/native/MobileLogin.tsx` (or the rider signup step) with a multi-select of active outlets and a pincode chip input.
+- Save into existing `riders.preferred_outlets` / `riders.preferred_pincodes` columns at signup.
+- Surface these on the admin approval screen so admins can one-click copy preferred → actual coverage when approving.
 
-## Phase 1 — Foundation (this turn)
+## 2. Capacitor push notifications (background)
+- Add `@capacitor/push-notifications`.
+- New table `device_tokens (user_id, token, platform)` + GRANTs + RLS (user manages own).
+- New server fn `registerDeviceToken` called from rider app on login.
+- Extend `notify_rider_on_assignment` trigger path: after insert into `notifications`, also enqueue a push via an edge function that uses FCM (requires `FCM_SERVER_KEY` secret — will request from user when we get here).
+- Rider route registers token + listeners; foreground still uses existing chime.
 
-**MySQL schema (`php-backend/schema_phase4.sql`)** — adds:
-- `user_roles` (admin / moderator / user) + seed helper
-- `warehouses`, `warehouse_pincodes`, `warehouse_managers`, `product_stock`
-- `partner_restaurants`, `partner_outlets`, `partner_outlet_managers`, `partner_dishes`, `partner_dish_variants`, `partner_dish_addons`
-- `banners`, `riders`, `refund_requests`, `order_assignments`, `coupon_redemptions`
-- `ALTER orders` to add `warehouse_id`, `outlet_id`, `restaurant_id`, `razorpay_order_id`, `razorpay_payment_id`, `payment_status`
+## 3. Auto-suggest nearest rider by pincode
+- In `outletListAvailableRiders`, accept optional `deliveryPincode`.
+- Rank: (a) rider linked to outlet AND serves that pincode, (b) rider linked to outlet, (c) others — then by active load asc.
+- Pass order's delivery pincode from the assign sheet; show a "⭐ Best match" badge on top rider.
 
-**PHP helpers (`config.php`)** — add `has_role()`, `require_admin()`, `manages_warehouse()`, `owns_restaurant()`, `manages_outlet()`, `require_admin_or_warehouse_manager()`.
+## 4. Rider earnings / payouts
+- New tables:
+  - `rider_earnings (rider_id, order_id, base_fee, distance_fee, tip, total, status: pending|paid, earned_at)`
+  - `rider_payouts (rider_id, amount, period_start, period_end, status, paid_at, notes)`
+- GRANTs + RLS: rider sees own; admin sees all.
+- Trigger on `orders` status → `delivered` inserts an earnings row using a configurable per-order base fee (start with flat ₹40, store in `app_settings` or hardcode constant).
+- Rider route: new "Earnings" tab showing today / week / month totals + recent deliveries.
+- Admin route `src/routes/_authenticated/admin/payouts.tsx`: list pending earnings per rider, "Mark paid" → creates payout + flips earnings.
 
-## Phase 2 — Admin endpoints + wiring (this turn if room, else next)
+## 5. Live order status for customers
+- Customer order detail page already shows status; add a timeline component (Placed → Confirmed → Preparing → Out for delivery → Delivered) driven by `orders.status` + `order_assignments`.
+- Subscribe via Supabase realtime on the customer's `orders` row + assignment row so the UI updates without refresh.
+- Show assigned rider's name, vehicle, and phone (tap to call) once status is `out_for_delivery`.
 
-`php-backend/api/admin/*.php` (~30 files): stats, products CRUD, categories CRUD, orders list/update, banners CRUD, customers list/block, refunds, riders + assignments, low-stock + reorder, restaurants approve/block/docs, analytics, settlements, reports, team (grant/revoke admin, warehouse mapping).
+## Order of work
+I'll ship #1 → #5 sequentially, each with its own migration if needed, types regen, and UI wiring. After each one I'll confirm before moving on so you can test and redirect.
 
-Then add `php.admin.*` methods in `src/lib/php-api/index.ts` and switch each `/admin/*` route to `useDualFn(...)`.
+## Things I'll ask before starting a step
+- **#2 Push**: needs an FCM (Android) / APNs setup. I'll request `FCM_SERVER_KEY` + ask whether iOS is in scope before building.
+- **#4 Earnings**: confirm flat fee vs distance-based, and whether tips are in scope now.
 
-## Phase 3 — Warehouse manager (warehouses CRUD, pincodes, stock, my warehouses, outlet pages)
-~12 endpoints + wire `/_authenticated/outlet/*` routes.
-
-## Phase 4 — Restaurant partner (onboarding, dishes, outlets, outlet managers, orders, payouts, dashboard)
-~25 endpoints + wire `/_authenticated/partner/*` and `/_authenticated/outlet/*` routes.
-
-## Technical notes
-
-- **Role check**: mirrors Supabase exactly — `SELECT 1 FROM user_roles WHERE user_id=? AND role='admin'`. `require_admin()` throws 403 on miss.
-- **Auth model unchanged**: existing JWT issued by `auth/login.php` already carries `sub` (user id). Helpers read that, then check role tables.
-- **First admin**: I'll add a one-line SQL snippet in the schema file showing how to grant yourself admin: `INSERT INTO user_roles (id, user_id, role) VALUES (UUID(), '<your-user-id>', 'admin');`
-- **Signed file URLs**: Supabase storage signed URLs become simple authenticated file proxy `php-backend/api/admin/doc_url.php` returning a short-lived token URL.
-- **Razorpay / partner docs**: schema adds the columns, but Razorpay verify and partner doc upload remain Cloud-only until you decide on a PHP storage strategy (local filesystem vs S3). I'll flag where this matters.
-
-## After approval
-
-I'll execute Phase 1 (schema + helpers) plus begin Phase 2 (admin endpoints) in the same turn, then continue in follow-up turns.
+Starting with **#1 (rider signup preferred areas)** as soon as you approve this plan.
