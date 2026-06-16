@@ -277,8 +277,25 @@ function ApplyForm({ onApplied }: { onApplied: () => void }) {
   const [vehicle, setVehicle] = useState<"bike" | "scooter" | "bicycle" | "car">("bike");
   const [vehicleNo, setVehicleNo] = useState("");
   const [notes, setNotes] = useState("");
+  const [selOutlets, setSelOutlets] = useState<Set<string>>(new Set());
+  const [pincodesText, setPincodesText] = useState("");
+  const [outletsOpen, setOutletsOpen] = useState(false);
+
+  const outletsQ = useQuery({ queryKey: ["rider-signup-outlets"], queryFn: () => riderListOutletsForSignup() });
+  const outlets = (outletsQ.data ?? []) as any[];
+
+  const toggleOutlet = (id: string) => {
+    const n = new Set(selOutlets);
+    n.has(id) ? n.delete(id) : n.add(id);
+    setSelOutlets(n);
+  };
+
   const m = useMutation({
-    mutationFn: () => riderApply({ data: { name, phone, vehicle, vehicle_no: vehicleNo, notes } }),
+    mutationFn: () => riderApply({ data: {
+      name, phone, vehicle, vehicle_no: vehicleNo, notes,
+      preferred_outlet_ids: Array.from(selOutlets),
+      preferred_pincodes: pincodesText.split(/[,\s]+/).map((s) => s.trim()).filter((s) => /^\d{6}$/.test(s)),
+    } }),
     onSuccess: () => { toast.success("Application submitted!"); onApplied(); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -302,7 +319,7 @@ function ApplyForm({ onApplied }: { onApplied: () => void }) {
         <Field label="Vehicle">
           <div className="flex gap-2">
             {(["bike", "scooter", "bicycle", "car"] as const).map((v) => (
-              <button key={v} onClick={() => setVehicle(v)} className={`flex-1 rounded-2xl border py-2 text-xs font-extrabold capitalize ${
+              <button key={v} type="button" onClick={() => setVehicle(v)} className={`flex-1 rounded-2xl border py-2 text-xs font-extrabold capitalize ${
                 vehicle === v ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600"
               }`}>{v}</button>
             ))}
@@ -311,6 +328,46 @@ function ApplyForm({ onApplied }: { onApplied: () => void }) {
         <Field label="Vehicle number">
           <input value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value.toUpperCase())} placeholder="KA01AB1234" className={input} />
         </Field>
+
+        <Field label={`Preferred outlets (${selOutlets.size} selected)`}>
+          <button
+            type="button"
+            onClick={() => setOutletsOpen((v) => !v)}
+            className={input + " text-left"}
+          >
+            {selOutlets.size === 0
+              ? <span className="text-zinc-400">Tap to pick outlets you can serve</span>
+              : <span>{outlets.filter((o) => selOutlets.has(o.id)).map((o) => o.name).slice(0, 3).join(", ")}{selOutlets.size > 3 ? ` +${selOutlets.size - 3}` : ""}</span>}
+          </button>
+          {outletsOpen && (
+            <div className="mt-2 max-h-60 space-y-1 overflow-auto rounded-2xl border border-zinc-200 bg-white p-2">
+              {outletsQ.isLoading && <Loader2 className="m-3 h-4 w-4 animate-spin text-zinc-400" />}
+              {!outletsQ.isLoading && outlets.length === 0 && (
+                <div className="p-3 text-center text-xs text-zinc-500">No outlets available right now.</div>
+              )}
+              {outlets.map((o) => (
+                <label key={o.id} className="flex cursor-pointer items-center gap-2 rounded-lg p-2 text-sm hover:bg-zinc-50">
+                  <input type="checkbox" checked={selOutlets.has(o.id)} onChange={() => toggleOutlet(o.id)} />
+                  <span className="flex-1">
+                    <span className="font-bold text-zinc-900">{o.name}</span>
+                    <span className="ml-1 text-[11px] text-zinc-500">{o.partner_restaurants?.name} · {o.area || o.pincode || ""}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        </Field>
+
+        <Field label="Preferred pincodes (comma-separated, 6-digit)">
+          <textarea
+            value={pincodesText}
+            onChange={(e) => setPincodesText(e.target.value)}
+            rows={2}
+            placeholder="560001, 560002"
+            className={input}
+          />
+        </Field>
+
         <Field label="Anything else? (optional)">
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className={input} />
         </Field>
