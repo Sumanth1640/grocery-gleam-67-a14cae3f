@@ -56,6 +56,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           bg: string
@@ -1029,6 +1047,64 @@ export type Database = {
         }
         Relationships: []
       }
+      rider_earnings: {
+        Row: {
+          base_fee: number
+          created_at: string
+          earned_at: string
+          id: string
+          order_id: string
+          payout_id: string | null
+          rider_id: string
+          status: string
+          total: number
+        }
+        Insert: {
+          base_fee?: number
+          created_at?: string
+          earned_at?: string
+          id?: string
+          order_id: string
+          payout_id?: string | null
+          rider_id: string
+          status?: string
+          total?: number
+        }
+        Update: {
+          base_fee?: number
+          created_at?: string
+          earned_at?: string
+          id?: string
+          order_id?: string
+          payout_id?: string | null
+          rider_id?: string
+          status?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_earnings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_earnings_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "rider_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_earnings_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rider_outlets: {
         Row: {
           created_at: string
@@ -1055,6 +1131,50 @@ export type Database = {
           },
           {
             foreignKeyName: "rider_outlets_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rider_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          paid_at: string
+          period_end: string | null
+          period_start: string | null
+          rider_id: string
+          status: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string
+          period_end?: string | null
+          period_start?: string | null
+          rider_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string
+          period_end?: string | null
+          period_start?: string | null
+          rider_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_payouts_rider_id_fkey"
             columns: ["rider_id"]
             isOneToOne: false
             referencedRelation: "riders"
