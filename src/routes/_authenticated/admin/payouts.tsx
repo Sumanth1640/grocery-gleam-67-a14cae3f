@@ -4,6 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Wallet, Bike, BadgeCheck, History, Settings2 } from "lucide-react";
 import { adminListPendingEarnings, adminListPayouts, adminPayRider, adminGetRiderFee, adminSetRiderFee } from "@/lib/earnings.functions";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 
 export const Route = createFileRoute("/_authenticated/admin/payouts")({
   head: () => ({ meta: [{ title: "Rider payouts — Admin" }] }),
@@ -12,12 +14,17 @@ export const Route = createFileRoute("/_authenticated/admin/payouts")({
 
 function PayoutsPage() {
   const qc = useQueryClient();
-  const pending = useQuery({ queryKey: ["admin-pending-earnings"], queryFn: () => adminListPendingEarnings(), refetchInterval: 30_000 });
-  const history = useQuery({ queryKey: ["admin-payouts"], queryFn: () => adminListPayouts() });
-  const feeQ = useQuery({ queryKey: ["admin-rider-fee"], queryFn: () => adminGetRiderFee() });
+  const pendingFn = useDualFn(adminListPendingEarnings, () => php.admin.pendingEarnings());
+  const historyFn = useDualFn(adminListPayouts, () => php.admin.payoutsHistory());
+  const feeGetFn = useDualFn(adminGetRiderFee, () => php.admin.getRiderFee());
+  const payFn = useDualFn(adminPayRider, (d) => php.admin.payRider(d));
+
+  const pending = useQuery({ queryKey: ["admin-pending-earnings"], queryFn: () => pendingFn(), refetchInterval: 30_000 });
+  const history = useQuery({ queryKey: ["admin-payouts"], queryFn: () => historyFn() });
+  const feeQ = useQuery({ queryKey: ["admin-rider-fee"], queryFn: () => feeGetFn() });
 
   const payM = useMutation({
-    mutationFn: (v: { rider_id: string; notes?: string }) => adminPayRider({ data: { rider_id: v.rider_id, notes: v.notes ?? "" } }),
+    mutationFn: (v: { rider_id: string; notes?: string }) => payFn({ data: { rider_id: v.rider_id, notes: v.notes ?? "" } }),
     onSuccess: (r: any) => {
       toast.success(`Paid ₹${r.amount.toFixed(2)} (${r.count} deliveries)`);
       qc.invalidateQueries({ queryKey: ["admin-pending-earnings"] });
