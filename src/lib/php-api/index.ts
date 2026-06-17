@@ -421,6 +421,22 @@ export const php = {
       request<{ ok: true }>("/admin/assignments/assign.php", "POST", p),
     updateAssignment: (p: { order_id: string; status: string }) =>
       request<{ ok: true }>("/admin/assignments/update.php", "POST", p),
+    // rider applications (approval workflow)
+    pendingRiders:    (_p?: unknown) => request<any[]>("/admin/riders/pending.php"),
+    decideRider:      (p: { rider_id: string; approve: boolean; reason?: string }) =>
+      request<{ ok: true }>("/admin/riders/decide.php", "POST", p),
+    outletsForRider:  (_p?: unknown) => request<any[]>("/admin/riders/outlets_for_rider.php"),
+    getRiderAreas:    (p: { rider_id: string }) =>
+      request<{ outlet_ids: string[]; pincodes: string[] }>("/admin/riders/get_areas.php", "POST", p),
+    setRiderAreas:    (p: { rider_id: string; outlet_ids: string[]; pincodes: string[] }) =>
+      request<{ ok: true }>("/admin/riders/set_areas.php", "POST", p),
+    // rider payouts + per-delivery fee
+    pendingEarnings:  (_p?: unknown) => request<any[]>("/admin/payouts/pending_earnings.php"),
+    payoutsHistory:   (_p?: unknown) => request<any[]>("/admin/payouts/history.php"),
+    payRider:         (p: { rider_id: string; notes?: string }) =>
+      request<{ ok: true; amount: number; count: number }>("/admin/payouts/pay.php", "POST", p),
+    getRiderFee:      (_p?: unknown) => request<{ fee: number }>("/admin/payouts/get_fee.php"),
+    setRiderFee:      (p: { fee: number }) => request<{ ok: true }>("/admin/payouts/set_fee.php", "POST", p),
     // restaurants
     listRestaurants:   (p?: { status?: string }) => request<any[]>("/admin/restaurants/list.php", "POST", { status: p?.status ?? "" }),
     setRestaurantStatus:  (p: { id: string; status: string; commission_rate?: number; rejection_reason?: string | null }) =>
