@@ -293,7 +293,10 @@ function ApplyForm({ onApplied }: { onApplied: () => void }) {
   const [pincodesText, setPincodesText] = useState("");
   const [outletsOpen, setOutletsOpen] = useState(false);
 
-  const outletsQ = useQuery({ queryKey: ["rider-signup-outlets"], queryFn: () => riderListOutletsForSignup() });
+  const outletsFn = useDualFn(riderListOutletsForSignup, () => php.rider.outletsForSignup());
+  const applyFn = useDualFn(riderApply, (d) => php.rider.apply(d));
+
+  const outletsQ = useQuery({ queryKey: ["rider-signup-outlets"], queryFn: () => outletsFn() });
   const outlets = (outletsQ.data ?? []) as any[];
 
   const toggleOutlet = (id: string) => {
@@ -303,7 +306,7 @@ function ApplyForm({ onApplied }: { onApplied: () => void }) {
   };
 
   const m = useMutation({
-    mutationFn: () => riderApply({ data: {
+    mutationFn: () => applyFn({ data: {
       name, phone, vehicle, vehicle_no: vehicleNo, notes,
       preferred_outlet_ids: Array.from(selOutlets),
       preferred_pincodes: pincodesText.split(/[,\s]+/).map((s) => s.trim()).filter((s) => /^\d{6}$/.test(s)),
@@ -409,7 +412,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const input = "w-full rounded-2xl border-none bg-zinc-100 px-4 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-[oklch(0.55_0.16_145)]/30";
 
 function EarningsSection() {
-  const q = useQuery({ queryKey: ["rider-my-earnings"], queryFn: () => riderMyEarnings(), refetchInterval: 30_000 });
+  const earningsFn = useDualFn(riderMyEarnings, () => php.rider.myEarnings());
+  const q = useQuery({ queryKey: ["rider-my-earnings"], queryFn: () => earningsFn(), refetchInterval: 30_000 });
   const d = q.data;
   if (q.isLoading) return null;
   if (!d || (d.rows.length === 0 && d.summary.today === 0 && d.summary.pending === 0)) {
