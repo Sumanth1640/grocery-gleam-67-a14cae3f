@@ -1,41 +1,76 @@
-Build out the remaining rider/delivery features in order, one focused migration + code pass per feature.
+# Port Rider Features to PHP (Hostinger)
 
-## 1. Rider signup — preferred outlets/pincodes
-- Extend `src/components/native/MobileLogin.tsx` (or the rider signup step) with a multi-select of active outlets and a pincode chip input.
-- Save into existing `riders.preferred_outlets` / `riders.preferred_pincodes` columns at signup.
-- Surface these on the admin approval screen so admins can one-click copy preferred → actual coverage when approving.
+Bring the rider/delivery system to feature parity in the PHP backend so the Hostinger build has working rider signup, admin approval, assignment, earnings, payouts, and customer tracking.
 
-## 2. Capacitor push notifications (background)
-- Add `@capacitor/push-notifications`.
-- New table `device_tokens (user_id, token, platform)` + GRANTs + RLS (user manages own).
-- New server fn `registerDeviceToken` called from rider app on login.
-- Extend `notify_rider_on_assignment` trigger path: after insert into `notifications`, also enqueue a push via an edge function that uses FCM (requires `FCM_SERVER_KEY` secret — will request from user when we get here).
-- Rider route registers token + listeners; foreground still uses existing chime.
+## 1. Database — `schema_phase11.sql`
 
-## 3. Auto-suggest nearest rider by pincode
-- In `outletListAvailableRiders`, accept optional `deliveryPincode`.
-- Rank: (a) rider linked to outlet AND serves that pincode, (b) rider linked to outlet, (c) others — then by active load asc.
-- Pass order's delivery pincode from the assign sheet; show a "⭐ Best match" badge on top rider.
+New / extended MySQL tables (mirroring the Supabase schema you already have):
 
-## 4. Rider earnings / payouts
-- New tables:
-  - `rider_earnings (rider_id, order_id, base_fee, distance_fee, tip, total, status: pending|paid, earned_at)`
-  - `rider_payouts (rider_id, amount, period_start, period_end, status, paid_at, notes)`
-- GRANTs + RLS: rider sees own; admin sees all.
-- Trigger on `orders` status → `delivered` inserts an earnings row using a configurable per-order base fee (start with flat ₹40, store in `app_settings` or hardcode constant).
-- Rider route: new "Earnings" tab showing today / week / month totals + recent deliveries.
-- Admin route `src/routes/_authenticated/admin/payouts.tsx`: list pending earnings per rider, "Mark paid" → creates payout + flips earnings.
+- `riders` — user_id, full_name, phone, vehicle_type, vehicle_number, license_no, status (pending/approved/rejected/suspended), is_online, current_lat/lng, created_at
+- `rider_outlets` — rider_id, outlet_id  *(coverage)*
+- `rider_pincodes` — rider_id, pincode
+- `order_assignments` — order_id, rider_id, status (assigned/picked_up/delivered/cancelled), assigned_at, picked_up_at, delivered_at, notes
+- `rider_earnings` — rider_id, order_id (unique), base_fee, total, status (pending/paid), earned_at, paid_at, payout_id
+- `rider_payouts` — rider_id, amount, period_start, period_end, status, paid_at, note
+- `app_settings` — key, value  *(seed `rider_flat_fee = 40`)*
 
-## 5. Live order status for customers
-- Customer order detail page already shows status; add a timeline component (Placed → Confirmed → Preparing → Out for delivery → Delivered) driven by `orders.status` + `order_assignments`.
-- Subscribe via Supabase realtime on the customer's `orders` row + assignment row so the UI updates without refresh.
-- Show assigned rider's name, vehicle, and phone (tap to call) once status is `out_for_delivery`.
+Plus a `pending_preferred_outlets` / `pending_preferred_pincodes` column on `riders` (JSON) so admin can see requested coverage before approval, matching the Cloud flow.
 
-## Order of work
-I'll ship #1 → #5 sequentially, each with its own migration if needed, types regen, and UI wiring. After each one I'll confirm before moving on so you can test and redirect.
+## 2. PHP API endpoints under `php-backend/api/rider/` and `php-backend/api/admin/`
 
-## Things I'll ask before starting a step
-- **#2 Push**: needs an FCM (Android) / APNs setup. I'll request `FCM_SERVER_KEY` + ask whether iOS is in scope before building.
-- **#4 Earnings**: confirm flat fee vs distance-based, and whether tips are in scope now.
+**Rider self-service**
+- `POST  /api/rider/apply` — submit application with preferred outlets + pincodes
+- `GET   /api/rider/me` — current rider profile + status
+- `POST  /api/rider/online` — toggle online
+- `GET   /api/rider/assignments` — my active + recent assignments
+- `POST  /api/rider/assignments/update` — picked_up / delivered (triggers earning)
+- `GET   /api/rider/earnings` — today / week / month + recent rows
+- `GET   /api/rider/outlets-for-signup` — list active outlets
 
-Starting with **#1 (rider signup preferred areas)** as soon as you approve this plan.
+**Outlet manager**
+- `GET   /api/outlet/riders/available?outlet_id=&pincode=` — ranked list (pincode match → lowest active load), returns `best_match` flag
+- `POST  /api/outlet/orders/assign-rider` — create assignment
+
+**Admin**
+- `GET   /api/admin/riders?status=` — list with requested coverage
+- `POST  /api/admin/riders/decide` — approve/reject (on approve, copy preferred coverage into `rider_outlets`/`rider_pincodes` if empty)
+- `GET   /api/admin/payouts/pending` — grouped by rider
+- `POST  /api/admin/payouts/process` — mark earnings paid + create payout row
+- `GET   /api/admin/settings/rider-fee` / `POST` to update flat fee
+
+**Customer**
+- `GET   /api/orders/{id}/rider` — rider name, phone, vehicle (only when status = out_for_delivery)
+
+Earnings are inserted automatically inside the "mark delivered" handler (PHP equivalent of the trigger), reading the flat fee from `app_settings`.
+
+## 3. Helpers
+
+`php-backend/rider_helpers.php` — `rank_riders()`, `record_rider_earning()`, `assert_rider_owns_assignment()`, plus auth helpers for `rider`/`outlet_manager`/`admin` roles (reuse existing `partner_helpers.php` patterns).
+
+## 4. Frontend wiring (`src/lib/dual-api.ts` + `src/lib/php-api/index.ts`)
+
+Add a `rider` namespace to `php` with one method per endpoint above, then add `dualApi.rider.*` methods that branch on `USE_PHP` between the existing TanStack server fns and the new PHP calls. Update these route files to call `dualApi.rider.*` instead of importing server fns directly:
+
+- `src/routes/_authenticated/rider.tsx`
+- `src/routes/_authenticated/admin/riders.tsx`
+- `src/routes/_authenticated/admin/payouts.tsx`
+- `src/routes/_authenticated/outlet/orders.tsx` (rider list + assign)
+- `src/routes/_authenticated/orders.$id.tsx` (customer rider card)
+
+Realtime: PHP has no websockets — fall back to a 15s `refetchInterval` on the customer rider card and rider dashboard when `USE_PHP`.
+
+## 5. Docs
+
+Append a "Phase 11 — Rider system" section to `HOSTINGER_DEPLOY.md` listing `schema_phase11.sql` in the import order and noting the polling fallback.
+
+## Technical notes
+
+- Auth: reuse the existing JWT middleware; role checks via the same pattern as `partner` endpoints.
+- Earnings trigger replacement: call `record_rider_earning($rider_id,$order_id)` inside the "delivered" handler, using `INSERT IGNORE` on `(order_id)` for idempotency.
+- Nearest-rider ranking is done in PHP (pincode match boolean, then active-assignment count `ASC`), no geo math needed for v1 — matches current Cloud behavior.
+- Push notifications were already skipped, so nothing to port there.
+
+## Out of scope
+
+- Live GPS streaming for the rider (no realtime channel on shared hosting).
+- iOS/Android push.
