@@ -9,6 +9,8 @@ import { riderMe, riderMyAssignments, riderUpdateAssignmentStatus, riderApply, r
 import { riderMyEarnings } from "@/lib/earnings.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { php } from "@/lib/php-api";
 
 export const Route = createFileRoute("/_authenticated/rider")({
   head: () => ({ meta: [{ title: "Rider — hallifresh" }] }),
@@ -22,22 +24,28 @@ function RiderHome() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const meQ = useQuery({ queryKey: ["rider-me"], queryFn: () => riderMe() });
+
+  const meFn = useDualFn(riderMe, () => php.rider.me());
+  const assignFnFetch = useDualFn(riderMyAssignments, () => php.rider.myAssignments());
+  const updateFn = useDualFn(riderUpdateAssignmentStatus, (d) => php.rider.updateAssignment(d));
+
+  const meQ = useQuery({ queryKey: ["rider-me"], queryFn: () => meFn() });
   const rider = meQ.data?.rider;
 
   const assignQ = useQuery({
     queryKey: ["rider-assignments"],
-    queryFn: () => riderMyAssignments(),
+    queryFn: () => assignFnFetch(),
     enabled: !!rider && rider.status === "approved",
     refetchInterval: 15_000,
   });
 
   const updateM = useMutation({
     mutationFn: (v: { assignment_id: string; status: "picked_up" | "delivered" }) =>
-      riderUpdateAssignmentStatus({ data: v }),
+      updateFn({ data: v }),
     onSuccess: () => {
       toast.success("Status updated");
       qc.invalidateQueries({ queryKey: ["rider-assignments"] });
+      qc.invalidateQueries({ queryKey: ["rider-my-earnings"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
