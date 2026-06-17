@@ -293,7 +293,36 @@ export const php = {
       request<{ ok: true }>("/outlet_mgr/dish_toggle_stock.php", "POST", p),
     toggleOutletOpen: (p: { outlet_id: string; is_open: boolean }) =>
       request<{ ok: true }>("/outlet_mgr/toggle_open.php", "POST", p),
+
+    // rider assignment (outlet manager)
+    availableRiders: (p: { outlet_id: string; delivery_pincode?: string }) =>
+      request<any[]>("/outlet_mgr/available_riders.php", "POST", p),
+    assignOrder: (p: { order_id: string; rider_id: string }) =>
+      request<{ ok: true }>("/outlet_mgr/assign_rider.php", "POST", p),
+    getOrderAssignment: (p: { order_id: string }) =>
+      request<any | null>("/outlet_mgr/order_assignment.php", "POST", p),
   },
+
+  // ---------- Rider self-service ----------
+  rider: {
+    me: () => request<{ rider: any | null }>("/rider/me.php"),
+    apply: (p: {
+      name: string; phone: string; vehicle: string; vehicle_no: string; notes: string;
+      preferred_outlet_ids: string[]; preferred_pincodes: string[];
+    }) => request<any>("/rider/apply.php", "POST", p),
+    outletsForSignup: () => request<any[]>("/rider/outlets_for_signup.php"),
+    myAssignments: () => request<any[]>("/rider/assignments.php"),
+    updateAssignment: (p: { assignment_id: string; status: "picked_up" | "delivered" | "assigned" }) =>
+      request<{ ok: true }>("/rider/update_assignment.php", "POST", p),
+    myEarnings: () =>
+      request<{ rows: any[]; summary: { today: number; week: number; month: number; pending: number; paid: number } }>(
+        "/rider/earnings.php",
+      ),
+  },
+
+  // Customer: see the rider assigned to my order
+  myOrderRider: (order_id: string) =>
+    request<any | null>("/orders/rider.php", "POST", { order_id }),
 
   // Payments
   createRazorpayOrder: (amount: number) =>
