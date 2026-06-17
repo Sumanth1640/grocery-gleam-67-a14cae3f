@@ -141,11 +141,12 @@ function WebOrderDetailPage({ id }: { id: string }) {
     navigate({ to: "/cart" });
   };
 
+  const riderFn = useDualFn(customerGetOrderRider, (d: { order_id: string }) => php.myOrderRider(d.order_id));
   const riderQ = useQuery({
     queryKey: ["order-rider", id],
-    queryFn: () => customerGetOrderRider({ data: { order_id: id } }),
-    enabled: !USE_PHP && !!order && (order.status === "out_for_delivery" || order.status === "delivered"),
-    refetchInterval: 30_000,
+    queryFn: () => riderFn({ data: { order_id: id } }),
+    enabled: !!order && (order.status === "out_for_delivery" || order.status === "delivered"),
+    refetchInterval: USE_PHP ? 15_000 : 30_000,
   });
 
 

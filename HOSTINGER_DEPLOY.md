@@ -26,6 +26,17 @@ In **hPanel → Databases → MySQL Databases**:
    - `php-backend/schema_phase4.sql`
    - `php-backend/schema_phase5.sql`
    - `php-backend/schema_phase6.sql`
+   - `php-backend/schema_phase7.sql`
+   - `php-backend/schema_phase8.sql`
+   - `php-backend/schema_phase9.sql`
+   - `php-backend/schema_phase10.sql`
+   - `php-backend/schema_phase11.sql` *(rider self-service, coverage, earnings, payouts)*
+
+> **Note on rider tracking:** The PHP backend has no websockets, so the
+> customer "live rider" card and the rider dashboard fall back to a 15s
+> poll. Everything else (signup → admin approval → outlet assignment →
+> nearest-rider ranking → mark-delivered → earnings → payouts) works
+> identically to Lovable Cloud.
 
 ---
 

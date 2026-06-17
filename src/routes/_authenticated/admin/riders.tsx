@@ -37,9 +37,11 @@ function RidersPage() {
   const assignM = useMutation({ mutationFn: (v: { order_id: string; rider_id: string }) => assignFn({ data: v }), onSuccess: () => { toast.success("Assigned"); qc.invalidateQueries({ queryKey: ["admin-assignable"] }); qc.invalidateQueries({ queryKey: ["admin-riders"] }); }, onError: (e: Error) => toast.error(e.message) });
   const updateM = useMutation({ mutationFn: (v: any) => updateFn({ data: v }), onSuccess: () => { toast.success("Updated"); qc.invalidateQueries({ queryKey: ["admin-assignable"] }); qc.invalidateQueries({ queryKey: ["admin-riders"] }); }, onError: (e: Error) => toast.error(e.message) });
 
-  const pending = useQuery({ queryKey: ["admin-pending-riders"], queryFn: () => adminListPendingRiders(), refetchInterval: 30_000 });
+  const pendingFn = useDualFn(adminListPendingRiders, () => php.admin.pendingRiders());
+  const decideFn = useDualFn(adminDecideRider, (d) => php.admin.decideRider(d));
+  const pending = useQuery({ queryKey: ["admin-pending-riders"], queryFn: () => pendingFn(), refetchInterval: 30_000 });
   const decideM = useMutation({
-    mutationFn: (v: { rider_id: string; approve: boolean; reason?: string }) => adminDecideRider({ data: { ...v, reason: v.reason ?? "" } }),
+    mutationFn: (v: { rider_id: string; approve: boolean; reason?: string }) => decideFn({ data: { ...v, reason: v.reason ?? "" } }),
     onSuccess: () => { toast.success("Updated"); qc.invalidateQueries({ queryKey: ["admin-pending-riders"] }); qc.invalidateQueries({ queryKey: ["admin-riders"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -187,8 +189,11 @@ function RidersPage() {
 
 function AreasDialog({ rider, onClose }: { rider: any; onClose: () => void }) {
   const qc = useQueryClient();
-  const outlets = useQuery({ queryKey: ["admin-outlets-for-rider"], queryFn: () => adminListOutletsForRider() });
-  const current = useQuery({ queryKey: ["admin-rider-areas", rider.id], queryFn: () => adminGetRiderAreas({ data: { rider_id: rider.id } }) });
+  const outletsFn = useDualFn(adminListOutletsForRider, () => php.admin.outletsForRider());
+  const getAreasFn = useDualFn(adminGetRiderAreas, (d) => php.admin.getRiderAreas(d));
+  const setAreasFn = useDualFn(adminSetRiderAreas, (d) => php.admin.setRiderAreas(d));
+  const outlets = useQuery({ queryKey: ["admin-outlets-for-rider"], queryFn: () => outletsFn() });
+  const current = useQuery({ queryKey: ["admin-rider-areas", rider.id], queryFn: () => getAreasFn({ data: { rider_id: rider.id } }) });
   const [selOutlets, setSelOutlets] = useState<Set<string>>(new Set());
   const [pincodes, setPincodes] = useState<string>("");
   const [loaded, setLoaded] = useState(false);
@@ -198,7 +203,7 @@ function AreasDialog({ rider, onClose }: { rider: any; onClose: () => void }) {
     setLoaded(true);
   }
   const saveM = useMutation({
-    mutationFn: () => adminSetRiderAreas({ data: {
+    mutationFn: () => setAreasFn({ data: {
       rider_id: rider.id,
       outlet_ids: Array.from(selOutlets),
       pincodes: pincodes.split(/[,\s]+/).map((s) => s.trim()).filter((s) => /^\d{6}$/.test(s)),
