@@ -238,18 +238,22 @@ function escapeHtml(s: string) {
 function AssignRiderButton({ orderId, outletId, deliveryPincode }: { orderId: string; outletId: string; deliveryPincode?: string }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
+  const getAssignFn = useDualFn(outletGetOrderAssignment, (d) => php.outletMgr.getOrderAssignment(d));
+  const availFn = useDualFn(outletListAvailableRiders, (d) => php.outletMgr.availableRiders(d));
+  const assignFn = useDualFn(outletAssignOrder, (d) => php.outletMgr.assignOrder(d));
+
   const current = useQuery({
     queryKey: ["outlet-assignment", orderId],
-    queryFn: () => outletGetOrderAssignment({ data: { order_id: orderId } }),
+    queryFn: () => getAssignFn({ data: { order_id: orderId } }),
     refetchInterval: 20_000,
   });
   const riders = useQuery({
     queryKey: ["outlet-available-riders", outletId, deliveryPincode ?? ""],
-    queryFn: () => outletListAvailableRiders({ data: { outlet_id: outletId, delivery_pincode: deliveryPincode && /^\d{6}$/.test(deliveryPincode) ? deliveryPincode : undefined } }),
+    queryFn: () => availFn({ data: { outlet_id: outletId, delivery_pincode: deliveryPincode && /^\d{6}$/.test(deliveryPincode) ? deliveryPincode : undefined } }),
     enabled: open,
   });
   const assign = useMutation({
-    mutationFn: (rider_id: string) => outletAssignOrder({ data: { order_id: orderId, rider_id } }),
+    mutationFn: (rider_id: string) => assignFn({ data: { order_id: orderId, rider_id } }),
     onSuccess: () => {
       toast.success("Rider assigned");
       setOpen(false);
