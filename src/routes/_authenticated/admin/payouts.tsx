@@ -113,8 +113,9 @@ function PayoutsPage() {
 function FeeEditor({ fee, onSaved }: { fee: number; onSaved: () => void }) {
   const [open, setOpen] = useState(false);
   const [val, setVal] = useState(fee);
+  const setFeeFn = useDualFn(adminSetRiderFee, (d) => php.admin.setRiderFee(d));
   const m = useMutation({
-    mutationFn: () => adminSetRiderFee({ data: { fee: val } }),
+    mutationFn: () => setFeeFn({ data: { fee: val } }),
     onSuccess: () => { toast.success("Fee updated"); setOpen(false); onSaved(); },
     onError: (e: Error) => toast.error(e.message),
   });
