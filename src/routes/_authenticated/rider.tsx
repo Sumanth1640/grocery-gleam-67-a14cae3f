@@ -14,6 +14,8 @@ import { php } from "@/lib/php-api";
 import { ensureNotifyPermission, notify } from "@/lib/native-notify";
 import { capturePhoto } from "@/lib/native-camera";
 import { phpUploads } from "@/lib/php-api";
+import { setBadge } from "@/lib/native-badge";
+import { enqueueAssignmentUpdate, flushQueue, initOfflineQueueAutoFlush, queueSize } from "@/lib/offline-queue";
 
 export const Route = createFileRoute("/_authenticated/rider")({
   head: () => ({ meta: [{ title: "Rider — hallifresh" }] }),
@@ -42,11 +44,32 @@ function RiderHome() {
     refetchInterval: 15_000,
   });
 
+  const [pendingCount, setPendingCount] = useState<number>(() => queueSize());
+
   const updateM = useMutation({
-    mutationFn: (v: { assignment_id: string; status: "picked_up" | "delivered"; proof_url?: string }) =>
-      updateFn({ data: v }),
-    onSuccess: () => {
-      toast.success("Status updated");
+    mutationFn: async (v: { assignment_id: string; status: "picked_up" | "delivered"; proof_url?: string }) => {
+      const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+      if (offline) {
+        enqueueAssignmentUpdate(v);
+        setPendingCount(queueSize());
+        return { queued: true as const };
+      }
+      try {
+        return await updateFn({ data: v });
+      } catch (e) {
+        // Network-ish failure → queue and retry later
+        const msg = (e as Error)?.message || "";
+        if (/network|fetch|failed|timeout/i.test(msg)) {
+          enqueueAssignmentUpdate(v);
+          setPendingCount(queueSize());
+          return { queued: true as const };
+        }
+        throw e;
+      }
+    },
+    onSuccess: (res: any) => {
+      if (res?.queued) toast.message("Saved offline — will sync when online");
+      else toast.success("Status updated");
       qc.invalidateQueries({ queryKey: ["rider-assignments"] });
       qc.invalidateQueries({ queryKey: ["rider-my-earnings"] });
     },
@@ -55,6 +78,10 @@ function RiderHome() {
 
   const handleDeliver = async (assignmentId: string) => {
     if (!user?.id) return;
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      toast.error("You're offline — connect to internet to upload the delivery photo");
+      return;
+    }
     try {
       toast.info("Take a photo of the delivered order");
       const blob = await capturePhoto();
@@ -80,7 +107,26 @@ function RiderHome() {
 
   useEffect(() => {
     void ensureNotifyPermission();
-  }, []);
+    const dispose = initOfflineQueueAutoFlush(async (remaining) => {
+      setPendingCount(remaining);
+      if (remaining === 0) {
+        qc.invalidateQueries({ queryKey: ["rider-assignments"] });
+      }
+    });
+    return dispose;
+  }, [qc]);
+
+  // Keep app icon badge in sync with active assignment count
+  useEffect(() => {
+    const list = assignQ.data ?? [];
+    const active = list.filter((a: any) => a.status === "assigned" || a.status === "picked_up").length;
+    void setBadge(active);
+  }, [assignQ.data]);
+
+  // Retry queue flush whenever assignments refetch
+  useEffect(() => {
+    void flushQueue().then((r) => setPendingCount(r.remaining));
+  }, [assignQ.dataUpdatedAt]);
 
   if (meQ.isLoading) {
     return <div className="grid min-h-screen place-items-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-600" /></div>;
