@@ -37,7 +37,17 @@ export function MobileLogin({ redirect }: { redirect: string }) {
 
   const resolveDest = async (): Promise<string> => {
     if (redirect) return redirect;
-    if (USE_PHP) return "/";
+    if (USE_PHP) {
+      try {
+        const r = await php.rider.me();
+        if (r?.rider && r.rider.status === "approved") return "/rider";
+      } catch { /* ignore */ }
+      try {
+        const role = await php.checkRole();
+        if (role.isAdmin) return "/admin";
+      } catch { /* ignore */ }
+      return "/";
+    }
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return "/";
