@@ -5,23 +5,26 @@ $rider = require_rider();
 $b = json_body();
 $aid = (string)($b['assignment_id'] ?? '');
 $status = (string)($b['status'] ?? '');
+$proof = isset($b['proof_url']) ? (string)$b['proof_url'] : '';
 if ($aid === '' || !in_array($status, ['picked_up','delivered','assigned'], true)) json_error('Invalid input');
+if ($status === 'delivered' && $proof === '') json_error('Delivery proof photo is required');
 
 $st = db()->prepare('SELECT id, order_id, rider_id FROM order_assignments WHERE id = ?');
 $st->execute([$aid]);
 $a = $st->fetch();
 if (!$a || $a['rider_id'] !== $rider['id']) json_error('Assignment not found', 404);
 
-$extra = '';
-if ($status === 'picked_up') $extra = ', picked_up_at = CURRENT_TIMESTAMP';
-if ($status === 'delivered') $extra = ', delivered_at = CURRENT_TIMESTAMP';
-db()->prepare("UPDATE order_assignments SET status = ? $extra WHERE id = ?")->execute([$status, $aid]);
+$sets = ['status = ?'];
+$params = [$status];
+if ($status === 'picked_up')  $sets[] = 'picked_up_at = CURRENT_TIMESTAMP';
+if ($status === 'delivered')  { $sets[] = 'delivered_at = CURRENT_TIMESTAMP'; $sets[] = 'proof_photo = ?'; $params[] = $proof; }
+$params[] = $aid;
+db()->prepare('UPDATE order_assignments SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
 
 if ($status === 'picked_up') {
   db()->prepare("UPDATE orders SET status = 'out_for_delivery' WHERE id = ?")->execute([$a['order_id']]);
 } elseif ($status === 'delivered') {
   db()->prepare("UPDATE orders SET status = 'delivered' WHERE id = ?")->execute([$a['order_id']]);
-  // Trigger replacement: record the earning row (idempotent)
   record_rider_earning($rider['id'], $a['order_id']);
 }
 json_ok(['ok' => true]);

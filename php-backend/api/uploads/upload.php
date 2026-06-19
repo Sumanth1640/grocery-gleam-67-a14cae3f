@@ -21,7 +21,7 @@ $bucket = $_POST['bucket'] ?? '';
 $folder = $_POST['folder'] ?? '';
 $kind   = $_POST['kind']   ?? '';
 
-if (!in_array($bucket, ['catalog', 'partner-docs', 'refund-proofs'], true)) {
+if (!in_array($bucket, ['catalog', 'partner-docs', 'refund-proofs', 'delivery-proofs'], true)) {
   json_error('Invalid bucket', 400);
 }
 
@@ -31,13 +31,14 @@ if (!in_array($bucket, ['catalog', 'partner-docs', 'refund-proofs'], true)) {
 //   (partners upload their own dish/restaurant images here)
 // - partner-docs uploads must be scoped to the caller's own user id folder
 // - refund-proofs uploads must be scoped to the caller's own user id folder
+// - delivery-proofs uploads must be scoped to the caller's own user id folder (rider)
 if ($bucket === 'catalog') {
   $partnerFolders = ['dishes', 'restaurants'];
   if (!in_array($folder, $partnerFolders, true)) {
     require_admin($uid);
   }
   // any authenticated user may upload to dishes/restaurants
-} else if ($bucket === 'partner-docs' || $bucket === 'refund-proofs') {
+} else if ($bucket === 'partner-docs' || $bucket === 'refund-proofs' || $bucket === 'delivery-proofs') {
   if ($folder === '' || $folder !== $uid) {
     json_error('Forbidden: files must be uploaded to your own folder', 403);
   }
@@ -62,9 +63,10 @@ $origName = (string)($f['name'] ?? 'file');
 $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION)) ?: 'bin';
 
 $allowedByBucket = [
-  'catalog'        => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-  'partner-docs'   => ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
-  'refund-proofs'  => ['jpg', 'jpeg', 'png', 'webp'],
+  'catalog'         => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+  'partner-docs'    => ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+  'refund-proofs'   => ['jpg', 'jpeg', 'png', 'webp'],
+  'delivery-proofs' => ['jpg', 'jpeg', 'png', 'webp'],
 ];
 
 if (!in_array($ext, $allowedByBucket[$bucket], true)) {
