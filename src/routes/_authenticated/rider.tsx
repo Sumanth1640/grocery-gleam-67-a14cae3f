@@ -194,6 +194,19 @@ function RiderHome() {
         </div>
       </div>
 
+      {pendingCount > 0 && (
+        <div className="mx-5 mt-3 flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800">
+          <span>⏳ {pendingCount} update{pendingCount > 1 ? "s" : ""} waiting to sync</span>
+          <button
+            onClick={() => flushQueue().then((r) => setPendingCount(r.remaining))}
+            className="rounded-full bg-amber-600 px-3 py-1 text-white"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+
       <section className="px-5 pt-5">
         <h2 className="text-sm font-extrabold text-zinc-900">Active deliveries</h2>
         <div className="mt-3 space-y-3">
