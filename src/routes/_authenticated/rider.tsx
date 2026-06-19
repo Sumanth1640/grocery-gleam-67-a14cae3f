@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import {
-  ChevronLeft, Bike, Package, MapPin, Phone, CheckCircle2, Truck, Clock, LogOut, Loader2, Wallet,
+  ChevronLeft, Bike, Package, MapPin, Phone, CheckCircle2, Truck, Clock, LogOut, Loader2, Wallet, RefreshCw, WifiOff,
 } from "lucide-react";
 import { riderMe, riderMyAssignments, riderUpdateAssignmentStatus, riderApply, riderListOutletsForSignup } from "@/lib/rider.functions";
 import { riderMyEarnings } from "@/lib/earnings.functions";
@@ -45,6 +45,21 @@ function RiderHome() {
   });
 
   const [pendingCount, setPendingCount] = useState<number>(() => queueSize());
+  const [online, setOnline] = useState<boolean>(() => (typeof navigator === "undefined" ? true : navigator.onLine));
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyAction, setBusyAction] = useState<"pickup" | "deliver" | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const on = () => { setOnline(true); toast.success("Back online — syncing…"); };
+    const off = () => { setOnline(false); toast.message("You're offline — actions will be saved and synced later"); };
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
 
   const updateM = useMutation({
     mutationFn: async (v: { assignment_id: string; status: "picked_up" | "delivered"; proof_url?: string }) => {
@@ -74,7 +89,13 @@ function RiderHome() {
       qc.invalidateQueries({ queryKey: ["rider-my-earnings"] });
     },
     onError: (e: Error) => toast.error(e.message),
+    onSettled: () => { setBusyId(null); setBusyAction(null); },
   });
+
+  const onPickupClick = (id: string) => {
+    setBusyId(id); setBusyAction("pickup");
+    updateM.mutate({ assignment_id: id, status: "picked_up" });
+  };
 
   const handleDeliver = async (assignmentId: string) => {
     if (!user?.id) return;
@@ -83,13 +104,15 @@ function RiderHome() {
       return;
     }
     try {
+      setBusyId(assignmentId); setBusyAction("deliver");
       toast.info("Take a photo of the delivered order");
       const blob = await capturePhoto();
-      if (!blob) return;
+      if (!blob) { setBusyId(null); setBusyAction(null); return; }
       const up = await phpUploads.deliveryProof(blob, user.id);
       updateM.mutate({ assignment_id: assignmentId, status: "delivered", proof_url: up.url });
     } catch (e: any) {
       toast.error(e?.message || "Could not capture or upload photo");
+      setBusyId(null); setBusyAction(null);
     }
   };
 
@@ -194,6 +217,13 @@ function RiderHome() {
         </div>
       </div>
 
+      {!online && (
+        <div className="mx-5 mt-3 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-900 px-3 py-2 text-[11px] font-extrabold text-white">
+          <WifiOff className="h-3.5 w-3.5" />
+          <span>Offline — pickups will be queued. Deliveries need internet for the proof photo.</span>
+        </div>
+      )}
+
       {pendingCount > 0 && (
         <div className="mx-5 mt-3 flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800">
           <span>⏳ {pendingCount} update{pendingCount > 1 ? "s" : ""} waiting to sync</span>
@@ -208,19 +238,32 @@ function RiderHome() {
 
 
       <section className="px-5 pt-5">
-        <h2 className="text-sm font-extrabold text-zinc-900">Active deliveries</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-extrabold text-zinc-900">Active deliveries</h2>
+          <button
+            onClick={() => assignQ.refetch()}
+            disabled={assignQ.isFetching}
+            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-zinc-600 shadow-sm disabled:opacity-50"
+            aria-label="Refresh"
+          >
+            <RefreshCw className={`h-3 w-3 ${assignQ.isFetching ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+        </div>
         <div className="mt-3 space-y-3">
           {active.length === 0 && (
             <div className="rounded-2xl border border-dashed border-zinc-200 bg-white p-6 text-center text-xs font-semibold text-zinc-500">
-              No active deliveries right now.
+              No active deliveries right now.<br />New assignments will appear here automatically.
             </div>
           )}
           {active.map((a: any) => (
             <DeliveryCard
               key={a.id}
               a={a}
-              busy={updateM.isPending}
-              onPickup={() => updateM.mutate({ assignment_id: a.id, status: "picked_up" })}
+              online={online}
+              isBusy={busyId === a.id}
+              busyAction={busyId === a.id ? busyAction : null}
+              onPickup={() => onPickupClick(a.id)}
               onDeliver={() => handleDeliver(a.id)}
             />
           ))}
@@ -277,9 +320,13 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function DeliveryCard({ a, busy, onPickup, onDeliver }: { a: any; busy: boolean; onPickup: () => void; onDeliver: () => void }) {
+function DeliveryCard({ a, online, isBusy, busyAction, onPickup, onDeliver }: {
+  a: any; online: boolean; isBusy: boolean; busyAction: "pickup" | "deliver" | null;
+  onPickup: () => void; onDeliver: () => void;
+}) {
   const o = a.orders ?? {};
   const addr = o.address ?? {};
+  const deliverDisabled = isBusy || !online;
   return (
     <div className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -305,22 +352,31 @@ function DeliveryCard({ a, busy, onPickup, onDeliver }: { a: any; busy: boolean;
         </div>
         {addr.phone && (
           <a href={`tel:${addr.phone}`} className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-emerald-700">
-            <Phone className="h-3 w-3" /> {addr.phone}
+            <Phone className="h-3 w-3" /> Call {addr.phone}
           </a>
         )}
       </div>
 
       <div className="mt-3 flex gap-2">
         {a.status === "assigned" ? (
-          <button disabled={busy} onClick={onPickup} className="flex-1 rounded-2xl bg-blue-600 px-4 py-3 text-xs font-extrabold text-white disabled:opacity-60">
-            <Truck className="mr-1 inline h-3.5 w-3.5" /> Mark picked up
+          <button disabled={isBusy} onClick={onPickup} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-2xl bg-blue-600 px-4 py-3 text-xs font-extrabold text-white disabled:opacity-60">
+            {busyAction === "pickup"
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <Truck className="h-3.5 w-3.5" />}
+            {busyAction === "pickup" ? "Saving…" : "Mark picked up"}
           </button>
         ) : (
-          <button disabled={busy} onClick={onDeliver} className="flex-1 rounded-2xl bg-[oklch(0.55_0.16_145)] px-4 py-3 text-xs font-extrabold text-white disabled:opacity-60">
-            <CheckCircle2 className="mr-1 inline h-3.5 w-3.5" /> Mark delivered
+          <button disabled={deliverDisabled} onClick={onDeliver} title={!online ? "You're offline — connect to upload proof" : undefined} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-2xl bg-[oklch(0.55_0.16_145)] px-4 py-3 text-xs font-extrabold text-white disabled:opacity-60">
+            {busyAction === "deliver"
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <CheckCircle2 className="h-3.5 w-3.5" />}
+            {busyAction === "deliver" ? "Uploading…" : "Mark delivered"}
           </button>
         )}
       </div>
+      {!online && a.status === "picked_up" && (
+        <div className="mt-2 text-[10px] font-semibold text-zinc-500">Delivery needs internet for the proof photo upload.</div>
+      )}
     </div>
   );
 }
