@@ -12,6 +12,8 @@ import { useAuth } from "@/lib/use-auth";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
 import { ensureNotifyPermission, notify } from "@/lib/native-notify";
+import { capturePhoto } from "@/lib/native-camera";
+import { phpUploads } from "@/lib/php-api";
 
 export const Route = createFileRoute("/_authenticated/rider")({
   head: () => ({ meta: [{ title: "Rider — hallifresh" }] }),
@@ -41,7 +43,7 @@ function RiderHome() {
   });
 
   const updateM = useMutation({
-    mutationFn: (v: { assignment_id: string; status: "picked_up" | "delivered" }) =>
+    mutationFn: (v: { assignment_id: string; status: "picked_up" | "delivered"; proof_url?: string }) =>
       updateFn({ data: v }),
     onSuccess: () => {
       toast.success("Status updated");
@@ -50,6 +52,19 @@ function RiderHome() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const handleDeliver = async (assignmentId: string) => {
+    if (!user?.id) return;
+    try {
+      toast.info("Take a photo of the delivered order");
+      const blob = await capturePhoto();
+      if (!blob) return;
+      const up = await phpUploads.deliveryProof(blob, user.id);
+      updateM.mutate({ assignment_id: assignmentId, status: "delivered", proof_url: up.url });
+    } catch (e: any) {
+      toast.error(e?.message || "Could not capture or upload photo");
+    }
+  };
 
   // Play a soft chime + fire a local notification when a new active assignment appears.
   const prevActiveRef = useRef<number | null>(null);
@@ -147,7 +162,7 @@ function RiderHome() {
               a={a}
               busy={updateM.isPending}
               onPickup={() => updateM.mutate({ assignment_id: a.id, status: "picked_up" })}
-              onDeliver={() => updateM.mutate({ assignment_id: a.id, status: "delivered" })}
+              onDeliver={() => handleDeliver(a.id)}
             />
           ))}
         </div>

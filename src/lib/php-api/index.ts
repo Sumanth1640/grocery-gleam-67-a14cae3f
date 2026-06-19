@@ -312,7 +312,7 @@ export const php = {
     }) => request<any>("/rider/apply.php", "POST", p),
     outletsForSignup: () => request<any[]>("/rider/outlets_for_signup.php"),
     myAssignments: () => request<any[]>("/rider/assignments.php"),
-    updateAssignment: (p: { assignment_id: string; status: "picked_up" | "delivered" | "assigned" }) =>
+    updateAssignment: (p: { assignment_id: string; status: "picked_up" | "delivered" | "assigned"; proof_url?: string }) =>
       request<{ ok: true }>("/rider/update_assignment.php", "POST", p),
     myEarnings: () =>
       request<{ rows: any[]; summary: { today: number; week: number; month: number; pending: number; paid: number } }>(
@@ -562,6 +562,15 @@ export const phpUploads = {
     fd.append("bucket", "refund-proofs");
     fd.append("folder", userId);
     fd.append("file", file);
+    return uploadMultipart("/uploads/upload.php", fd);
+  },
+  /** Rider delivery proof photo — folder MUST equal the current user's id. */
+  deliveryProof: (file: Blob, userId: string) => {
+    const fd = new FormData();
+    fd.append("bucket", "delivery-proofs");
+    fd.append("folder", userId);
+    const ext = (file.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+    fd.append("file", file, `proof-${Date.now()}.${ext}`);
     return uploadMultipart("/uploads/upload.php", fd);
   },
 
