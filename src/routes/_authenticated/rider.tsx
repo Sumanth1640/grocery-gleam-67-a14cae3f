@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
+import { ensureNotifyPermission, notify } from "@/lib/native-notify";
 
 export const Route = createFileRoute("/_authenticated/rider")({
   head: () => ({ meta: [{ title: "Rider — hallifresh" }] }),
@@ -50,24 +51,20 @@ function RiderHome() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Play a soft chime when a new active assignment appears.
+  // Play a soft chime + fire a local notification when a new active assignment appears.
   const prevActiveRef = useRef<number | null>(null);
   useEffect(() => {
     const list = assignQ.data ?? [];
     const activeCount = list.filter((a: any) => a.status === "assigned").length;
     if (prevActiveRef.current !== null && activeCount > prevActiveRef.current) {
       playChime();
-      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-        new Notification("New delivery assigned", { body: "Open the rider app to view details." });
-      }
+      void notify("New delivery assigned", "Open the rider app to view details.");
     }
     prevActiveRef.current = activeCount;
   }, [assignQ.data]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().catch(() => {});
-    }
+    void ensureNotifyPermission();
   }, []);
 
   if (meQ.isLoading) {
