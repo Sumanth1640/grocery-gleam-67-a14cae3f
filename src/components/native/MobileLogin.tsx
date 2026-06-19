@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { dualApi, USE_PHP } from "@/lib/dual-api";
-import { phpAuth } from "@/lib/php-api";
+import { phpAuth, php } from "@/lib/php-api";
 import { Eye, EyeOff, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
