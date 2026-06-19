@@ -22,21 +22,23 @@ export function MobileLogin({ redirect }: { redirect: string }) {
 
   useEffect(() => {
     let active = true;
-    const dest = redirect || "/";
     if (USE_PHP) {
-      if (phpAuth.get() && active) navigate({ to: dest, replace: true });
+      if (phpAuth.get()) {
+        void resolveDest().then((dest) => { if (active) navigate({ to: dest, replace: true }); });
+      }
       return () => { active = false; };
     }
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!active || !data.session) return;
-      navigate({ to: dest, replace: true });
+      const dest = await resolveDest();
+      if (active) navigate({ to: dest, replace: true });
     });
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, redirect]);
 
   const resolveDest = async (): Promise<string> => {
-    if (redirect) return redirect;
+    const hasExplicit = redirect && redirect !== "/";
     if (USE_PHP) {
       try {
         const r = await php.rider.me();
@@ -46,18 +48,19 @@ export function MobileLogin({ redirect }: { redirect: string }) {
         const role = await php.checkRole();
         if (role.isAdmin) return "/admin";
       } catch { /* ignore */ }
-      return "/";
+      return hasExplicit ? redirect : "/";
     }
     try {
       const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return "/";
-      const { data: roles } = await supabase
-        .from("user_roles").select("role").eq("user_id", u.user.id);
-      const list = (roles ?? []).map((r) => r.role);
-      if (list.includes("rider")) return "/rider";
-      if (list.includes("admin")) return "/admin";
+      if (u.user) {
+        const { data: roles } = await supabase
+          .from("user_roles").select("role").eq("user_id", u.user.id);
+        const list = (roles ?? []).map((r) => r.role);
+        if (list.includes("rider")) return "/rider";
+        if (list.includes("admin")) return "/admin";
+      }
     } catch { /* ignore */ }
-    return "/";
+    return hasExplicit ? redirect : "/";
   };
 
   const submit = async (e: FormEvent) => {
