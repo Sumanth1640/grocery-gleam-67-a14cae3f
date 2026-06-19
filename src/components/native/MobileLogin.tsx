@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { dualApi, USE_PHP } from "@/lib/dual-api";
-import { phpAuth } from "@/lib/php-api";
+import { phpAuth, php } from "@/lib/php-api";
 import { Eye, EyeOff, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,7 +37,17 @@ export function MobileLogin({ redirect }: { redirect: string }) {
 
   const resolveDest = async (): Promise<string> => {
     if (redirect) return redirect;
-    if (USE_PHP) return "/";
+    if (USE_PHP) {
+      try {
+        const r = await php.rider.me();
+        if (r?.rider && r.rider.status === "approved") return "/rider";
+      } catch { /* ignore */ }
+      try {
+        const role = await php.checkRole();
+        if (role.isAdmin) return "/admin";
+      } catch { /* ignore */ }
+      return "/";
+    }
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return "/";
