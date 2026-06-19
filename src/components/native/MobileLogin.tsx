@@ -22,14 +22,16 @@ export function MobileLogin({ redirect }: { redirect: string }) {
 
   useEffect(() => {
     let active = true;
-    const dest = redirect || "/";
     if (USE_PHP) {
-      if (phpAuth.get() && active) navigate({ to: dest, replace: true });
+      if (phpAuth.get()) {
+        void resolveDest().then((dest) => { if (active) navigate({ to: dest, replace: true }); });
+      }
       return () => { active = false; };
     }
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!active || !data.session) return;
-      navigate({ to: dest, replace: true });
+      const dest = await resolveDest();
+      if (active) navigate({ to: dest, replace: true });
     });
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
