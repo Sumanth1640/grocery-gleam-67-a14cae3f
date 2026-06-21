@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { initNativeNotifications, notify, onNotificationTap } from "@/lib/native-notifications";
+import { initNativePush } from "@/lib/native-push";
 import { orderStore } from "@/lib/order-store";
 
 /**
