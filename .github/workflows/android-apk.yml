@@ -56,8 +56,9 @@ jobs:
 
       - name: Copy google-services.json into android/app
         run: |
-          cp google-services.json android/app/google-services.json 2>/dev/null || \
-          cp android/app/google-services.json android/app/google-services.json 2>/dev/null || true
+          if [ -f google-services.json ]; then
+            cp google-services.json android/app/google-services.json
+          fi
           test -f android/app/google-services.json && echo "google-services.json present" || (echo "ERROR: missing google-services.json" && exit 1)
 
       - name: Enable Firebase / FCM in Gradle
