@@ -54,9 +54,10 @@ const NOTIFICATION_SMALL_ICON = "ic_stat_hallifresh";
 
 async function getPlugin() {
   try {
-    const { Capacitor, registerPlugin } = await import("@capacitor/core");
+    const { Capacitor } = await import("@capacitor/core");
     if (!Capacitor.isNativePlatform()) return null;
-    return registerPlugin<LocalNotificationsPlugin>("LocalNotifications");
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
+    return LocalNotifications as LocalNotificationsPlugin;
   } catch (e) {
     console.warn("[native-notifications] plugin load failed", e);
     return null;
