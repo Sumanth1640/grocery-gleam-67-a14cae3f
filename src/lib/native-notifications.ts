@@ -43,7 +43,7 @@ type LocalNotificationsPlugin = {
       schedule?: { at: Date; allowWhileIdle?: boolean };
       extra?: Record<string, unknown>;
     }>;
-  }) => Promise<void>;
+  }) => Promise<unknown>;
   cancel: (options: { notifications: Array<{ id: number }> }) => Promise<void>;
 };
 
