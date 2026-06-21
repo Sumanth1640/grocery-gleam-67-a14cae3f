@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { phpAuth } from "@/lib/php-api";
 
 const PUSH_CHANNEL_ID = "hallifresh-default";
+const PUSH_SMALL_ICON = "ic_stat_hallifresh";
 let listenersAttached = false;
 
 async function postToken(tokenValue: string, platform: string) {
@@ -12,22 +13,34 @@ async function postToken(tokenValue: string, platform: string) {
   const phpToken = phpAuth.get();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (phpToken) headers.Authorization = `Bearer ${phpToken}`;
-  await fetch(`${BACKEND_BASE}/notifications/register_token.php`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      token: tokenValue,
-      platform,
-      user_id: uid,
-    }),
-    credentials: "include",
-  }).catch(() => {});
+  const body = JSON.stringify({ token: tokenValue, platform, user_id: uid });
+  for (const base of backendCandidates()) {
+    try {
+      const response = await fetch(`${base}/notifications/register_token.php`, {
+        method: "POST",
+        headers,
+        body,
+        credentials: "include",
+      });
+      if (response.ok) return;
+      const text = await response.text().catch(() => "");
+      console.warn("FCM token registration failed", base, response.status, text.slice(0, 160));
+    } catch (error) {
+      console.warn("FCM token registration network error", base, error);
+    }
+  }
 }
 
 const BACKEND_BASE =
   (typeof window !== "undefined" &&
     (window as any).__HALLIFRESH_API_BASE__) ||
   "https://hallifresh.in/php-backend/api";
+
+function backendCandidates(): string[] {
+  const configured = (import.meta.env.VITE_PHP_API_BASE as string | undefined)?.replace(/\/$/, "");
+  const candidates = [configured, BACKEND_BASE, "/php-backend/api", "/api"].filter(Boolean) as string[];
+  return [...new Set(candidates)];
+}
 
 export async function initNativePush(): Promise<void> {
   try {
@@ -112,7 +125,7 @@ export async function initNativePush(): Promise<void> {
                   title: notification?.title ?? notification?.data?.title ?? "Notification",
                   body: notification?.body ?? notification?.data?.body ?? "",
                   channelId: PUSH_CHANNEL_ID,
-                  smallIcon: "ic_stat_icon_config_sample",
+                  smallIcon: PUSH_SMALL_ICON,
                   extra: notification?.data ?? {},
                 },
               ],

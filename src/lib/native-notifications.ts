@@ -49,6 +49,8 @@ type LocalNotificationsPlugin = {
 
 let permissionGranted: boolean | null = null;
 const listeners: Array<(payload: Record<string, unknown> | undefined) => void> = [];
+const NOTIFICATION_CHANNEL_ID = "hallifresh-default";
+const NOTIFICATION_SMALL_ICON = "ic_stat_hallifresh";
 
 async function getPlugin() {
   try {
@@ -77,7 +79,7 @@ export async function initNativeNotifications() {
     // Create a default notification channel (Android 8+)
     try {
       await plugin.createChannel({
-        id: "hallifresh-default",
+        id: NOTIFICATION_CHANNEL_ID,
         name: "Hallifresh",
         description: "Order updates, reminders, offers & alerts",
         importance: 5,
@@ -120,8 +122,8 @@ export async function notify(opts: NotifyOptions) {
           id: opts.id ?? Math.floor(Date.now() % 2_000_000_000),
           title: opts.title,
           body: opts.body,
-          channelId: "hallifresh-default",
-          smallIcon: "ic_stat_icon_config_sample",
+          channelId: NOTIFICATION_CHANNEL_ID,
+          smallIcon: NOTIFICATION_SMALL_ICON,
           schedule: opts.at ? { at: opts.at, allowWhileIdle: true } : undefined,
           extra: opts.extra ?? {},
         },
