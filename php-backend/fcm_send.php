@@ -3,17 +3,21 @@
 // Sends FCM push notifications using Firebase HTTP v1 + a service account.
 //
 // SETUP (do once on Hostinger):
-//   1. Upload the Firebase service account JSON to a location OUTSIDE the
-//      public web root, e.g.  /home/<youruser>/private/fcm-service-account.json
-//   2. Edit FCM_SERVICE_ACCOUNT_PATH below, or set an env var of the same
-//      name in your hosting panel. NEVER commit the JSON to git.
+//   1. Generate a Firebase service account private key from the Firebase Console.
+//   2. Upload the JSON file to a folder OUTSIDE public_html (e.g.
+//      /home/<youruser>/private/fcm-service-account.json).
+//   3. In your Hostinger control panel set an environment variable:
+//        FCM_SERVICE_ACCOUNT_PATH = /home/<youruser>/private/fcm-service-account.json
+//   4. NEVER commit the JSON file to git.
 
 require_once __DIR__ . '/config.php';
 
 if (!defined('FCM_SERVICE_ACCOUNT_PATH')) {
-  define('FCM_SERVICE_ACCOUNT_PATH',
-    getenv('FCM_SERVICE_ACCOUNT_PATH')
-      ?: (__DIR__ . '/secrets/fcm-service-account.json'));
+  $envPath = getenv('FCM_SERVICE_ACCOUNT_PATH');
+  if (!$envPath || !is_string($envPath) || $envPath === '') {
+    error_log('FCM: FCM_SERVICE_ACCOUNT_PATH environment variable is not set');
+  }
+  define('FCM_SERVICE_ACCOUNT_PATH', $envPath ?: '');
 }
 
 function fcm_access_token(): ?string {
