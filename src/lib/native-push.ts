@@ -51,6 +51,31 @@ export async function initNativePush(): Promise<void> {
       console.warn("Push registration error", err);
     });
 
+    // Foreground push: Android suppresses the system tray when app is open,
+    // so surface it as a local notification ourselves.
+    await PushNotifications.addListener(
+      "pushNotificationReceived",
+      async (notification: any) => {
+        try {
+          const localSpec = "@capacitor/local-notifications";
+          const { LocalNotifications } = await import(/* @vite-ignore */ localSpec);
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                id: Math.floor(Math.random() * 2_000_000_000),
+                title: notification?.title ?? notification?.data?.title ?? "Notification",
+                body: notification?.body ?? notification?.data?.body ?? "",
+                channelId: "default",
+                extra: notification?.data ?? {},
+              },
+            ],
+          });
+        } catch (e) {
+          console.warn("Foreground push -> local notification failed", e);
+        }
+      },
+    );
+
     // When a push is tapped while app is in background -> route
     await PushNotifications.addListener(
       "pushNotificationActionPerformed",
@@ -63,6 +88,7 @@ export async function initNativePush(): Promise<void> {
         } catch {}
       },
     );
+
   } catch (e) {
     console.warn("initNativePush failed", e);
   }
