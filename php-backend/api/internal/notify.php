@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../notification_helpers.php';
 require_method('POST');
 
 // HARDCODED — set this to the same value stored in Lovable secrets (INTERNAL_NOTIFY_SECRET)
-$EXPECTED = '27064431dbd914db0f491db4eb18c50cf3c753d96d816813815b8404bf21b1f4';
+$EXPECTED = 'f3a9b2c1d4e5f6789012345678901234abcd5678ef9012345678901234567890ab';
 $got = $_SERVER['HTTP_X_INTERNAL_SECRET'] ?? '';
 if (!$EXPECTED || !hash_equals($EXPECTED, $got)) json_error('Unauthorized', 401);
 
