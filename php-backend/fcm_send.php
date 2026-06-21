@@ -1,0 +1,123 @@
+<?php
+// php-backend/fcm_send.php
+// Sends FCM push notifications using Firebase HTTP v1 + a service account.
+//
+// SETUP (do once on Hostinger):
+//   1. Upload the Firebase service account JSON to a location OUTSIDE the
+//      public web root, e.g.  /home/<youruser>/private/fcm-service-account.json
+//   2. Edit FCM_SERVICE_ACCOUNT_PATH below, or set an env var of the same
+//      name in your hosting panel. NEVER commit the JSON to git.
+
+require_once __DIR__ . '/config.php';
+
+if (!defined('FCM_SERVICE_ACCOUNT_PATH')) {
+  define('FCM_SERVICE_ACCOUNT_PATH',
+    getenv('FCM_SERVICE_ACCOUNT_PATH')
+      ?: (__DIR__ . '/secrets/fcm-service-account.json'));
+}
+
+function fcm_access_token(): ?string {
+  static $cached = null; static $exp = 0;
+  if ($cached && time() < $exp - 60) return $cached;
+
+  $path = FCM_SERVICE_ACCOUNT_PATH;
+  if (!is_readable($path)) { error_log("FCM: service account not readable at $path"); return null; }
+  $sa = json_decode(file_get_contents($path), true);
+  if (!$sa || empty($sa['client_email']) || empty($sa['private_key'])) return null;
+
+  $now = time();
+  $header  = ['alg' => 'RS256', 'typ' => 'JWT'];
+  $claims  = [
+    'iss'   => $sa['client_email'],
+    'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
+    'aud'   => 'https://oauth2.googleapis.com/token',
+    'iat'   => $now,
+    'exp'   => $now + 3600,
+  ];
+  $b64 = fn($s) => rtrim(strtr(base64_encode($s), '+/', '-_'), '=');
+  $unsigned = $b64(json_encode($header)) . '.' . $b64(json_encode($claims));
+
+  $sig = '';
+  $pk = openssl_pkey_get_private($sa['private_key']);
+  if (!$pk) { error_log('FCM: bad private key'); return null; }
+  openssl_sign($unsigned, $sig, $pk, 'SHA256');
+  $jwt = $unsigned . '.' . $b64($sig);
+
+  $ch = curl_init('https://oauth2.googleapis.com/token');
+  curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => http_build_query([
+      'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      'assertion'  => $jwt,
+    ]),
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 15,
+  ]);
+  $resp = curl_exec($ch);
+  $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  curl_close($ch);
+  if ($code !== 200) { error_log("FCM token http $code: $resp"); return null; }
+  $j = json_decode($resp, true);
+  if (empty($j['access_token'])) return null;
+
+  $cached = $j['access_token'];
+  $exp    = $now + (int)($j['expires_in'] ?? 3600);
+  return $cached;
+}
+
+function fcm_project_id(): ?string {
+  if (!is_readable(FCM_SERVICE_ACCOUNT_PATH)) return null;
+  $sa = json_decode(file_get_contents(FCM_SERVICE_ACCOUNT_PATH), true);
+  return $sa['project_id'] ?? null;
+}
+
+/**
+ * Send a notification to every device token registered for $user_id.
+ * Silently no-ops if FCM isn't configured. Never throws.
+ */
+function fcm_send_to_user(string $user_id, string $title, string $body, array $data = []): void {
+  try {
+    $token = fcm_access_token();
+    $project = fcm_project_id();
+    if (!$token || !$project) return;
+
+    $st = db()->prepare('SELECT token FROM device_tokens WHERE user_id = ?');
+    $st->execute([$user_id]);
+    $tokens = array_column($st->fetchAll(), 'token');
+    if (!$tokens) return;
+
+    $url = "https://fcm.googleapis.com/v1/projects/$project/messages:send";
+    foreach ($tokens as $t) {
+      $payload = [
+        'message' => [
+          'token' => $t,
+          'notification' => ['title' => $title, 'body' => $body],
+          'data' => array_map('strval', $data),
+          'android' => ['priority' => 'HIGH', 'notification' => ['channel_id' => 'default']],
+        ],
+      ];
+      $ch = curl_init($url);
+      curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+          'Authorization: Bearer ' . $token,
+          'Content-Type: application/json',
+        ],
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 10,
+      ]);
+      $resp = curl_exec($ch);
+      $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      curl_close($ch);
+      // 404 / 410 = token is no longer valid -> prune
+      if ($code === 404 || $code === 410) {
+        try { db()->prepare('DELETE FROM device_tokens WHERE token = ?')->execute([$t]); } catch (Throwable $e) {}
+      } elseif ($code >= 400) {
+        error_log("FCM send http $code: $resp");
+      }
+    }
+  } catch (Throwable $e) {
+    error_log('FCM send failed: ' . $e->getMessage());
+  }
+}
