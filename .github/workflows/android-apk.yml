@@ -47,10 +47,12 @@ jobs:
 
       - name: Add Android platform
         run: |
-          if [ ! -d "android" ]; then
+          if [ ! -f "android/build.gradle" ]; then
+            rm -rf android
             npx cap add android
           fi
           npx cap sync android
+          test -f android/build.gradle && echo "android/build.gradle present" || (echo "ERROR: android/build.gradle missing after cap add" && ls -la android && exit 1)
 
       - name: Copy google-services.json into android/app
         run: |
