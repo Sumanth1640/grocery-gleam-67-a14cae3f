@@ -20,7 +20,16 @@ if (!defined('FCM_SERVICE_ACCOUNT_PATH')) {
     if (is_readable($fallback)) {
       $envPath = $fallback;
     } else {
-      error_log('FCM: FCM_SERVICE_ACCOUNT_PATH env var is not set and secrets/fcm-service-account.json not found');
+      foreach (glob(__DIR__ . '/secrets/*.json') ?: [] as $candidate) {
+        $json = json_decode((string)@file_get_contents($candidate), true);
+        if (!empty($json['project_id']) && !empty($json['client_email']) && !empty($json['private_key'])) {
+          $envPath = $candidate;
+          break;
+        }
+      }
+      if (!$envPath) {
+        error_log('FCM: FCM_SERVICE_ACCOUNT_PATH env var is not set and no Firebase service-account JSON was found in secrets/');
+      }
     }
   }
   define('FCM_SERVICE_ACCOUNT_PATH', $envPath ?: '');
