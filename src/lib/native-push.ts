@@ -6,13 +6,15 @@ import { phpAuth } from "@/lib/php-api";
 const PUSH_CHANNEL_ID = "hallifresh-default";
 const PUSH_SMALL_ICON = "ic_stat_hallifresh";
 let listenersAttached = false;
-let lastTokenPosted: string | null = null;
+let lastTokenPostKey: string | null = null;
 
 async function postToken(tokenValue: string, platform: string) {
   if (!tokenValue) return;
   const { data } = await supabase.auth.getUser();
   const uid = data.user?.id ?? null;
   const phpToken = phpAuth.get();
+  const postKey = JSON.stringify([tokenValue, platform, phpToken ?? "", uid ?? ""]);
+  if (lastTokenPostKey === postKey) return;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (phpToken) headers.Authorization = `Bearer ${phpToken}`;
   const body = JSON.stringify({ token: tokenValue, platform, user_id: uid });
@@ -25,7 +27,7 @@ async function postToken(tokenValue: string, platform: string) {
         credentials: "include",
       });
       if (response.ok) {
-        lastTokenPosted = tokenValue;
+        lastTokenPostKey = postKey;
         try {
           localStorage.setItem("hallifresh_fcm_token", tokenValue);
         } catch {}
@@ -145,7 +147,7 @@ export async function initNativePush(): Promise<void> {
 
     try {
       const cachedToken = localStorage.getItem("hallifresh_fcm_token");
-      if (cachedToken && cachedToken !== lastTokenPosted) {
+      if (cachedToken) {
         await postToken(cachedToken, Capacitor.getPlatform());
       }
     } catch {}
