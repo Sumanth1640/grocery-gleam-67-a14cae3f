@@ -4,6 +4,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { phpAuth } from "@/lib/php-api";
 
 const PUSH_CHANNEL_ID = "hallifresh-default";
+let listenersAttached = false;
+
+async function postToken(tokenValue: string, platform: string) {
+  const { data } = await supabase.auth.getUser();
+  const uid = data.user?.id ?? null;
+  const phpToken = phpAuth.get();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (phpToken) headers.Authorization = `Bearer ${phpToken}`;
+  await fetch(`${BACKEND_BASE}/notifications/register_token.php`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      token: tokenValue,
+      platform,
+      user_id: uid,
+    }),
+    credentials: "include",
+  }).catch(() => {});
+}
 
 const BACKEND_BASE =
   (typeof window !== "undefined" &&
@@ -52,31 +71,32 @@ export async function initNativePush(): Promise<void> {
       ]);
     } catch {}
 
-    await PushNotifications.addListener("registration", async (token: any) => {
-      try {
-        const { data } = await supabase.auth.getUser();
-        const uid = data.user?.id ?? null;
-        const phpToken = phpAuth.get();
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (phpToken) headers.Authorization = `Bearer ${phpToken}`;
-        await fetch(`${BACKEND_BASE}/notifications/register_token.php`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            token: token.value,
-            platform: Capacitor.getPlatform(),
-            user_id: uid,
-          }),
-          credentials: "include",
-        }).catch(() => {});
-      } catch (e) {
-        console.warn("FCM token POST failed", e);
-      }
-    });
+    if (!listenersAttached) {
+      listenersAttached = true;
+      await PushNotifications.addListener("registration", async (token: any) => {
+        try {
+          await postToken(token.value, Capacitor.getPlatform());
+        } catch (e) {
+          console.warn("FCM token POST failed", e);
+        }
+      });
 
-    await PushNotifications.addListener("registrationError", (err: any) => {
-      console.warn("Push registration error", err);
-    });
+      await PushNotifications.addListener("registrationError", (err: any) => {
+        console.warn("Push registration error", err);
+      });
+
+      await PushNotifications.addListener(
+        "pushNotificationActionPerformed",
+        (action: any) => {
+          const route =
+            (action.notification.data?.route as string | undefined) ??
+            "/notifications";
+          try {
+            window.location.assign(route);
+          } catch {}
+        },
+      );
+    }
 
     await PushNotifications.register();
 
@@ -103,19 +123,6 @@ export async function initNativePush(): Promise<void> {
         } catch (e) {
           console.warn("Foreground push -> local notification failed", e);
         }
-      },
-    );
-
-    // When a push is tapped while app is in background -> route
-    await PushNotifications.addListener(
-      "pushNotificationActionPerformed",
-      (action: any) => {
-        const route =
-          (action.notification.data?.route as string | undefined) ??
-          "/notifications";
-        try {
-          window.location.assign(route);
-        } catch {}
       },
     );
 
