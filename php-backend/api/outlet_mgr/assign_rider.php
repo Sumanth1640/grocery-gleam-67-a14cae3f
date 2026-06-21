@@ -43,8 +43,21 @@ if ($existing) {
 // Notify the rider (if linked to a user account)
 $st = db()->prepare('SELECT user_id FROM riders WHERE id = ?');
 $st->execute([$rider_id]); $ru = $st->fetchColumn();
+$trace = __DIR__ . '/../../secrets/assign_trace.log';
+@file_put_contents($trace, '['.date('c')."] assign order=$order_id rider=$rider_id rider_user_id=".($ru?:'(null)')."\n", FILE_APPEND);
 if ($ru) {
-  require_once __DIR__ . '/../../rider_helpers.php';
+  require_once __DIR__ . '/../../notification_helpers.php';
+  // Count device tokens for this user before sending
+  try {
+    $c = db()->prepare('SELECT COUNT(*) FROM device_tokens WHERE user_id = ?');
+    $c->execute([$ru]); $n = (int)$c->fetchColumn();
+    @file_put_contents($trace, '['.date('c')."] device_tokens for $ru = $n\n", FILE_APPEND);
+  } catch (Throwable $e) {
+    @file_put_contents($trace, '['.date('c')."] device_tokens lookup err: ".$e->getMessage()."\n", FILE_APPEND);
+  }
   notify_user($ru, 'order', 'New delivery assigned', 'You have a new delivery. Open the rider app for details.', '/rider');
+  @file_put_contents($trace, '['.date('c')."] notify_user returned\n", FILE_APPEND);
+} else {
+  @file_put_contents($trace, '['.date('c')."] SKIP: rider has no user_id\n", FILE_APPEND);
 }
 json_ok(['ok' => true]);
