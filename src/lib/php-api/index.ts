@@ -303,6 +303,20 @@ export const php = {
       request<any | null>("/outlet_mgr/order_assignment.php", "POST", p),
   },
 
+  // ---------- Warehouse manager ----------
+  warehouseMgr: {
+    myWarehouses: (_p?: unknown) =>
+      request<any[]>("/warehouse_mgr/my_warehouses.php"),
+    listOrders: (p?: { warehouse_id?: string }) =>
+      request<any[]>("/warehouse_mgr/orders_list.php", "POST", { warehouse_id: p?.warehouse_id ?? "" }),
+    availableRiders: (p: { warehouse_id: string; delivery_pincode?: string }) =>
+      request<any[]>("/warehouse_mgr/available_riders.php", "POST", p),
+    assignOrder: (p: { order_id: string; rider_id: string }) =>
+      request<{ ok: true }>("/warehouse_mgr/assign_rider.php", "POST", p),
+    getOrderAssignment: (p: { order_id: string }) =>
+      request<any | null>("/warehouse_mgr/order_assignment.php", "POST", p),
+  },
+
   // ---------- Rider self-service ----------
   rider: {
     me: () => request<{ rider: any | null }>("/rider/me.php"),
