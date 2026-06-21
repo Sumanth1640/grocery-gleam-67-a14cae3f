@@ -15,7 +15,13 @@ require_once __DIR__ . '/config.php';
 if (!defined('FCM_SERVICE_ACCOUNT_PATH')) {
   $envPath = getenv('FCM_SERVICE_ACCOUNT_PATH');
   if (!$envPath || !is_string($envPath) || $envPath === '') {
-    error_log('FCM: FCM_SERVICE_ACCOUNT_PATH environment variable is not set');
+    // fallback to the local secrets folder (gitignored, never commit)
+    $fallback = __DIR__ . '/secrets/fcm-service-account.json';
+    if (is_readable($fallback)) {
+      $envPath = $fallback;
+    } else {
+      error_log('FCM: FCM_SERVICE_ACCOUNT_PATH env var is not set and secrets/fcm-service-account.json not found');
+    }
   }
   define('FCM_SERVICE_ACCOUNT_PATH', $envPath ?: '');
 }
