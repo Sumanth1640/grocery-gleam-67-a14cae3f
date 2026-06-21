@@ -1,13 +1,12 @@
 <?php
 // Internal endpoint to trigger an FCM push + notifications row.
-// Auth: shared secret via header X-Internal-Secret (hardcoded below).
-// Call from trusted server code only.
+// Auth: shared secret via header X-Internal-Secret (set INTERNAL_NOTIFY_SECRET in env
+// or edit the fallback constant below). Call from trusted server code only.
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../notification_helpers.php';
 require_method('POST');
 
-// HARDCODED — set this to the same value stored in Lovable secrets (INTERNAL_NOTIFY_SECRET)
-$EXPECTED = '27064431dbd914db0f491db4eb18c50cf3c753d96d816813815b8404bf21b1f4';
+$EXPECTED = getenv('INTERNAL_NOTIFY_SECRET') ?: 'CHANGE_ME_INTERNAL_NOTIFY_SECRET';
 $got = $_SERVER['HTTP_X_INTERNAL_SECRET'] ?? '';
 if (!$EXPECTED || !hash_equals($EXPECTED, $got)) json_error('Unauthorized', 401);
 
