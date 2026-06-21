@@ -54,7 +54,7 @@ try {
   $st = db()->prepare(
     "INSERT INTO device_tokens (token, user_id, platform)
      VALUES (?, ?, ?)
-     ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), platform = VALUES(platform), updated_at = NOW()"
+     ON DUPLICATE KEY UPDATE user_id = COALESCE(VALUES(user_id), user_id), platform = VALUES(platform), updated_at = NOW()"
   );
   $st->execute([$token, $uid, $platform]);
   json_ok(['ok' => true, 'attached' => $uid !== null, 'token_length' => strlen($token)]);

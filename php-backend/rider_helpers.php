@@ -5,6 +5,7 @@
 // ============================================================
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/notification_helpers.php';
 
 /** Return the rider row for a given auth user, or null. */
 function rider_for_user(string $user_id): ?array {
@@ -42,9 +43,3 @@ function record_rider_earning(string $rider_id, string $order_id): void {
   )->execute([$id, $rider_id, $order_id, $fee, $fee]);
 }
 
-/** Convenience: insert a notification row. */
-function notify_user(string $user_id, string $kind, string $title, string $body, ?string $link = null): void {
-  db()->prepare(
-    'INSERT INTO notifications (id, user_id, kind, title, body, link) VALUES (?,?,?,?,?,?)'
-  )->execute([uuid_v4(), $user_id, $kind, $title, $body, $link]);
-}

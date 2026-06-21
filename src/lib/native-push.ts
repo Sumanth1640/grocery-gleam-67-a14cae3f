@@ -6,13 +6,25 @@ import { phpAuth } from "@/lib/php-api";
 const PUSH_CHANNEL_ID = "hallifresh-default";
 const PUSH_SMALL_ICON = "ic_stat_hallifresh";
 let listenersAttached = false;
-let lastTokenPosted: string | null = null;
+let lastTokenPostKey: string | null = null;
+
+function jwtSub(token: string | null): string | null {
+  try {
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split(".")[1]?.replace(/-/g, "+").replace(/_/g, "/") ?? ""));
+    return typeof payload?.sub === "string" ? payload.sub : null;
+  } catch {
+    return null;
+  }
+}
 
 async function postToken(tokenValue: string, platform: string) {
   if (!tokenValue) return;
   const { data } = await supabase.auth.getUser();
-  const uid = data.user?.id ?? null;
   const phpToken = phpAuth.get();
+  const uid = jwtSub(phpToken) ?? data.user?.id ?? null;
+  const postKey = JSON.stringify([tokenValue, platform, phpToken ?? "", uid ?? ""]);
+  if (lastTokenPostKey === postKey) return;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (phpToken) headers.Authorization = `Bearer ${phpToken}`;
   const body = JSON.stringify({ token: tokenValue, platform, user_id: uid });
@@ -25,7 +37,7 @@ async function postToken(tokenValue: string, platform: string) {
         credentials: "include",
       });
       if (response.ok) {
-        lastTokenPosted = tokenValue;
+        lastTokenPostKey = postKey;
         try {
           localStorage.setItem("hallifresh_fcm_token", tokenValue);
         } catch {}
@@ -123,18 +135,12 @@ export async function initNativePush(): Promise<void> {
         "pushNotificationReceived",
         async (notification: any) => {
           try {
-            const { LocalNotifications } = await import("@capacitor/local-notifications");
-            await LocalNotifications.schedule({
-              notifications: [
-                {
-                  id: Math.floor(Math.random() * 2_000_000_000),
-                  title: notification?.title ?? notification?.data?.title ?? "Notification",
-                  body: notification?.body ?? notification?.data?.body ?? "",
-                  channelId: PUSH_CHANNEL_ID,
-                  smallIcon: PUSH_SMALL_ICON,
-                  extra: notification?.data ?? {},
-                },
-              ],
+            const { notify } = await import("@/lib/native-notifications");
+            await notify({
+              id: Math.floor(Math.random() * 2_000_000_000),
+              title: notification?.title ?? notification?.data?.title ?? "Notification",
+              body: notification?.body ?? notification?.data?.body ?? "",
+              extra: notification?.data ?? {},
             });
           } catch (e) {
             console.warn("Foreground push -> local notification failed", e);
@@ -145,7 +151,7 @@ export async function initNativePush(): Promise<void> {
 
     try {
       const cachedToken = localStorage.getItem("hallifresh_fcm_token");
-      if (cachedToken && cachedToken !== lastTokenPosted) {
+      if (cachedToken) {
         await postToken(cachedToken, Capacitor.getPlatform());
       }
     } catch {}
