@@ -28,7 +28,7 @@ export async function initNativePush(): Promise<void> {
 
     await PushNotifications.register();
 
-    await PushNotifications.addListener("registration", async (token) => {
+    await PushNotifications.addListener("registration", async (token: any) => {
       try {
         const { data } = await supabase.auth.getUser();
         const uid = data.user?.id ?? null;
@@ -47,14 +47,14 @@ export async function initNativePush(): Promise<void> {
       }
     });
 
-    await PushNotifications.addListener("registrationError", (err) => {
+    await PushNotifications.addListener("registrationError", (err: any) => {
       console.warn("Push registration error", err);
     });
 
     // When a push is tapped while app is in background -> route
     await PushNotifications.addListener(
       "pushNotificationActionPerformed",
-      (action) => {
+      (action: any) => {
         const route =
           (action.notification.data?.route as string | undefined) ??
           "/notifications";
