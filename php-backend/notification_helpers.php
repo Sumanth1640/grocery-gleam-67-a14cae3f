@@ -84,13 +84,24 @@ function notification_select_columns_sql(): string {
 function notify_user(string $user_id, string $kind, string $title, string $body, string $link): void {
   try {
     ensure_notifications_table();
-    if (!notification_table_exists()) return;
-    $st = db()->prepare('INSERT INTO notifications (id, user_id, kind, title, body, link, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, NOW())');
-    $st->execute([uuid_v4(), $user_id, $kind, $title, $body, $link]);
-  } catch (Throwable $e) {
-    try {
-      $st = db()->prepare('INSERT INTO notifications (id, user_id, kind, title, body, link, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())');
-      $st->execute([uuid_v4(), $user_id, $kind, $title, $body, $link]);
-    } catch (Throwable $ignored) { /* notification failures must not break checkout */ }
-  }
+    if (!notification_table_exists()) {
+      // fall through to push only
+    } else {
+      try {
+        $st = db()->prepare('INSERT INTO notifications (id, user_id, kind, title, body, link, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, NOW())');
+        $st->execute([uuid_v4(), $user_id, $kind, $title, $body, $link]);
+      } catch (Throwable $e) {
+        try {
+          $st = db()->prepare('INSERT INTO notifications (id, user_id, kind, title, body, link, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())');
+          $st->execute([uuid_v4(), $user_id, $kind, $title, $body, $link]);
+        } catch (Throwable $ignored) { /* notification failures must not break checkout */ }
+      }
+    }
+  } catch (Throwable $e) { /* ignore */ }
+
+  // Fire FCM push (best-effort, never throws)
+  try {
+    require_once __DIR__ . '/fcm_send.php';
+    fcm_send_to_user($user_id, $title, $body, ['route' => $link, 'kind' => $kind]);
+  } catch (Throwable $e) { /* ignore */ }
 }
