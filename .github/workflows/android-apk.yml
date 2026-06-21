@@ -109,7 +109,7 @@ jobs:
           if 'com.google.firebase.messaging.default_notification_icon' not in text:
               text = text.replace(
                   '</application>',
-                  '        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@mipmap/ic_launcher" />\n</application>'
+                  '        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_hallifresh" />\n</application>'
               )
           manifest.write_text(text)
           PY
@@ -124,6 +124,11 @@ jobs:
 
           const logo = path.resolve('public/hallifresh-logo.png');
           const res = path.resolve('android/app/src/main/res');
+          await fs.mkdir(path.join(res, 'drawable'), { recursive: true });
+          await fs.writeFile(
+            path.join(res, 'drawable/ic_stat_hallifresh.xml'),
+            '<?xml version="1.0" encoding="utf-8"?>\n<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">\n  <path android:fillColor="#FFFFFFFF" android:pathData="M12,2C8,2 4.8,4.5 3.5,8.1C7.1,8 10.2,9.6 12,12.2C13.8,9.6 16.9,8 20.5,8.1C19.2,4.5 16,2 12,2Z"/>\n  <path android:fillColor="#FFFFFFFF" android:pathData="M4,10.4C4.3,16.4 7.4,20.5 12,22C16.6,20.5 19.7,16.4 20,10.4C16.4,10.5 13.8,12.3 12,15.4C10.2,12.3 7.6,10.5 4,10.4Z"/>\n</vector>\n',
+          );
           const densities = {
             mdpi: 1,
             hdpi: 1.5,

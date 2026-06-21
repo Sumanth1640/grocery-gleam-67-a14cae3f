@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { phpAuth } from "@/lib/php-api";
 
 const PUSH_CHANNEL_ID = "hallifresh-default";
+const PUSH_SMALL_ICON = "ic_stat_hallifresh";
 let listenersAttached = false;
 
 async function postToken(tokenValue: string, platform: string) {
@@ -21,7 +22,14 @@ async function postToken(tokenValue: string, platform: string) {
       user_id: uid,
     }),
     credentials: "include",
-  }).catch(() => {});
+  }).then(async (response) => {
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      console.warn("FCM token registration failed", response.status, text.slice(0, 160));
+    }
+  }).catch((error) => {
+    console.warn("FCM token registration network error", error);
+  });
 }
 
 const BACKEND_BASE =
@@ -112,7 +120,7 @@ export async function initNativePush(): Promise<void> {
                   title: notification?.title ?? notification?.data?.title ?? "Notification",
                   body: notification?.body ?? notification?.data?.body ?? "",
                   channelId: PUSH_CHANNEL_ID,
-                  smallIcon: "ic_stat_icon_config_sample",
+                  smallIcon: PUSH_SMALL_ICON,
                   extra: notification?.data ?? {},
                 },
               ],

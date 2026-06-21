@@ -28,13 +28,19 @@ try {
 
 try {
   db()->exec("CREATE TABLE IF NOT EXISTS device_tokens (
-    token VARCHAR(255) PRIMARY KEY,
+    token VARCHAR(512) PRIMARY KEY,
     user_id CHAR(36) DEFAULT NULL,
     platform VARCHAR(16) NOT NULL DEFAULT 'android',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_user (user_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+  try {
+    $col = db()->query("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'device_tokens' AND column_name = 'token' LIMIT 1")->fetchColumn();
+    if ((int)$col > 0 && (int)$col < 512) {
+      db()->exec("ALTER TABLE device_tokens MODIFY token VARCHAR(512) NOT NULL");
+    }
+  } catch (Throwable $e) { /* older hosts may not allow ALTER; insert below will report failure */ }
 
   $st = db()->prepare(
     "INSERT INTO device_tokens (token, user_id, platform)
@@ -42,7 +48,8 @@ try {
      ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), platform = VALUES(platform), updated_at = NOW()"
   );
   $st->execute([$token, $uid, $platform]);
-  json_ok(['ok' => true]);
+  json_ok(['ok' => true, 'attached' => $uid !== null, 'token_length' => strlen($token)]);
 } catch (Throwable $e) {
+  error_log('FCM token register failed: ' . $e->getMessage());
   json_error('Failed to store token', 500);
 }

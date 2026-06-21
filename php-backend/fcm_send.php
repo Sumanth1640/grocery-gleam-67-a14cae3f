@@ -91,6 +91,17 @@ function fcm_send_to_user(string $user_id, string $title, string $body, array $d
     $project = fcm_project_id();
     if (!$token || !$project) return;
 
+    try {
+      db()->exec("CREATE TABLE IF NOT EXISTS device_tokens (
+        token VARCHAR(512) PRIMARY KEY,
+        user_id CHAR(36) DEFAULT NULL,
+        platform VARCHAR(16) NOT NULL DEFAULT 'android',
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user (user_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) {}
+
     $st = db()->prepare('SELECT token FROM device_tokens WHERE user_id = ?');
     $st->execute([$user_id]);
     $tokens = array_column($st->fetchAll(), 'token');
@@ -102,12 +113,14 @@ function fcm_send_to_user(string $user_id, string $title, string $body, array $d
         'message' => [
           'token' => $t,
           'notification' => ['title' => $title, 'body' => $body],
-          'data' => array_map('strval', $data),
+          'data' => array_map('strval', array_merge(['title' => $title, 'body' => $body], $data)),
           'android' => [
             'priority' => 'HIGH',
+            'ttl' => '86400s',
             'notification' => [
               'channel_id' => 'hallifresh-default',
               'notification_priority' => 'PRIORITY_HIGH',
+              'icon' => 'ic_stat_hallifresh',
               'default_sound' => true,
               'default_vibrate_timings' => true,
             ],
