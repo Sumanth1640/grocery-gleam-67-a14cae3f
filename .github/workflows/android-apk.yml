@@ -101,6 +101,12 @@ jobs:
           import pathlib, re
           manifest = pathlib.Path('android/app/src/main/AndroidManifest.xml')
           text = manifest.read_text()
+          if 'android.permission.POST_NOTIFICATIONS' not in text:
+              text = text.replace(
+                  '<application',
+                  '<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n\n    <application',
+                  1,
+              )
           if 'com.google.firebase.messaging.default_notification_channel_id' not in text:
               text = text.replace(
                   '</application>',
