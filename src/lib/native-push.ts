@@ -9,10 +9,14 @@ const BACKEND_BASE =
 
 export async function initNativePush(): Promise<void> {
   try {
-    const { Capacitor } = await import("@capacitor/core");
+    // Use variable specifiers + @vite-ignore so Rollup doesn't try to
+    // resolve these Capacitor-only modules during the web SPA build.
+    const coreSpec = "@capacitor/core";
+    const pushSpec = "@capacitor/push-notifications";
+    const { Capacitor } = await import(/* @vite-ignore */ coreSpec);
     if (!Capacitor.isNativePlatform()) return;
 
-    const { PushNotifications } = await import("@capacitor/push-notifications");
+    const { PushNotifications } = await import(/* @vite-ignore */ pushSpec);
 
     const perm = await PushNotifications.checkPermissions();
     let status = perm.receive;
