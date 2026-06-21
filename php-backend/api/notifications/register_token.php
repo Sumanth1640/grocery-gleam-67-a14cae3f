@@ -26,6 +26,15 @@ try {
   }
 } catch (Throwable $e) { /* ignore */ }
 
+// Native APK can send the logged-in cloud user id directly when PHP auth is
+// not active yet. Only use it as a fallback; PHP Bearer auth remains primary.
+if ($uid === null && !empty($in['user_id'])) {
+  $candidate = trim((string)$in['user_id']);
+  if (preg_match('/^[0-9a-fA-F-]{32,36}$/', $candidate)) {
+    $uid = $candidate;
+  }
+}
+
 try {
   db()->exec("CREATE TABLE IF NOT EXISTS device_tokens (
     token VARCHAR(512) PRIMARY KEY,
