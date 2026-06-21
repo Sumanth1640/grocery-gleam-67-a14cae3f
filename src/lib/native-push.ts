@@ -6,8 +6,10 @@ import { phpAuth } from "@/lib/php-api";
 const PUSH_CHANNEL_ID = "hallifresh-default";
 const PUSH_SMALL_ICON = "ic_stat_hallifresh";
 let listenersAttached = false;
+let lastTokenPosted: string | null = null;
 
 async function postToken(tokenValue: string, platform: string) {
+  if (!tokenValue) return;
   const { data } = await supabase.auth.getUser();
   const uid = data.user?.id ?? null;
   const phpToken = phpAuth.get();
@@ -22,7 +24,13 @@ async function postToken(tokenValue: string, platform: string) {
         body,
         credentials: "include",
       });
-      if (response.ok) return;
+      if (response.ok) {
+        lastTokenPosted = tokenValue;
+        try {
+          localStorage.setItem("hallifresh_fcm_token", tokenValue);
+        } catch {}
+        return;
+      }
       const text = await response.text().catch(() => "");
       console.warn("FCM token registration failed", base, response.status, text.slice(0, 160));
     } catch (error) {
@@ -44,14 +52,10 @@ function backendCandidates(): string[] {
 
 export async function initNativePush(): Promise<void> {
   try {
-    // Use variable specifiers + @vite-ignore so Rollup doesn't try to
-    // resolve these Capacitor-only modules during the web SPA build.
-    const coreSpec = "@capacitor/core";
-    const pushSpec = "@capacitor/push-notifications";
-    const { Capacitor } = await import(/* @vite-ignore */ coreSpec);
+    const { Capacitor } = await import("@capacitor/core");
     if (!Capacitor.isNativePlatform()) return;
 
-    const { PushNotifications } = await import(/* @vite-ignore */ pushSpec);
+    const { PushNotifications } = await import("@capacitor/push-notifications");
 
     const perm = await PushNotifications.checkPermissions();
     let status = perm.receive;
@@ -88,6 +92,9 @@ export async function initNativePush(): Promise<void> {
       listenersAttached = true;
       await PushNotifications.addListener("registration", async (token: any) => {
         try {
+          try {
+            localStorage.setItem("hallifresh_fcm_token", token.value);
+          } catch {}
           await postToken(token.value, Capacitor.getPlatform());
         } catch (e) {
           console.warn("FCM token POST failed", e);
@@ -116,8 +123,7 @@ export async function initNativePush(): Promise<void> {
         "pushNotificationReceived",
         async (notification: any) => {
           try {
-            const localSpec = "@capacitor/local-notifications";
-            const { LocalNotifications } = await import(/* @vite-ignore */ localSpec);
+            const { LocalNotifications } = await import("@capacitor/local-notifications");
             await LocalNotifications.schedule({
               notifications: [
                 {
@@ -136,6 +142,13 @@ export async function initNativePush(): Promise<void> {
         },
       );
     }
+
+    try {
+      const cachedToken = localStorage.getItem("hallifresh_fcm_token");
+      if (cachedToken && cachedToken !== lastTokenPosted) {
+        await postToken(cachedToken, Capacitor.getPlatform());
+      }
+    } catch {}
 
     await PushNotifications.register();
 
