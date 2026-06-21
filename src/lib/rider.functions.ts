@@ -294,6 +294,24 @@ export const outletAssignOrder = createServerFn({ method: "POST" })
         body: "You have a new delivery. Open the rider app for details.",
         link: "/rider",
       });
+      // Trigger FCM push via PHP backend (device tokens live in MySQL).
+      try {
+        const base = (process.env.PHP_API_BASE || "https://hallifresh.in/php-backend/api").replace(/\/$/, "");
+        const secret = process.env.INTERNAL_NOTIFY_SECRET || "";
+        if (secret) {
+          await fetch(`${base}/internal/notify.php`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Internal-Secret": secret },
+            body: JSON.stringify({
+              user_id: rider.user_id,
+              kind: "order",
+              title: "New delivery assigned",
+              body: "You have a new delivery. Open the rider app for details.",
+              link: "/rider",
+            }),
+          });
+        }
+      } catch (e) { console.error("FCM push trigger failed", e); }
     }
     return { ok: true };
   });
