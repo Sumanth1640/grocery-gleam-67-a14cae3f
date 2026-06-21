@@ -52,6 +52,48 @@ jobs:
           fi
           npx cap sync android
 
+      - name: Copy google-services.json into android/app
+        run: |
+          cp google-services.json android/app/google-services.json 2>/dev/null || \
+          cp android/app/google-services.json android/app/google-services.json 2>/dev/null || true
+          test -f android/app/google-services.json && echo "google-services.json present" || (echo "ERROR: missing google-services.json" && exit 1)
+
+      - name: Enable Firebase / FCM in Gradle
+        run: |
+          # Root build.gradle: add google-services classpath
+          ROOT="android/build.gradle"
+          if ! grep -q "google-services" "$ROOT"; then
+            python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path("android/build.gradle")
+          x = p.read_text()
+          if "com.google.gms:google-services" not in x:
+              x = re.sub(r"(dependencies\s*\{)",
+                         r"\1\n        classpath 'com.google.gms:google-services:4.4.2'",
+                         x, count=1)
+              p.write_text(x)
+              print("Added google-services classpath")
+          PY
+          fi
+          # app build.gradle: apply plugin + firebase-messaging dep
+          APP="android/app/build.gradle"
+          if ! grep -q "com.google.gms.google-services" "$APP"; then
+            echo "" >> "$APP"
+            echo "apply plugin: 'com.google.gms.google-services'" >> "$APP"
+          fi
+          python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path("android/app/build.gradle")
+          x = p.read_text()
+          if "firebase-messaging" not in x:
+              x = re.sub(r"(dependencies\s*\{)",
+                         r"\1\n    implementation platform('com.google.firebase:firebase-bom:33.5.1')\n    implementation 'com.google.firebase:firebase-messaging'",
+                         x, count=1)
+              p.write_text(x)
+              print("Added Firebase messaging dependency")
+          PY
+          cat android/app/build.gradle | tail -20
+
       - name: Apply HalliFresh logo to Android splash and launcher icons
         run: |
           cat > apply-logo.mjs <<'NODE'
