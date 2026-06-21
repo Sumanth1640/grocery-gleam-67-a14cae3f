@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "746808793699",
+    "project_id": "hallifresh-e50e9",
+    "storage_bucket": "hallifresh-e50e9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746808793699:android:a929d3e2f1524fb40bf656",
+        "android_client_info": {
+          "package_name": "app.lovable.hallifresh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBr-CYu1QiXYfEeqUQqp8aSlWLuTBN5JT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
