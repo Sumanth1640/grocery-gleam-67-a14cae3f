@@ -63,7 +63,6 @@ jobs:
 
       - name: Enable Firebase / FCM in Gradle
         run: |
-          # Root build.gradle: add google-services classpath
           ROOT="android/build.gradle"
           if ! grep -q "google-services" "$ROOT"; then
             python3 - <<'PY'
@@ -78,7 +77,6 @@ jobs:
               print("Added google-services classpath")
           PY
           fi
-          # app build.gradle: apply plugin + firebase-messaging dep
           APP="android/app/build.gradle"
           if ! grep -q "com.google.gms.google-services" "$APP"; then
             echo "" >> "$APP"
@@ -96,6 +94,25 @@ jobs:
               print("Added Firebase messaging dependency")
           PY
           cat android/app/build.gradle | tail -20
+
+      - name: Configure Android notification channel
+        run: |
+          python3 - <<'PY'
+          import pathlib, re
+          manifest = pathlib.Path('android/app/src/main/AndroidManifest.xml')
+          text = manifest.read_text()
+          if 'com.google.firebase.messaging.default_notification_channel_id' not in text:
+              text = text.replace(
+                  '</application>',
+                  '        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="hallifresh-default" />\n</application>'
+              )
+          if 'com.google.firebase.messaging.default_notification_icon' not in text:
+              text = text.replace(
+                  '</application>',
+                  '        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@mipmap/ic_launcher" />\n</application>'
+              )
+          manifest.write_text(text)
+          PY
 
       - name: Apply HalliFresh logo to Android splash and launcher icons
         run: |
