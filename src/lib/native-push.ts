@@ -1,6 +1,9 @@
 // Registers the device with FCM (via Capacitor) and POSTs the token to the
 // PHP backend so server-side notifications can wake the app.
 import { supabase } from "@/integrations/supabase/client";
+import { phpAuth } from "@/lib/php-api";
+
+const PUSH_CHANNEL_ID = "hallifresh-default";
 
 const BACKEND_BASE =
   (typeof window !== "undefined" &&
@@ -26,15 +29,39 @@ export async function initNativePush(): Promise<void> {
     }
     if (status !== "granted") return;
 
-    await PushNotifications.register();
+    try {
+      await Promise.all([
+        PushNotifications.createChannel?.({
+          id: PUSH_CHANNEL_ID,
+          name: "Hallifresh",
+          description: "Order updates, reminders, offers & alerts",
+          importance: 5,
+          visibility: 1,
+          vibration: true,
+          lights: true,
+        }),
+        PushNotifications.createChannel?.({
+          id: "default",
+          name: "Hallifresh",
+          description: "Order updates, reminders, offers & alerts",
+          importance: 5,
+          visibility: 1,
+          vibration: true,
+          lights: true,
+        }),
+      ]);
+    } catch {}
 
     await PushNotifications.addListener("registration", async (token: any) => {
       try {
         const { data } = await supabase.auth.getUser();
         const uid = data.user?.id ?? null;
+        const phpToken = phpAuth.get();
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (phpToken) headers.Authorization = `Bearer ${phpToken}`;
         await fetch(`${BACKEND_BASE}/notifications/register_token.php`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({
             token: token.value,
             platform: Capacitor.getPlatform(),
@@ -51,6 +78,8 @@ export async function initNativePush(): Promise<void> {
       console.warn("Push registration error", err);
     });
 
+    await PushNotifications.register();
+
     // Foreground push: Android suppresses the system tray when app is open,
     // so surface it as a local notification ourselves.
     await PushNotifications.addListener(
@@ -65,7 +94,8 @@ export async function initNativePush(): Promise<void> {
                 id: Math.floor(Math.random() * 2_000_000_000),
                 title: notification?.title ?? notification?.data?.title ?? "Notification",
                 body: notification?.body ?? notification?.data?.body ?? "",
-                channelId: "default",
+                channelId: PUSH_CHANNEL_ID,
+                smallIcon: "ic_stat_icon_config_sample",
                 extra: notification?.data ?? {},
               },
             ],
