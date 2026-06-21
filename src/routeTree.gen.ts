@@ -31,6 +31,7 @@ import { Route as FoodCheckoutRouteImport } from './routes/food/checkout'
 import { Route as FoodCartRouteImport } from './routes/food/cart'
 import { Route as DebugPhpModeRouteImport } from './routes/debug.php-mode'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
+import { Route as AuthenticatedWarehouseRouteImport } from './routes/_authenticated/warehouse'
 import { Route as AuthenticatedRiderRouteImport } from './routes/_authenticated/rider'
 import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedOutletRouteImport } from './routes/_authenticated/outlet'
@@ -187,6 +188,11 @@ const CSlugRoute = CSlugRouteImport.update({
   id: '/c/$slug',
   path: '/c/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWarehouseRoute = AuthenticatedWarehouseRouteImport.update({
+  id: '/warehouse',
+  path: '/warehouse',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedRiderRoute = AuthenticatedRiderRouteImport.update({
   id: '/rider',
@@ -477,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/rider': typeof AuthenticatedRiderRoute
+  '/warehouse': typeof AuthenticatedWarehouseRoute
   '/c/$slug': typeof CSlugRoute
   '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
@@ -544,6 +551,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/rider': typeof AuthenticatedRiderRoute
+  '/warehouse': typeof AuthenticatedWarehouseRoute
   '/c/$slug': typeof CSlugRoute
   '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
@@ -615,6 +623,7 @@ export interface FileRoutesById {
   '/_authenticated/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/_authenticated/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/_authenticated/rider': typeof AuthenticatedRiderRoute
+  '/_authenticated/warehouse': typeof AuthenticatedWarehouseRoute
   '/c/$slug': typeof CSlugRoute
   '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
@@ -687,6 +696,7 @@ export interface FileRouteTypes {
     | '/outlet'
     | '/partner'
     | '/rider'
+    | '/warehouse'
     | '/c/$slug'
     | '/debug/php-mode'
     | '/food/cart'
@@ -754,6 +764,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/orders'
     | '/rider'
+    | '/warehouse'
     | '/c/$slug'
     | '/debug/php-mode'
     | '/food/cart'
@@ -824,6 +835,7 @@ export interface FileRouteTypes {
     | '/_authenticated/outlet'
     | '/_authenticated/partner'
     | '/_authenticated/rider'
+    | '/_authenticated/warehouse'
     | '/c/$slug'
     | '/debug/php-mode'
     | '/food/cart'
@@ -1059,6 +1071,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/c/$slug'
       preLoaderRoute: typeof CSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/warehouse': {
+      id: '/_authenticated/warehouse'
+      path: '/warehouse'
+      fullPath: '/warehouse'
+      preLoaderRoute: typeof AuthenticatedWarehouseRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/rider': {
       id: '/_authenticated/rider'
@@ -1534,6 +1553,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedOutletRoute: typeof AuthenticatedOutletRouteWithChildren
   AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRouteWithChildren
   AuthenticatedRiderRoute: typeof AuthenticatedRiderRoute
+  AuthenticatedWarehouseRoute: typeof AuthenticatedWarehouseRoute
   AuthenticatedFoodOrdersRoute: typeof AuthenticatedFoodOrdersRoute
 }
 
@@ -1545,6 +1565,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedOutletRoute: AuthenticatedOutletRouteWithChildren,
   AuthenticatedPartnerRoute: AuthenticatedPartnerRouteWithChildren,
   AuthenticatedRiderRoute: AuthenticatedRiderRoute,
+  AuthenticatedWarehouseRoute: AuthenticatedWarehouseRoute,
   AuthenticatedFoodOrdersRoute: AuthenticatedFoodOrdersRoute,
 }
 
