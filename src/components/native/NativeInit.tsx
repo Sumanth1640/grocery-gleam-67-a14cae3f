@@ -90,6 +90,10 @@ export function NativeInit() {
         // ---- Local notifications (native only) ----
         await initNativeNotifications();
 
+        // ---- FCM push (native only) ----
+        await initNativePush();
+
+
         // Tap a notification -> route to the relevant page if extra.route is set
         cleanups.push(
           onNotificationTap((extra) => {
