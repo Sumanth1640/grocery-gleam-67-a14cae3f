@@ -103,7 +103,15 @@ function fcm_send_to_user(string $user_id, string $title, string $body, array $d
           'token' => $t,
           'notification' => ['title' => $title, 'body' => $body],
           'data' => array_map('strval', $data),
-          'android' => ['priority' => 'HIGH', 'notification' => ['channel_id' => 'default']],
+          'android' => [
+            'priority' => 'HIGH',
+            'notification' => [
+              'channel_id' => 'hallifresh-default',
+              'notification_priority' => 'PRIORITY_HIGH',
+              'default_sound' => true,
+              'default_vibrate_timings' => true,
+            ],
+          ],
         ],
       ];
       $ch = curl_init($url);

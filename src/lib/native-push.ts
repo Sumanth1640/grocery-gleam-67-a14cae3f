@@ -1,6 +1,28 @@
 // Registers the device with FCM (via Capacitor) and POSTs the token to the
 // PHP backend so server-side notifications can wake the app.
 import { supabase } from "@/integrations/supabase/client";
+import { phpAuth } from "@/lib/php-api";
+
+const PUSH_CHANNEL_ID = "hallifresh-default";
+let listenersAttached = false;
+
+async function postToken(tokenValue: string, platform: string) {
+  const { data } = await supabase.auth.getUser();
+  const uid = data.user?.id ?? null;
+  const phpToken = phpAuth.get();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (phpToken) headers.Authorization = `Bearer ${phpToken}`;
+  await fetch(`${BACKEND_BASE}/notifications/register_token.php`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      token: tokenValue,
+      platform,
+      user_id: uid,
+    }),
+    credentials: "include",
+  }).catch(() => {});
+}
 
 const BACKEND_BASE =
   (typeof window !== "undefined" &&
@@ -26,68 +48,83 @@ export async function initNativePush(): Promise<void> {
     }
     if (status !== "granted") return;
 
-    await PushNotifications.register();
+    try {
+      await Promise.all([
+        PushNotifications.createChannel?.({
+          id: PUSH_CHANNEL_ID,
+          name: "Hallifresh",
+          description: "Order updates, reminders, offers & alerts",
+          importance: 5,
+          visibility: 1,
+          vibration: true,
+          lights: true,
+        }),
+        PushNotifications.createChannel?.({
+          id: "default",
+          name: "Hallifresh",
+          description: "Order updates, reminders, offers & alerts",
+          importance: 5,
+          visibility: 1,
+          vibration: true,
+          lights: true,
+        }),
+      ]);
+    } catch {}
 
-    await PushNotifications.addListener("registration", async (token: any) => {
-      try {
-        const { data } = await supabase.auth.getUser();
-        const uid = data.user?.id ?? null;
-        await fetch(`${BACKEND_BASE}/notifications/register_token.php`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            token: token.value,
-            platform: Capacitor.getPlatform(),
-            user_id: uid,
-          }),
-          credentials: "include",
-        }).catch(() => {});
-      } catch (e) {
-        console.warn("FCM token POST failed", e);
-      }
-    });
-
-    await PushNotifications.addListener("registrationError", (err: any) => {
-      console.warn("Push registration error", err);
-    });
-
-    // Foreground push: Android suppresses the system tray when app is open,
-    // so surface it as a local notification ourselves.
-    await PushNotifications.addListener(
-      "pushNotificationReceived",
-      async (notification: any) => {
+    if (!listenersAttached) {
+      listenersAttached = true;
+      await PushNotifications.addListener("registration", async (token: any) => {
         try {
-          const localSpec = "@capacitor/local-notifications";
-          const { LocalNotifications } = await import(/* @vite-ignore */ localSpec);
-          await LocalNotifications.schedule({
-            notifications: [
-              {
-                id: Math.floor(Math.random() * 2_000_000_000),
-                title: notification?.title ?? notification?.data?.title ?? "Notification",
-                body: notification?.body ?? notification?.data?.body ?? "",
-                channelId: "default",
-                extra: notification?.data ?? {},
-              },
-            ],
-          });
+          await postToken(token.value, Capacitor.getPlatform());
         } catch (e) {
-          console.warn("Foreground push -> local notification failed", e);
+          console.warn("FCM token POST failed", e);
         }
-      },
-    );
+      });
 
-    // When a push is tapped while app is in background -> route
-    await PushNotifications.addListener(
-      "pushNotificationActionPerformed",
-      (action: any) => {
-        const route =
-          (action.notification.data?.route as string | undefined) ??
-          "/notifications";
-        try {
-          window.location.assign(route);
-        } catch {}
-      },
-    );
+      await PushNotifications.addListener("registrationError", (err: any) => {
+        console.warn("Push registration error", err);
+      });
+
+      await PushNotifications.addListener(
+        "pushNotificationActionPerformed",
+        (action: any) => {
+          const route =
+            (action.notification.data?.route as string | undefined) ??
+            "/notifications";
+          try {
+            window.location.assign(route);
+          } catch {}
+        },
+      );
+
+      // Foreground push: Android suppresses the system tray when app is open,
+      // so surface it as a local notification ourselves.
+      await PushNotifications.addListener(
+        "pushNotificationReceived",
+        async (notification: any) => {
+          try {
+            const localSpec = "@capacitor/local-notifications";
+            const { LocalNotifications } = await import(/* @vite-ignore */ localSpec);
+            await LocalNotifications.schedule({
+              notifications: [
+                {
+                  id: Math.floor(Math.random() * 2_000_000_000),
+                  title: notification?.title ?? notification?.data?.title ?? "Notification",
+                  body: notification?.body ?? notification?.data?.body ?? "",
+                  channelId: PUSH_CHANNEL_ID,
+                  smallIcon: "ic_stat_icon_config_sample",
+                  extra: notification?.data ?? {},
+                },
+              ],
+            });
+          } catch (e) {
+            console.warn("Foreground push -> local notification failed", e);
+          }
+        },
+      );
+    }
+
+    await PushNotifications.register();
 
   } catch (e) {
     console.warn("initNativePush failed", e);

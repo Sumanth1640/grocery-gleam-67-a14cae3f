@@ -53,6 +53,7 @@ export const dualApi = {
     if (USE_PHP) {
       const r = await php.signup(email, password);
       phpAuth.set(r.token);
+      void import("@/lib/native-push").then(({ initNativePush }) => initNativePush()).catch(() => {});
       return { user: r.user, error: null };
     }
     const { supabase } = await import("@/integrations/supabase/client");
@@ -64,6 +65,7 @@ export const dualApi = {
         data: fullName ? { full_name: fullName } : undefined,
       },
     });
+    if (!error) void import("@/lib/native-push").then(({ initNativePush }) => initNativePush()).catch(() => {});
     return { user: data.user, error };
   },
 
@@ -71,10 +73,12 @@ export const dualApi = {
     if (USE_PHP) {
       const r = await php.login(email, password);
       phpAuth.set(r.token);
+      void import("@/lib/native-push").then(({ initNativePush }) => initNativePush()).catch(() => {});
       return { user: r.user, error: null };
     }
     const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) void import("@/lib/native-push").then(({ initNativePush }) => initNativePush()).catch(() => {});
     return { user: data.user, error };
   },
 
