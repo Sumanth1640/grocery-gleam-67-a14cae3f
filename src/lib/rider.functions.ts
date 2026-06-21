@@ -270,7 +270,7 @@ export const outletAssignOrder = createServerFn({ method: "POST" })
       .from("rider_outlets").select("rider_id").eq("outlet_id", order.outlet_id).eq("rider_id", data.rider_id).maybeSingle();
     if (!link) throw new Error("Rider not linked to this outlet");
     const { data: rider } = await supabaseAdmin
-      .from("riders").select("status, is_active").eq("id", data.rider_id).maybeSingle();
+      .from("riders").select("status, is_active, user_id").eq("id", data.rider_id).maybeSingle();
     if (!rider || rider.status !== "approved" || !rider.is_active) throw new Error("Rider unavailable");
 
     const { data: existing } = await supabaseAdmin
@@ -285,6 +285,15 @@ export const outletAssignOrder = createServerFn({ method: "POST" })
       const { error } = await supabaseAdmin.from("order_assignments")
         .insert({ order_id: data.order_id, rider_id: data.rider_id, status: "assigned" });
       if (error) throw new Error(error.message);
+    }
+    if (rider.user_id) {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: rider.user_id,
+        kind: "order",
+        title: "New delivery assigned",
+        body: "You have a new delivery. Open the rider app for details.",
+        link: "/rider",
+      });
     }
     return { ok: true };
   });
