@@ -24,6 +24,14 @@ export function NativeBottomNav() {
 
   if (path.startsWith("/p/")) return null;
   if (path === "/checkout" || path.startsWith("/checkout/") || path === "/food/checkout" || path.startsWith("/food/checkout/")) return null;
+  // Hide on operator dashboards — they have their own navigation/sticky bars.
+  if (
+    path === "/rider" || path.startsWith("/rider/") ||
+    path === "/warehouse" || path.startsWith("/warehouse/") ||
+    path === "/admin" || path.startsWith("/admin/") ||
+    path === "/outlet" || path.startsWith("/outlet/") ||
+    path === "/partner" || path.startsWith("/partner/")
+  ) return null;
 
   const items = [
     { to: "/", icon: Home, label: "Home", match: (p: string) => p === "/" },
