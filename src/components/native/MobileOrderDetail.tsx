@@ -219,9 +219,9 @@ export function MobileOrderDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* Sticky actions */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-100 bg-white/95 px-5 py-3 backdrop-blur">
-        <div className="flex gap-2">
+      {/* Sticky actions — sits above the floating native bottom dock */}
+      <div className="fixed inset-x-0 bottom-24 z-30 px-3">
+        <div className="mx-auto flex max-w-md gap-2 rounded-3xl border border-zinc-100 bg-white/95 p-2 shadow-lg backdrop-blur">
           <Link
             to="/orders/$id/invoice"
             params={{ id: order.id }}

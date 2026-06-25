@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   Store,
+  Truck,
   User as UserIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -45,6 +46,8 @@ export function MobileAccount() {
 
   const orderCount = Array.isArray(orders) ? orders.length : 0;
   const hasOutlets = Array.isArray(outlets) && outlets.length > 0;
+  const isAdminUser = !!(admin && typeof admin === "object" && "isAdmin" in admin && (admin as { isAdmin?: boolean }).isAdmin);
+  const isWarehouseManagerUser = !!(admin && typeof admin === "object" && "isWarehouseManager" in admin && (admin as { isWarehouseManager?: boolean }).isWarehouseManager);
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-36" style={FONT}>
@@ -84,9 +87,10 @@ export function MobileAccount() {
           <MenuItem to="/notifications" icon={Bell} label="Notifications" />
         </MenuGroup>
 
-        {(admin || hasOutlets) && (
+        {(isAdminUser || isWarehouseManagerUser || hasOutlets) && (
           <MenuGroup>
-            {admin && <MenuItem to="/admin" icon={Shield} label="Admin dashboard" accent />}
+            {isAdminUser && <MenuItem to="/admin" icon={Shield} label="Admin dashboard" accent />}
+            {isWarehouseManagerUser && <MenuItem to="/warehouse" icon={Truck} label="Warehouse manager" accent />}
             {hasOutlets && <MenuItem to="/outlet" icon={Store} label="Outlet manager" accent />}
           </MenuGroup>
         )}
