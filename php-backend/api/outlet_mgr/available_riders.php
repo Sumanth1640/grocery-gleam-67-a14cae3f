@@ -8,12 +8,17 @@ $pincode   = isset($b['delivery_pincode']) && preg_match('/^\d{6}$/', (string)$b
 if ($outlet_id === '') json_error('Missing outlet_id');
 if (!manages_outlet($uid, $outlet_id)) json_error('Not your outlet', 403);
 
-// Riders linked to this outlet, approved & active
+// Riders linked to this outlet, approved & active, AND not currently busy
+// (busy = has at least one assignment in 'assigned' or 'picked_up').
 $st = db()->prepare(
   "SELECT r.id, r.name, r.phone, r.vehicle, r.vehicle_no, r.is_active, r.status
      FROM riders r
      JOIN rider_outlets ro ON ro.rider_id = r.id
-    WHERE ro.outlet_id = ? AND r.status = 'approved' AND r.is_active = 1"
+    WHERE ro.outlet_id = ? AND r.status = 'approved' AND r.is_active = 1
+      AND NOT EXISTS (
+        SELECT 1 FROM order_assignments a
+         WHERE a.rider_id = r.id AND a.status IN ('assigned','picked_up')
+      )"
 );
 $st->execute([$outlet_id]);
 $riders = $st->fetchAll();
