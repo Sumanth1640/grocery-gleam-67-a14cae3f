@@ -87,7 +87,10 @@ function RiderProfile() {
 
   const status = (rider.status ?? "pending") as "pending" | "approved" | "rejected";
   const StatusIcon = status === "approved" ? CheckCircle2 : status === "rejected" ? XCircle : Clock;
-  const statusColor = status === "approved" ? "emerald" : status === "rejected" ? "rose" : "amber";
+  const statusChip =
+    status === "approved" ? "bg-emerald-50 text-emerald-700"
+    : status === "rejected" ? "bg-rose-50 text-rose-700"
+    : "bg-amber-50 text-amber-700";
   const isActive = !!rider.is_active;
 
   const toggleOutlet = (id: string) =>
