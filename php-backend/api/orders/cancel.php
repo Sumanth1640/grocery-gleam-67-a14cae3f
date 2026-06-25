@@ -19,4 +19,8 @@ if ($row['status'] !== 'placed') json_error('Order can no longer be cancelled', 
 $upd = db()->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
 $upd->execute([$id]);
 
+require_once __DIR__ . '/../../notification_helpers.php';
+notify_user($row['user_id'], 'order', 'Order cancelled',
+  'Your order has been cancelled.', '/orders/'.$id);
+
 json_ok(['ok' => true]);

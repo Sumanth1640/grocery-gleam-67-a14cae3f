@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../rider_helpers.php';
+require_once __DIR__ . '/../../notification_helpers.php';
 require_method('POST');
 $rider = require_rider();
 $b = json_body();
@@ -21,10 +22,18 @@ if ($status === 'delivered')  { $sets[] = 'delivered_at = CURRENT_TIMESTAMP'; $s
 $params[] = $aid;
 db()->prepare('UPDATE order_assignments SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
 
+$customer_id = null;
+$cst = db()->prepare('SELECT user_id FROM orders WHERE id = ?');
+$cst->execute([$a['order_id']]); $customer_id = $cst->fetchColumn();
+
 if ($status === 'picked_up') {
   db()->prepare("UPDATE orders SET status = 'out_for_delivery' WHERE id = ?")->execute([$a['order_id']]);
+  if ($customer_id) notify_user($customer_id, 'order', 'Order out for delivery',
+    'Your rider has picked up your order and is on the way.', '/orders/'.$a['order_id']);
 } elseif ($status === 'delivered') {
   db()->prepare("UPDATE orders SET status = 'delivered' WHERE id = ?")->execute([$a['order_id']]);
   record_rider_earning($rider['id'], $a['order_id']);
+  if ($customer_id) notify_user($customer_id, 'order', 'Order delivered',
+    'Your order has been delivered. Enjoy!', '/orders/'.$a['order_id']);
 }
 json_ok(['ok' => true]);
