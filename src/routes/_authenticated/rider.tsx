@@ -201,13 +201,22 @@ function RiderHome() {
             <h1 className="font-display text-2xl font-black">Hi, {rider.name.split(" ")[0]}</h1>
             <div className="mt-1 text-xs text-white/80">{rider.vehicle} · {rider.vehicle_no || "—"}</div>
           </div>
-          <button
-            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
-            className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 backdrop-blur"
-            aria-label="Sign out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/rider/profile"
+              className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 backdrop-blur"
+              aria-label="Profile"
+            >
+              <span className="text-sm font-black">{(rider.name?.[0] ?? "R").toUpperCase()}</span>
+            </Link>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
+              className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 backdrop-blur"
+              aria-label="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-2">
