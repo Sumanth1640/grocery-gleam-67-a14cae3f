@@ -55,4 +55,13 @@ if ($ru) {
 } else {
   @file_put_contents($trace, '['.date('c')."] [warehouse] SKIP: rider has no user_id\n", FILE_APPEND);
 }
+
+// Notify the customer that a rider has been assigned
+require_once __DIR__ . '/../../notification_helpers.php';
+$cst = db()->prepare('SELECT user_id FROM orders WHERE id = ?');
+$cst->execute([$order_id]); $cu = $cst->fetchColumn();
+if ($cu) {
+  notify_user($cu, 'order', 'Rider assigned',
+    'A delivery rider has been assigned to your order.', '/orders/'.$order_id);
+}
 json_ok(['ok' => true]);
