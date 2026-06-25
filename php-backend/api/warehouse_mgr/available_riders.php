@@ -14,7 +14,7 @@ $st = db()->prepare('SELECT pincode FROM warehouse_pincodes WHERE warehouse_id =
 $st->execute([$warehouse_id]);
 $whPins = $st->fetchAll(PDO::FETCH_COLUMN) ?: [];
 
-// Riders covering any of the warehouse pincodes (approved + active)
+// Riders covering any of the warehouse pincodes (approved + active + not busy)
 $riders = [];
 if ($whPins) {
   $ph = implode(',', array_fill(0, count($whPins), '?'));
@@ -22,17 +22,26 @@ if ($whPins) {
     "SELECT DISTINCT r.id, r.name, r.phone, r.vehicle, r.vehicle_no, r.is_active, r.status
        FROM riders r
        JOIN rider_pincodes rp ON rp.rider_id = r.id
-      WHERE rp.pincode IN ($ph) AND r.status = 'approved' AND r.is_active = 1"
+      WHERE rp.pincode IN ($ph) AND r.status = 'approved' AND r.is_active = 1
+        AND NOT EXISTS (
+          SELECT 1 FROM order_assignments a
+           WHERE a.rider_id = r.id AND a.status IN ('assigned','picked_up')
+        )"
   );
   $st->execute($whPins);
   $riders = $st->fetchAll();
 }
 
 if (!$riders) {
-  // Fallback: any approved + active rider (warehouse may not have pincode mapping yet)
+  // Fallback: any approved + active + free rider (warehouse may not have pincode mapping yet)
   $riders = db()->query(
     "SELECT id, name, phone, vehicle, vehicle_no, is_active, status
-       FROM riders WHERE status = 'approved' AND is_active = 1"
+       FROM riders r
+      WHERE status = 'approved' AND is_active = 1
+        AND NOT EXISTS (
+          SELECT 1 FROM order_assignments a
+           WHERE a.rider_id = r.id AND a.status IN ('assigned','picked_up')
+        )"
   )->fetchAll();
   if (!$riders) json_ok([]);
 }

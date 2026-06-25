@@ -141,7 +141,7 @@ function RidersPage() {
                             onChange={(e) => { if (e.target.value) assignM.mutate({ order_id: o.id, rider_id: e.target.value }); e.currentTarget.value = ""; }}
                             className="rounded-lg border bg-background px-2 py-1 text-xs" defaultValue="">
                             <option value="">{o.assignment ? "Reassign…" : "Assign rider…"}</option>
-                            {(riders.data ?? []).filter((r: any) => r.is_active).map((r: any) => <option key={r.id} value={r.id}>{r.name} ({r.active_orders})</option>)}
+                            {(riders.data ?? []).filter((r: any) => r.is_active && (r.active_orders ?? 0) === 0).map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
                           </select>
                           {o.assignment && o.assignment.status !== "delivered" && o.assignment.status !== "cancelled" && (
                             <>
