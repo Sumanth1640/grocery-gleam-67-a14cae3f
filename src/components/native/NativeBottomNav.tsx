@@ -1,8 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Heart, Home, ShoppingBag, User, Utensils } from "lucide-react";
+import { Bike, Heart, Home, ShoppingBag, User, Utensils } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useCart, cartTotals } from "@/lib/cart-store";
 import { useFoodCart, foodCartTotals } from "@/lib/food-cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
+import { useAuth } from "@/lib/use-auth";
+import { useDualFn } from "@/lib/use-dual-fn";
+import { riderMe } from "@/lib/rider.functions";
+import { php } from "@/lib/php-api";
 
 /**
  * Premium dark-dock bottom navigation used in the Capacitor native shell.
@@ -16,7 +21,6 @@ export function NativeBottomNav() {
   const { itemsCount } = cartTotals(cart);
   const foodCount = foodCartTotals(foodCart).itemsCount;
   const wishCount = Object.keys(wishlist).length;
-  
 
   if (path.startsWith("/p/")) return null;
   if (path === "/checkout" || path.startsWith("/checkout/") || path === "/food/checkout" || path.startsWith("/food/checkout/")) return null;
