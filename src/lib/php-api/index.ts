@@ -332,6 +332,10 @@ export const php = {
       request<{ rows: any[]; summary: { today: number; week: number; month: number; pending: number; paid: number } }>(
         "/rider/earnings.php",
       ),
+    updateProfile: (p: {
+      name?: string; phone?: string; vehicle?: string; vehicle_no?: string; notes?: string;
+      is_active?: boolean; preferred_outlet_ids?: string[]; preferred_pincodes?: string[];
+    }) => request<{ rider: any }>("/rider/update_profile.php", "POST", p),
   },
 
   // Customer: see the rider assigned to my order
