@@ -444,6 +444,10 @@ export const php = {
       request<{ ok: true }>("/admin/assignments/assign.php", "POST", p),
     updateAssignment: (p: { order_id: string; status: string }) =>
       request<{ ok: true }>("/admin/assignments/update.php", "POST", p),
+    availableRiders:  (p: { warehouse_id?: string; delivery_pincode?: string }) =>
+      request<any[]>("/admin/assignments/available_riders.php", "POST", p),
+    currentAssignment: (p: { order_id: string }) =>
+      request<any>("/admin/assignments/current.php", "POST", p),
     // rider applications (approval workflow)
     pendingRiders:    (_p?: unknown) => request<any[]>("/admin/riders/pending.php"),
     decideRider:      (p: { rider_id: string; approve: boolean; reason?: string }) =>
