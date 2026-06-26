@@ -14,6 +14,12 @@ export const Route = createFileRoute("/_authenticated/warehouse/history")({
   component: WarehouseHistoryPage,
 });
 
+function WarehouseHistoryPage() {
+  return <WarehouseHistoryBody />;
+}
+
+export function WarehouseHistoryBody({ embedded = false }: { embedded?: boolean }) {
+
 type Status = "assigned" | "picked_up" | "delivered";
 const STATUS_LABEL: Record<string, string> = {
   assigned: "Assigned",
