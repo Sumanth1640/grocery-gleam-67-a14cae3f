@@ -90,7 +90,7 @@ export function MobileAccount() {
         {(isAdminUser || isWarehouseManagerUser || hasOutlets) && (
           <MenuGroup>
             {isAdminUser && <MenuItem to="/admin" icon={Shield} label="Admin dashboard" accent />}
-            {isWarehouseManagerUser && <MenuItem to="/warehouse" icon={Truck} label="Warehouse manager" accent />}
+            {isWarehouseManagerUser && <MenuItem to="/admin/rider-assignment" icon={Truck} label="Warehouse manager" accent />}
             {hasOutlets && <MenuItem to="/outlet" icon={Store} label="Outlet manager" accent />}
           </MenuGroup>
         )}

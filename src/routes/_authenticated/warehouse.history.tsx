@@ -10,6 +10,7 @@ export const Route = createFileRoute("/_authenticated/warehouse/history")({
     if (typeof window === "undefined") return;
     const { phpAuth } = await import("@/lib/php-api");
     if (!phpAuth.get()) throw redirect({ to: "/login", search: { redirect: location.href } });
+    throw redirect({ to: "/admin/assignment-history", replace: true });
   },
   component: WarehouseHistoryPage,
 });
