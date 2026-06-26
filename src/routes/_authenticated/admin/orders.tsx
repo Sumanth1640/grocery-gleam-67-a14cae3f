@@ -295,3 +295,125 @@ function OrdersAdmin() {
     </div>
   );
 }
+
+function AssignRiderButton({
+  orderId,
+  warehouseId,
+  deliveryPincode,
+}: {
+  orderId: string;
+  warehouseId: string;
+  deliveryPincode?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const qc = useQueryClient();
+
+  const current = useQuery({
+    queryKey: ["admin-assignment", orderId],
+    queryFn: () => php.admin.currentAssignment({ order_id: orderId }),
+    refetchInterval: 20_000,
+  });
+  const riders = useQuery({
+    queryKey: ["admin-available-riders", warehouseId, deliveryPincode ?? ""],
+    queryFn: () =>
+      php.admin.availableRiders({
+        warehouse_id: warehouseId || undefined,
+        delivery_pincode:
+          deliveryPincode && /^\d{4,8}$/.test(deliveryPincode) ? deliveryPincode : undefined,
+      }),
+    enabled: open,
+  });
+  const assign = useMutation({
+    mutationFn: (rider_id: string) => php.admin.assignRider({ order_id: orderId, rider_id }),
+    onSuccess: () => {
+      toast.success("Rider assigned");
+      setOpen(false);
+      qc.invalidateQueries({ queryKey: ["admin-assignment", orderId] });
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const a = current.data as { status?: string; riders?: { name: string; phone: string } | null } | null;
+  const assigned = a?.riders;
+  const label = assigned ? `${assigned.name}${a?.status ? ` · ${a.status.replace(/_/g, " ")}` : ""}` : "Assign rider";
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold ${
+          assigned ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "hover:bg-secondary"
+        }`}
+      >
+        {assigned ? <UserCheck className="h-3.5 w-3.5" /> : <Bike className="h-3.5 w-3.5" />}
+        {label}
+      </button>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 p-4"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border bg-card p-5 shadow-pop"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-lg font-bold">
+                {assigned ? "Change rider" : "Assign rider"}
+              </h3>
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-full p-1 hover:bg-secondary"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Free, approved riders. Pincode-matched riders appear first.
+            </p>
+            {assigned && (
+              <div className="mt-3 rounded-xl bg-emerald-50 p-3 text-xs">
+                Currently with <b>{assigned.name}</b> · {assigned.phone} ({a?.status})
+              </div>
+            )}
+            <div className="mt-3 max-h-72 space-y-2 overflow-auto">
+              {riders.isLoading && (
+                <div className="grid place-items-center py-8">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              )}
+              {!riders.isLoading && (riders.data ?? []).length === 0 && (
+                <div className="rounded-xl border bg-muted/30 p-4 text-center text-xs text-muted-foreground">
+                  No approved riders available right now.
+                </div>
+              )}
+              {((riders.data as any[] | undefined) ?? []).map((r) => (
+                <button
+                  key={r.id}
+                  disabled={assign.isPending}
+                  onClick={() => assign.mutate(r.id)}
+                  className="flex w-full items-center justify-between rounded-xl border bg-card p-3 text-left text-sm hover:bg-secondary disabled:opacity-50"
+                >
+                  <div>
+                    <div className="font-semibold">{r.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {r.phone} · {r.vehicle} {r.vehicle_no}
+                    </div>
+                  </div>
+                  <div className="text-right text-[10px]">
+                    {r.pincode_match && (
+                      <div className="font-bold uppercase text-emerald-600">Pin match</div>
+                    )}
+                    <div className="text-muted-foreground">{r.active_orders} active</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
