@@ -78,6 +78,7 @@ import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin/coupons'
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin/categories'
 import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authenticated/admin/banners'
+import { Route as AuthenticatedAdminAssignmentHistoryRouteImport } from './routes/_authenticated/admin/assignment-history'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 import { Route as AuthenticatedAdminPartnersIndexRouteImport } from './routes/_authenticated/admin/partners.index'
 import { Route as AuthenticatedOrdersIdInvoiceRouteImport } from './routes/_authenticated/orders.$id.invoice'
@@ -461,6 +462,12 @@ const AuthenticatedAdminBannersRoute =
     path: '/banners',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAssignmentHistoryRoute =
+  AuthenticatedAdminAssignmentHistoryRouteImport.update({
+    id: '/assignment-history',
+    path: '/assignment-history',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/analytics',
@@ -517,6 +524,7 @@ export interface FileRoutesByFullPath {
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/assignment-history': typeof AuthenticatedAdminAssignmentHistoryRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
@@ -588,6 +596,7 @@ export interface FileRoutesByTo {
   '/food': typeof FoodIndexRoute
   '/furniture': typeof FurnitureIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/assignment-history': typeof AuthenticatedAdminAssignmentHistoryRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
@@ -663,6 +672,7 @@ export interface FileRoutesById {
   '/food/': typeof FoodIndexRoute
   '/furniture/': typeof FurnitureIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/assignment-history': typeof AuthenticatedAdminAssignmentHistoryRoute
   '/_authenticated/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
@@ -739,6 +749,7 @@ export interface FileRouteTypes {
     | '/food/'
     | '/furniture/'
     | '/admin/analytics'
+    | '/admin/assignment-history'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/coupons'
@@ -810,6 +821,7 @@ export interface FileRouteTypes {
     | '/food'
     | '/furniture'
     | '/admin/analytics'
+    | '/admin/assignment-history'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/coupons'
@@ -884,6 +896,7 @@ export interface FileRouteTypes {
     | '/food/'
     | '/furniture/'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/assignment-history'
     | '/_authenticated/admin/banners'
     | '/_authenticated/admin/categories'
     | '/_authenticated/admin/coupons'
@@ -1440,6 +1453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBannersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/assignment-history': {
+      id: '/_authenticated/admin/assignment-history'
+      path: '/assignment-history'
+      fullPath: '/admin/assignment-history'
+      preLoaderRoute: typeof AuthenticatedAdminAssignmentHistoryRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/analytics': {
       id: '/_authenticated/admin/analytics'
       path: '/analytics'
@@ -1489,6 +1509,7 @@ const AuthenticatedAdminPartnersRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminAssignmentHistoryRoute: typeof AuthenticatedAdminAssignmentHistoryRoute
   AuthenticatedAdminBannersRoute: typeof AuthenticatedAdminBannersRoute
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
@@ -1515,6 +1536,8 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminAssignmentHistoryRoute:
+    AuthenticatedAdminAssignmentHistoryRoute,
   AuthenticatedAdminBannersRoute: AuthenticatedAdminBannersRoute,
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
