@@ -315,6 +315,11 @@ export const php = {
       request<{ ok: true }>("/warehouse_mgr/assign_rider.php", "POST", p),
     getOrderAssignment: (p: { order_id: string }) =>
       request<any | null>("/warehouse_mgr/order_assignment.php", "POST", p),
+    assignmentHistory: (p?: { warehouse_id?: string; limit?: number }) =>
+      request<any[]>("/warehouse_mgr/assignment_history.php", "POST", {
+        warehouse_id: p?.warehouse_id ?? "",
+        limit: p?.limit ?? 200,
+      }),
   },
 
   // ---------- Rider self-service ----------
