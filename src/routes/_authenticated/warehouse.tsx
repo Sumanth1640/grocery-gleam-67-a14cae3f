@@ -11,6 +11,7 @@ export const Route = createFileRoute("/_authenticated/warehouse")({
     if (typeof window === "undefined") return;
     const { phpAuth } = await import("@/lib/php-api");
     if (!phpAuth.get()) throw redirect({ to: "/login", search: { redirect: location.href } });
+    throw redirect({ to: "/admin/rider-assignment", replace: true });
   },
   component: WarehousePage,
 });
