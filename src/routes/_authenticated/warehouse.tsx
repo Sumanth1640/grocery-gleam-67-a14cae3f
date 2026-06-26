@@ -98,9 +98,14 @@ function WarehousePage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <h1 className="font-display text-2xl font-bold">Orders & rider assignment</h1>
-          <div className="text-xs text-muted-foreground">Auto-refreshes every 15s</div>
+          <div className="flex items-center gap-3">
+            <Link to="/warehouse/history" className="rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary">
+              Assignment history
+            </Link>
+            <div className="hidden text-xs text-muted-foreground sm:block">Auto-refreshes every 15s</div>
+          </div>
         </div>
 
         {warehouses.length > 1 && (

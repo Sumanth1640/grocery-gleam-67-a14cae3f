@@ -44,6 +44,7 @@ import { Route as AuthenticatedOutletIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as FoodRSlugRouteImport } from './routes/food/r.$slug'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
+import { Route as AuthenticatedWarehouseHistoryRouteImport } from './routes/_authenticated/warehouse.history'
 import { Route as AuthenticatedRiderProfileRouteImport } from './routes/_authenticated/rider.profile'
 import { Route as AuthenticatedPartnerProfileRouteImport } from './routes/_authenticated/partner/profile'
 import { Route as AuthenticatedPartnerPayoutsRouteImport } from './routes/_authenticated/partner/payouts'
@@ -258,6 +259,12 @@ const ApiPublicRazorpayWebhookRoute =
     id: '/api/public/razorpay-webhook',
     path: '/api/public/razorpay-webhook',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedWarehouseHistoryRoute =
+  AuthenticatedWarehouseHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedWarehouseRoute,
   } as any)
 const AuthenticatedRiderProfileRoute =
   AuthenticatedRiderProfileRouteImport.update({
@@ -490,7 +497,7 @@ export interface FileRoutesByFullPath {
   '/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/rider': typeof AuthenticatedRiderRouteWithChildren
-  '/warehouse': typeof AuthenticatedWarehouseRoute
+  '/warehouse': typeof AuthenticatedWarehouseRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
@@ -535,6 +542,7 @@ export interface FileRoutesByFullPath {
   '/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/rider/profile': typeof AuthenticatedRiderProfileRoute
+  '/warehouse/history': typeof AuthenticatedWarehouseHistoryRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -559,7 +567,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/rider': typeof AuthenticatedRiderRouteWithChildren
-  '/warehouse': typeof AuthenticatedWarehouseRoute
+  '/warehouse': typeof AuthenticatedWarehouseRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
@@ -603,6 +611,7 @@ export interface FileRoutesByTo {
   '/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/rider/profile': typeof AuthenticatedRiderProfileRoute
+  '/warehouse/history': typeof AuthenticatedWarehouseHistoryRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -632,7 +641,7 @@ export interface FileRoutesById {
   '/_authenticated/outlet': typeof AuthenticatedOutletRouteWithChildren
   '/_authenticated/partner': typeof AuthenticatedPartnerRouteWithChildren
   '/_authenticated/rider': typeof AuthenticatedRiderRouteWithChildren
-  '/_authenticated/warehouse': typeof AuthenticatedWarehouseRoute
+  '/_authenticated/warehouse': typeof AuthenticatedWarehouseRouteWithChildren
   '/c/$slug': typeof CSlugRoute
   '/debug/php-mode': typeof DebugPhpModeRoute
   '/food/cart': typeof FoodCartRoute
@@ -677,6 +686,7 @@ export interface FileRoutesById {
   '/_authenticated/partner/payouts': typeof AuthenticatedPartnerPayoutsRoute
   '/_authenticated/partner/profile': typeof AuthenticatedPartnerProfileRoute
   '/_authenticated/rider/profile': typeof AuthenticatedRiderProfileRoute
+  '/_authenticated/warehouse/history': typeof AuthenticatedWarehouseHistoryRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/food/r/$slug': typeof FoodRSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -751,6 +761,7 @@ export interface FileRouteTypes {
     | '/partner/payouts'
     | '/partner/profile'
     | '/rider/profile'
+    | '/warehouse/history'
     | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/admin/'
@@ -819,6 +830,7 @@ export interface FileRouteTypes {
     | '/partner/payouts'
     | '/partner/profile'
     | '/rider/profile'
+    | '/warehouse/history'
     | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/admin'
@@ -892,6 +904,7 @@ export interface FileRouteTypes {
     | '/_authenticated/partner/payouts'
     | '/_authenticated/partner/profile'
     | '/_authenticated/rider/profile'
+    | '/_authenticated/warehouse/history'
     | '/api/public/razorpay-webhook'
     | '/food/r/$slug'
     | '/_authenticated/admin/'
@@ -1175,6 +1188,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/razorpay-webhook'
       preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/warehouse/history': {
+      id: '/_authenticated/warehouse/history'
+      path: '/history'
+      fullPath: '/warehouse/history'
+      preLoaderRoute: typeof AuthenticatedWarehouseHistoryRouteImport
+      parentRoute: typeof AuthenticatedWarehouseRoute
     }
     '/_authenticated/rider/profile': {
       id: '/_authenticated/rider/profile'
@@ -1576,6 +1596,20 @@ const AuthenticatedRiderRouteChildren: AuthenticatedRiderRouteChildren = {
 const AuthenticatedRiderRouteWithChildren =
   AuthenticatedRiderRoute._addFileChildren(AuthenticatedRiderRouteChildren)
 
+interface AuthenticatedWarehouseRouteChildren {
+  AuthenticatedWarehouseHistoryRoute: typeof AuthenticatedWarehouseHistoryRoute
+}
+
+const AuthenticatedWarehouseRouteChildren: AuthenticatedWarehouseRouteChildren =
+  {
+    AuthenticatedWarehouseHistoryRoute: AuthenticatedWarehouseHistoryRoute,
+  }
+
+const AuthenticatedWarehouseRouteWithChildren =
+  AuthenticatedWarehouseRoute._addFileChildren(
+    AuthenticatedWarehouseRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
@@ -1584,7 +1618,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedOutletRoute: typeof AuthenticatedOutletRouteWithChildren
   AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRouteWithChildren
   AuthenticatedRiderRoute: typeof AuthenticatedRiderRouteWithChildren
-  AuthenticatedWarehouseRoute: typeof AuthenticatedWarehouseRoute
+  AuthenticatedWarehouseRoute: typeof AuthenticatedWarehouseRouteWithChildren
   AuthenticatedFoodOrdersRoute: typeof AuthenticatedFoodOrdersRoute
 }
 
@@ -1596,7 +1630,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedOutletRoute: AuthenticatedOutletRouteWithChildren,
   AuthenticatedPartnerRoute: AuthenticatedPartnerRouteWithChildren,
   AuthenticatedRiderRoute: AuthenticatedRiderRouteWithChildren,
-  AuthenticatedWarehouseRoute: AuthenticatedWarehouseRoute,
+  AuthenticatedWarehouseRoute: AuthenticatedWarehouseRouteWithChildren,
   AuthenticatedFoodOrdersRoute: AuthenticatedFoodOrdersRoute,
 }
 
@@ -1633,13 +1667,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
