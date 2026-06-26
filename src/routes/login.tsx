@@ -68,7 +68,8 @@ function WebLoginPage({ redirect }: { redirect: string }) {
   const resolvePostLoginDest = async (fallback: string): Promise<string> => {
     try {
       const role = USE_PHP ? await php.checkRole() : await isAdminFn();
-      if (role?.isAdmin || role?.isWarehouseManager) return "/admin";
+      if (role?.isAdmin) return "/admin";
+      if (role?.isWarehouseManager) return "/warehouse";
     } catch {
       // ignore — fall back to requested redirect
     }
