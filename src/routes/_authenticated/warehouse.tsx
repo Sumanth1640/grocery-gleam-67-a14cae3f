@@ -83,29 +83,31 @@ export function WarehousePanelBody({ embedded = false }: { embedded?: boolean })
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-          <Link to="/" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to site
-          </Link>
-          <div className="ml-2 flex items-center gap-2">
-            <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground"><Warehouse className="h-3.5 w-3.5" /></div>
-            <div className="font-display text-sm font-bold leading-none">
-              Warehouse panel
-              <div className="mt-0.5 text-[10px] font-medium text-muted-foreground">
-                {warehouses.length === 1 ? warehouses[0].name : `${warehouses.length} warehouses`}
+    <div className={embedded ? "" : "min-h-screen bg-muted/30"}>
+      {!embedded && (
+        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
+          <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+            <Link to="/" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to site
+            </Link>
+            <div className="ml-2 flex items-center gap-2">
+              <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground"><Warehouse className="h-3.5 w-3.5" /></div>
+              <div className="font-display text-sm font-bold leading-none">
+                Warehouse panel
+                <div className="mt-0.5 text-[10px] font-medium text-muted-foreground">
+                  {warehouses.length === 1 ? warehouses[0].name : `${warehouses.length} warehouses`}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className={embedded ? "" : "mx-auto max-w-6xl px-4 py-6"}>
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display text-2xl font-bold">Orders & rider assignment</h1>
           <div className="flex items-center gap-3">
-            <Link to="/warehouse/history" className="rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary">
+            <Link to={embedded ? "/admin/assignment-history" : "/warehouse/history"} className="rounded-full border px-3 py-1.5 text-xs font-bold hover:bg-secondary">
               Assignment history
             </Link>
             <div className="hidden text-xs text-muted-foreground sm:block">Auto-refreshes every 15s</div>
