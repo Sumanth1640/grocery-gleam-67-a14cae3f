@@ -30,7 +30,7 @@ const STATUS_TINT: Record<Status, string> = {
   cancelled: "bg-destructive/15 text-destructive",
 };
 
-function WarehousePage() {
+export function WarehousePanelBody({ embedded = false }: { embedded?: boolean }) {
   const wh = useQuery({ queryKey: ["wh-mgr-warehouses"], queryFn: () => php.warehouseMgr.myWarehouses() });
   const [selected, setSelected] = useState<string | undefined>(undefined);
   const warehouses = (wh.data ?? []) as Array<{ id: string; name: string; code: string; city?: string }>;
