@@ -18,8 +18,6 @@ function WarehouseHistoryPage() {
   return <WarehouseHistoryBody />;
 }
 
-export function WarehouseHistoryBody({ embedded = false }: { embedded?: boolean }) {
-
 type Status = "assigned" | "picked_up" | "delivered";
 const STATUS_LABEL: Record<string, string> = {
   assigned: "Assigned",
@@ -37,7 +35,7 @@ function fmt(d?: string | null) {
   try { return new Date(d).toLocaleString(); } catch { return "—"; }
 }
 
-function WarehouseHistoryPage() {
+export function WarehouseHistoryBody({ embedded = false }: { embedded?: boolean }) {
   const wh = useQuery({ queryKey: ["wh-mgr-warehouses"], queryFn: () => php.warehouseMgr.myWarehouses() });
   const warehouses = (wh.data ?? []) as Array<{ id: string; name: string; code: string }>;
   const [selected, setSelected] = useState<string | undefined>(undefined);
