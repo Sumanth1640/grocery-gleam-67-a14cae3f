@@ -109,6 +109,12 @@ function OrdersAdmin() {
             className="w-full rounded-xl border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:ring-focus"
           />
         </div>
+        <Link
+          to="/admin/assignment-history"
+          className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold hover:bg-secondary"
+        >
+          <History className="h-3.5 w-3.5" /> Assignment history
+        </Link>
       </div>
       <div className="flex flex-wrap gap-2">
         {(["all", ...STATUSES] as const).map((s) => (
