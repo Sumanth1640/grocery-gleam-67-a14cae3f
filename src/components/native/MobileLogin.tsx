@@ -47,7 +47,7 @@ export function MobileLogin({ redirect }: { redirect: string }) {
       try {
         const role = await php.checkRole();
         if (role.isAdmin) return "/admin";
-        if (role.isWarehouseManager) return "/warehouse";
+        if (role.isWarehouseManager) return "/admin";
       } catch { /* ignore */ }
       return hasExplicit ? redirect : "/";
     }
