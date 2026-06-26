@@ -15,6 +15,10 @@ export const Route = createFileRoute("/_authenticated/warehouse")({
   component: WarehousePage,
 });
 
+function WarehousePage() {
+  return <WarehousePanelBody />;
+}
+
 const STATUSES = ["placed", "preparing", "ready", "out_for_delivery", "delivered", "cancelled"] as const;
 type Status = typeof STATUSES[number];
 const STATUS_LABEL: Record<Status, string> = {
