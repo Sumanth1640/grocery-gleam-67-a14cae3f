@@ -81,20 +81,22 @@ export function WarehouseHistoryBody({ embedded = false }: { embedded?: boolean 
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 pb-24">
-      <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-          <Link to="/warehouse" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-3.5 w-3.5" /> Warehouse
-          </Link>
-          <div className="ml-2 flex items-center gap-2">
-            <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground"><Warehouse className="h-3.5 w-3.5" /></div>
-            <div className="font-display text-sm font-bold leading-none">Assignment history</div>
+    <div className={embedded ? "" : "min-h-screen bg-muted/30 pb-24"}>
+      {!embedded && (
+        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
+          <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+            <Link to="/warehouse" className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-3.5 w-3.5" /> Warehouse
+            </Link>
+            <div className="ml-2 flex items-center gap-2">
+              <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground"><Warehouse className="h-3.5 w-3.5" /></div>
+              <div className="font-display text-sm font-bold leading-none">Assignment history</div>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className={embedded ? "" : "mx-auto max-w-6xl px-4 py-6"}>
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-bold">Rider assignments</h1>
           <div className="text-xs text-muted-foreground">{filtered.length} record(s)</div>
