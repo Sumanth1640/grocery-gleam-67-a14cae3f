@@ -60,6 +60,7 @@ import { Route as AuthenticatedFoodOrdersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_authenticated/admin/warehouses'
 import { Route as AuthenticatedAdminTeamRouteImport } from './routes/_authenticated/admin/team'
 import { Route as AuthenticatedAdminRidersRouteImport } from './routes/_authenticated/admin/riders'
+import { Route as AuthenticatedAdminRiderAssignmentRouteImport } from './routes/_authenticated/admin/rider-assignment'
 import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin/restaurants'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
 import { Route as AuthenticatedAdminRefundsVerifyRouteImport } from './routes/_authenticated/admin/refunds-verify'
@@ -352,6 +353,12 @@ const AuthenticatedAdminRidersRoute =
     path: '/riders',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRiderAssignmentRoute =
+  AuthenticatedAdminRiderAssignmentRouteImport.update({
+    id: '/rider-assignment',
+    path: '/rider-assignment',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRestaurantsRoute =
   AuthenticatedAdminRestaurantsRouteImport.update({
     id: '/restaurants',
@@ -527,6 +534,7 @@ export interface FileRoutesByFullPath {
   '/admin/refunds-verify': typeof AuthenticatedAdminRefundsVerifyRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/admin/rider-assignment': typeof AuthenticatedAdminRiderAssignmentRoute
   '/admin/riders': typeof AuthenticatedAdminRidersRoute
   '/admin/team': typeof AuthenticatedAdminTeamRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
@@ -596,6 +604,7 @@ export interface FileRoutesByTo {
   '/admin/refunds-verify': typeof AuthenticatedAdminRefundsVerifyRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/admin/rider-assignment': typeof AuthenticatedAdminRiderAssignmentRoute
   '/admin/riders': typeof AuthenticatedAdminRidersRoute
   '/admin/team': typeof AuthenticatedAdminTeamRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
@@ -671,6 +680,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/refunds-verify': typeof AuthenticatedAdminRefundsVerifyRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
+  '/_authenticated/admin/rider-assignment': typeof AuthenticatedAdminRiderAssignmentRoute
   '/_authenticated/admin/riders': typeof AuthenticatedAdminRidersRoute
   '/_authenticated/admin/team': typeof AuthenticatedAdminTeamRoute
   '/_authenticated/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
@@ -746,6 +756,7 @@ export interface FileRouteTypes {
     | '/admin/refunds-verify'
     | '/admin/reports'
     | '/admin/restaurants'
+    | '/admin/rider-assignment'
     | '/admin/riders'
     | '/admin/team'
     | '/admin/warehouses'
@@ -815,6 +826,7 @@ export interface FileRouteTypes {
     | '/admin/refunds-verify'
     | '/admin/reports'
     | '/admin/restaurants'
+    | '/admin/rider-assignment'
     | '/admin/riders'
     | '/admin/team'
     | '/admin/warehouses'
@@ -889,6 +901,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/refunds-verify'
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/restaurants'
+    | '/_authenticated/admin/rider-assignment'
     | '/_authenticated/admin/riders'
     | '/_authenticated/admin/team'
     | '/_authenticated/admin/warehouses'
@@ -1301,6 +1314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRidersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/rider-assignment': {
+      id: '/_authenticated/admin/rider-assignment'
+      path: '/rider-assignment'
+      fullPath: '/admin/rider-assignment'
+      preLoaderRoute: typeof AuthenticatedAdminRiderAssignmentRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/restaurants': {
       id: '/_authenticated/admin/restaurants'
       path: '/restaurants'
@@ -1486,6 +1506,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminRefundsVerifyRoute: typeof AuthenticatedAdminRefundsVerifyRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminRestaurantsRoute: typeof AuthenticatedAdminRestaurantsRoute
+  AuthenticatedAdminRiderAssignmentRoute: typeof AuthenticatedAdminRiderAssignmentRoute
   AuthenticatedAdminRidersRoute: typeof AuthenticatedAdminRidersRoute
   AuthenticatedAdminTeamRoute: typeof AuthenticatedAdminTeamRoute
   AuthenticatedAdminWarehousesRoute: typeof AuthenticatedAdminWarehousesRoute
@@ -1512,6 +1533,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRefundsVerifyRoute: AuthenticatedAdminRefundsVerifyRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminRestaurantsRoute: AuthenticatedAdminRestaurantsRoute,
+  AuthenticatedAdminRiderAssignmentRoute:
+    AuthenticatedAdminRiderAssignmentRoute,
   AuthenticatedAdminRidersRoute: AuthenticatedAdminRidersRoute,
   AuthenticatedAdminTeamRoute: AuthenticatedAdminTeamRoute,
   AuthenticatedAdminWarehousesRoute: AuthenticatedAdminWarehousesRoute,
