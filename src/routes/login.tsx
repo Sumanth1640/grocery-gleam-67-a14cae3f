@@ -69,7 +69,7 @@ function WebLoginPage({ redirect }: { redirect: string }) {
     try {
       const role = USE_PHP ? await php.checkRole() : await isAdminFn();
       if (role?.isAdmin) return "/admin";
-      if (role?.isWarehouseManager) return "/warehouse";
+      if (role?.isWarehouseManager) return "/admin";
     } catch {
       // ignore — fall back to requested redirect
     }
