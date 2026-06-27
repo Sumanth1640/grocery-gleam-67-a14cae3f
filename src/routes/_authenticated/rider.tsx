@@ -335,28 +335,32 @@ function DeliveryCard({ a, online, isBusy, busyAction, onPickup, onDeliver }: {
 }) {
   const o = a.orders ?? {};
   const addr = o.address ?? {};
+  const items: any[] = Array.isArray(o.items) ? o.items : [];
+  const [expanded, setExpanded] = useState(false);
   const deliverDisabled = isBusy || !online;
   return (
     <div className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
-            <Package className="h-3 w-3" /> Order #{shortId(a.order_id)}
+      <button type="button" onClick={() => setExpanded((v) => !v)} className="w-full text-left">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
+              <Package className="h-3 w-3" /> Order #{shortId(a.order_id)}
+            </div>
+            <div className="mt-1.5 font-display text-lg font-black text-zinc-900">₹{o.total ?? "—"}</div>
+            <div className="text-[11px] font-semibold text-zinc-500 capitalize">{o.payment} · {fmtDate(o.created_at)}</div>
           </div>
-          <div className="mt-1.5 font-display text-lg font-black text-zinc-900">₹{o.total ?? "—"}</div>
-          <div className="text-[11px] font-semibold text-zinc-500 capitalize">{o.payment} · {fmtDate(o.created_at)}</div>
+          <span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ${
+            a.status === "picked_up" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
+          }`}>{a.status === "picked_up" ? "On the way" : "Pickup"}</span>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ${
-          a.status === "picked_up" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
-        }`}>{a.status === "picked_up" ? "On the way" : "Pickup"}</span>
-      </div>
+      </button>
 
       <div className="mt-3 rounded-xl bg-zinc-50 p-3">
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
           <div className="min-w-0 text-xs font-semibold text-zinc-700">
             <div className="font-extrabold text-zinc-900">{addr.full_name || addr.fullName || "Customer"}</div>
-            <div className="line-clamp-2">{[addr.line1, addr.line2, addr.city, addr.pincode].filter(Boolean).join(", ")}</div>
+            <div className={expanded ? "" : "line-clamp-2"}>{[addr.line1, addr.line2, addr.city, addr.pincode].filter(Boolean).join(", ")}</div>
           </div>
         </div>
         {addr.phone && (
@@ -365,6 +369,51 @@ function DeliveryCard({ a, online, isBusy, busyAction, onPickup, onDeliver }: {
           </a>
         )}
       </div>
+
+      {expanded && (
+        <div className="mt-3 space-y-3">
+          {items.length > 0 && (
+            <div className="rounded-xl border border-zinc-100 bg-white">
+              <div className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-wider text-zinc-500">
+                Items ({items.length})
+              </div>
+              <ul className="divide-y divide-zinc-100">
+                {items.map((it, i) => (
+                  <li key={i} className="flex items-center gap-2 px-3 py-2 text-xs">
+                    {it?.product?.image && (
+                      <img src={it.product.image} alt="" className="h-8 w-8 rounded-md object-cover" />
+                    )}
+                    <div className="flex-1 font-bold text-zinc-800 line-clamp-1">{it?.product?.name ?? "Item"}</div>
+                    <div className="text-zinc-500">× {it?.qty ?? 1}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-xl bg-zinc-50 px-3 py-2 text-[11px] font-semibold text-zinc-600">
+            <span>Subtotal ₹{o.subtotal ?? "—"}</span>
+            <span>Delivery {Number(o.delivery) > 0 ? `₹${o.delivery}` : "FREE"}</span>
+            <span className="font-extrabold text-zinc-900">Total ₹{o.total ?? "—"}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="w-full rounded-xl bg-zinc-100 px-3 py-2 text-[11px] font-extrabold text-zinc-600"
+          >
+            Hide details
+          </button>
+        </div>
+      )}
+
+      {!expanded && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="mt-2 w-full text-center text-[11px] font-extrabold text-emerald-700"
+        >
+          View full order details
+        </button>
+      )}
 
       <div className="mt-3 flex gap-2">
         {a.status === "assigned" ? (
