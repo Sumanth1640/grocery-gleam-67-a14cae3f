@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../config.php';
 require_method('POST');
-require_admin();
+require_admin_or_warehouse_manager();
 $b = json_body();
 $order_id = (string)($b['order_id'] ?? '');
 $rider_id = (string)($b['rider_id'] ?? '');
