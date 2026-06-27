@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../config.php';
 require_method('POST');
-require_admin();
+require_admin_or_warehouse_manager();
 $b = json_body();
 $warehouse_id = (string)($b['warehouse_id'] ?? '');
 $pincode = isset($b['delivery_pincode']) && preg_match('/^\d{4,8}$/', (string)$b['delivery_pincode'])
