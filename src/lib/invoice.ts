@@ -76,11 +76,39 @@ export function buildInvoiceHtml(order: OrderLike): string {
 }
 
 /** Save the invoice as a standalone HTML file the user can open/share. */
-export function downloadInvoiceFile(order: OrderLike) {
+export async function downloadInvoiceFile(order: OrderLike) {
   const fileName = `invoice-${order.id.slice(0, 8)}.html`;
   const full = `<!doctype html><html><head><meta charset="utf-8"/><title>Invoice ${order.id.slice(0, 8)}</title>
 <style>body{font-family:system-ui,-apple-system,sans-serif;color:#111;margin:0;background:#fff;padding:24px;max-width:720px;margin:0 auto}</style>
 </head><body>${buildInvoiceHtml(order)}</body></html>`;
+
+  // Native (Capacitor) path — Android WebView blocks blob downloads, so write
+  // to the device cache and open the system share sheet instead.
+  try {
+    const cap = (window as any).Capacitor;
+    if (cap?.isNativePlatform?.()) {
+      const [{ Filesystem, Directory, Encoding }, { Share }] = await Promise.all([
+        import("@capacitor/filesystem"),
+        import("@capacitor/share"),
+      ]);
+      const res = await Filesystem.writeFile({
+        path: fileName,
+        data: full,
+        directory: Directory.Cache,
+        encoding: Encoding.UTF8,
+      });
+      await Share.share({
+        title: `Invoice ${order.id.slice(0, 8)}`,
+        text: `Invoice for order #${order.id.slice(0, 8)}`,
+        url: res.uri,
+        dialogTitle: "Save or share invoice",
+      });
+      return;
+    }
+  } catch (err) {
+    console.warn("native invoice share failed, falling back to blob", err);
+  }
+
   try {
     const blob = new Blob([full], { type: "text/html" });
     const url = URL.createObjectURL(blob);
