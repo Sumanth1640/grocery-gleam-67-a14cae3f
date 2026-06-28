@@ -144,7 +144,7 @@ export function MobileSearch({ q, onQueryChange }: { q: string; onQueryChange: (
               {resultsQ.isLoading ? "Searching…" : `${results.length} products`}
             </p>
             {results.length > 0 ? (
-              <ul className="grid grid-cols-2 gap-3">
+              <ul className="grid grid-cols-3 gap-2">
                 {results.map((p) => (
                   <li
                     key={p.id}

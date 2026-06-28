@@ -71,7 +71,7 @@ export function MobileWishlist() {
       ) : (
         <>
           <div className="px-5">
-            <ul className="grid grid-cols-2 gap-3">
+            <ul className="grid grid-cols-3 gap-2">
               {items.map((p) => (
                 <li
                   key={p.id}
