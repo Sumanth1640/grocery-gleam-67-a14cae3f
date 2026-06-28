@@ -168,7 +168,7 @@ export function MobileFood() {
         </Link>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-4 px-5">
+      <div className="mt-3 grid grid-cols-3 gap-3 px-5">
         {dishesQ.isLoading
           ? Array.from({ length: 4 }).map((_, i) => <MobileDishSkeleton key={i} />)
           : popularDishes.map((d) => <MobileDishCard key={d.id} dish={d} />)}

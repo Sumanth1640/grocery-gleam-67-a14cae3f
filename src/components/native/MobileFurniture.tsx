@@ -127,7 +127,7 @@ export function MobileFurniture() {
             <p className="mt-1 text-[12px] text-zinc-500">Try a different category or wood.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {items.map((it) => (
               <Card key={it.id} item={it} />
             ))}

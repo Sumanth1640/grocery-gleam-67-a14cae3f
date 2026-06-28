@@ -109,7 +109,7 @@ export function MobileCategory({ slug }: { slug: string }) {
         </button>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-4 px-5">
+      <div className="mt-3 grid grid-cols-3 gap-3 px-5">
         {(itemsQ.isLoading ? Array.from({ length: 4 }) : popular).map((p: any, i) => (
           <MobileProductCard key={p?.id ?? i} product={p} />
         ))}
@@ -136,7 +136,7 @@ export function MobileCategory({ slug }: { slug: string }) {
               {showAllNew ? "Show less" : "View all"} <ChevronRight className="h-3 w-3" />
             </button>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-4 px-5">
+          <div className="mt-3 grid grid-cols-3 gap-3 px-5">
             {newArrivals.map((p: any) => (
               <MobileProductCard key={p.id} product={p} />
             ))}

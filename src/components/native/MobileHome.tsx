@@ -124,7 +124,7 @@ export function MobileHome() {
               View all
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             {(prodsQ.isLoading ? Array.from({ length: 4 }) : products).map((p: any, i: number) => (
               <NativeProductCard key={p?.id ?? i} product={p} />
             ))}
