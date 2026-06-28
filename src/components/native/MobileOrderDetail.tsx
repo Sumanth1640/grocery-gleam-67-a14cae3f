@@ -68,6 +68,27 @@ export function MobileOrderDetail({ id }: { id: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // ----- Refund -----
+  const refundFetchRpc = useDualFn(myRefundForOrder, (d: any) => php.myRefundForOrder(d.order_id));
+  const refundCreateRpc = useDualFn(createRefundRequest, (d: any) => php.createRefund(d));
+  const refundQ = useQuery({
+    queryKey: ["refund", id],
+    queryFn: () => refundFetchRpc({ data: { order_id: id } }),
+    enabled: !!order && order.status !== "placed",
+  });
+  const [showRefund, setShowRefund] = useState(false);
+  const [refundReason, setRefundReason] = useState("Item missing");
+  const [refundDetails, setRefundDetails] = useState("");
+  const refundM = useMutation({
+    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0, proof_urls: [] } }),
+    onSuccess: () => {
+      toast.success("Refund request submitted");
+      setShowRefund(false); setRefundDetails("");
+      qc.invalidateQueries({ queryKey: ["refund", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const handleReorder = () => {
     items.forEach((it) => { for (let i = 0; i < it.qty; i++) cartStore.add(it.product); });
     toast.success("Items added to cart");
