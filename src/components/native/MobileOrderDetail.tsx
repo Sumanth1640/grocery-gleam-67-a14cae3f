@@ -242,16 +242,101 @@ export function MobileOrderDetail({ id }: { id: string }) {
         </div>
       </div>
 
+      {/* Refund — shown inline above sticky actions */}
+      {!isCancelled && order.status !== "placed" && (
+        <div className="mt-3 px-5">
+          {refundQ.data ? (
+            <div
+              className={`rounded-3xl p-4 ring-1 ${
+                refundQ.data.status === "approved"
+                  ? "bg-emerald-50 ring-emerald-200"
+                  : refundQ.data.status === "rejected"
+                  ? "bg-red-50 ring-red-200"
+                  : "bg-amber-50 ring-amber-200"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                <div className="text-sm font-extrabold capitalize text-zinc-900">
+                  Refund {refundQ.data.status}
+                </div>
+              </div>
+              <div className="mt-1 text-[11px] text-zinc-600">
+                {refundQ.data.reason} · ₹{refundQ.data.amount} · Filed{" "}
+                {new Date(refundQ.data.created_at).toLocaleDateString()}
+              </div>
+              {refundQ.data.admin_note && (
+                <div className="mt-1 text-[11px] text-zinc-500">Note: {refundQ.data.admin_note}</div>
+              )}
+            </div>
+          ) : showRefund ? (
+            <form
+              onSubmit={(e) => { e.preventDefault(); refundM.mutate(); }}
+              className="space-y-2 rounded-3xl bg-white p-4 ring-1 ring-zinc-100 shadow-[0_4px_18px_rgba(15,23,42,0.06)]"
+            >
+              <div className="text-sm font-extrabold text-zinc-900">Request refund</div>
+              <select
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm"
+              >
+                <option>Item missing</option>
+                <option>Quality issue</option>
+                <option>Wrong item delivered</option>
+                <option>Damaged on arrival</option>
+                <option>Order not delivered</option>
+                <option>Other</option>
+              </select>
+              <textarea
+                value={refundDetails}
+                onChange={(e) => setRefundDetails(e.target.value)}
+                rows={3}
+                placeholder="Tell us what happened"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm"
+              />
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowRefund(false)}
+                  className="flex-1 rounded-xl bg-zinc-100 py-2 text-xs font-bold text-zinc-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={refundM.isPending}
+                  className="flex-1 rounded-xl bg-amber-600 py-2 text-xs font-extrabold text-white disabled:opacity-60"
+                >
+                  {refundM.isPending ? "Submitting…" : "Submit"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            (order.status === "delivered" || order.status === "out_for_delivery") && (
+              <button
+                onClick={() => setShowRefund(true)}
+                className="w-full rounded-2xl bg-amber-50 py-3 text-sm font-extrabold text-amber-700 ring-1 ring-amber-200"
+              >
+                Request refund
+              </button>
+            )
+          )}
+        </div>
+      )}
+
       {/* Sticky actions — sits above the floating native bottom dock */}
       <div className="fixed inset-x-0 bottom-24 z-30 px-3">
         <div className="mx-auto flex max-w-md gap-2 rounded-3xl border border-zinc-100 bg-white/95 p-2 shadow-lg backdrop-blur">
-          <Link
-            to="/orders/$id/invoice"
-            params={{ id: order.id }}
+          <button
+            onClick={() => downloadInvoiceFile({
+              ...order,
+              items: items as any,
+              address: address as any,
+            } as any)}
             className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-zinc-100 py-3 text-sm font-bold text-zinc-900"
           >
             <Download className="h-4 w-4" /> Invoice
-          </Link>
+          </button>
           {canCancel && (
             <button
               onClick={() => {
