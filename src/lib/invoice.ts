@@ -87,15 +87,14 @@ export async function downloadInvoiceFile(order: OrderLike) {
   try {
     const cap = (window as any).Capacitor;
     if (cap?.isNativePlatform?.()) {
-      const [{ Filesystem, Directory, Encoding }, { Share }] = await Promise.all([
-        import("@capacitor/filesystem"),
-        import("@capacitor/share"),
-      ]);
+      const Filesystem = cap.Plugins?.Filesystem;
+      const Share = cap.Plugins?.Share;
+      if (!Filesystem || !Share) throw new Error("Capacitor Filesystem/Share plugin not installed");
       const res = await Filesystem.writeFile({
         path: fileName,
         data: full,
-        directory: Directory.Cache,
-        encoding: Encoding.UTF8,
+        directory: "CACHE",
+        encoding: "utf8",
       });
       await Share.share({
         title: `Invoice ${order.id.slice(0, 8)}`,
@@ -108,6 +107,7 @@ export async function downloadInvoiceFile(order: OrderLike) {
   } catch (err) {
     console.warn("native invoice share failed, falling back to blob", err);
   }
+
 
   try {
     const blob = new Blob([full], { type: "text/html" });
