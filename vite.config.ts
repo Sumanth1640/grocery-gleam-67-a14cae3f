@@ -24,11 +24,9 @@ export default defineConfig(
         vite: {
           build: {
             manifest: true,
-            rollupOptions: {
-              external: ["@capacitor/filesystem", "@capacitor/share"],
-            },
           },
         },
+
       }
     : {
         vite: { build: { manifest: true } },
