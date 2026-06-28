@@ -185,49 +185,71 @@ export function MobileHome() {
 function NativeProductCard({ product }: { product: any }) {
   if (!product) {
     return (
-      <div className="rounded-[2rem] border border-zinc-100 bg-white p-3">
-        <div className="h-32 w-full animate-pulse rounded-2xl bg-zinc-100" />
-        <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-zinc-100" />
+      <div className="rounded-3xl bg-card p-3 shadow-card">
+        <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted" />
+        <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
+        <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-muted" />
       </div>
     );
   }
-  const off = product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+  const off =
+    product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
   return (
-    <div className="flex flex-col rounded-[2rem] border border-zinc-100 bg-white p-3 shadow-sm">
+    <div className="relative flex flex-col rounded-3xl bg-card p-3 shadow-card">
+      <div className="absolute left-3 top-3 z-10">
+        {off > 0 ? (
+          <ShieldBadge color="oklch(0.55 0.22 25)" label={`${off}%`} sub="OFF" />
+        ) : (
+          <ShieldBadge color="oklch(0.45 0.18 260)" label="Best" sub="sale" />
+        )}
+      </div>
       <Link
         to="/p/$id"
         params={{ id: product.slug }}
-        className="relative block h-32 overflow-hidden rounded-2xl bg-zinc-50"
+        className="block aspect-square overflow-hidden rounded-2xl bg-[oklch(0.97_0.01_145)]"
       >
         <img src={product.image} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
-        {off > 0 && (
-          <span className="absolute left-2 top-2 rounded-lg bg-rose-500 px-2 py-0.5 text-[9px] font-black text-white">
-            {off}% OFF
-          </span>
-        )}
       </Link>
-      <div className="px-1 pt-3">
-        <Link to="/p/$id" params={{ id: product.slug }} className="line-clamp-1 text-xs font-bold text-zinc-800">
-          {product.name}
-        </Link>
-        <p className="mb-2 text-[10px] font-semibold text-zinc-400">{product.weight}</p>
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-sm font-black text-zinc-900">₹{product.price}</span>
-            {off > 0 && <span className="ml-1 text-[10px] text-zinc-300 line-through">₹{product.mrp}</span>}
-          </div>
-          <button
-            onClick={() => cartStore.add(product)}
-            aria-label="Add to cart"
-            className="grid h-8 w-8 place-items-center rounded-xl bg-[oklch(0.55_0.16_145)] text-white shadow-lg shadow-emerald-100 transition active:scale-95"
-          >
-            <Plus className="h-4 w-4" strokeWidth={2.5} />
-          </button>
+      <Link to="/p/$id" params={{ id: product.slug }} className="mt-3 line-clamp-1 text-sm font-bold">
+        {product.name}
+      </Link>
+      <div className="text-[11px] text-muted-foreground">{product.weight}</div>
+      <div className="mt-2 flex items-end justify-between">
+        <div>
+          <div className="text-base font-extrabold">₹{product.price}</div>
+          {off > 0 && (
+            <div className="text-[11px] text-muted-foreground line-through">₹{product.mrp}</div>
+          )}
         </div>
+        <button
+          onClick={() => cartStore.add(product)}
+          aria-label="Add to cart"
+          className="grid h-9 w-9 place-items-center rounded-full bg-[oklch(0.7_0.2_45)] text-white shadow-pop transition active:scale-95"
+        >
+          <Plus className="h-4 w-4" strokeWidth={3} />
+        </button>
       </div>
     </div>
   );
 }
+
+function ShieldBadge({ color, label, sub }: { color: string; label: string; sub: string }) {
+  return (
+    <div
+      className="grid h-11 w-9 place-items-center text-center text-white shadow-pop"
+      style={{
+        background: color,
+        clipPath: "polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%)",
+      }}
+    >
+      <div className="-mt-1 leading-none">
+        <div className="text-[10px] font-extrabold">{label}</div>
+        <div className="text-[8px] font-semibold uppercase opacity-90">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
 
 function NativeDishMini({ dish }: { dish: any }) {
   const restaurant = dish.restaurant ?? {};
