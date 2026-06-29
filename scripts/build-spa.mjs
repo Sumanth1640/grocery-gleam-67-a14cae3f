@@ -15,6 +15,10 @@ const clientDir = join(root, "dist", "client");
 const serverDir = join(root, "dist", "server");
 const indexHtml = join(clientDir, "index.html");
 
+// Start from a clean dist folder so a failed Vite build cannot be mistaken for
+// success because of stale files from an earlier build.
+try { rmSync(join(root, "dist"), { recursive: true, force: true }); } catch { /* ignore */ }
+
 // ---- 1. Run `vite build`, filtering known-harmless prerender noise ----
 const PRERENDER_NOISE = [
   /\[prerender\]/i,
