@@ -12,7 +12,7 @@ $path = (string)($_GET['path'] ?? '');
 $path = ltrim(rawurldecode($path), '/');
 $path = str_replace('\\', '/', $path);
 
-if ($path === '' || str_contains($path, '..') || !preg_match('#^[A-Za-z0-9_\-/]+\.[A-Za-z0-9]+$#', $path)) {
+if ($path === '' || strpos($path, '..') !== false || !preg_match('#^[A-Za-z0-9_\-/]+\.[A-Za-z0-9]+$#', $path)) {
   json_error('Invalid path', 400);
 }
 
