@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { adminListOrders, adminUpdateOrderStatus } from "@/lib/admin.functions";
 import { useAuth } from "@/lib/use-auth";
 import { Loader2, ChevronDown, ChevronRight, Search, Bike, UserCheck, X, History } from "lucide-react";
+import { DeliveryProofPhoto } from "@/components/DeliveryProofPhoto";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
