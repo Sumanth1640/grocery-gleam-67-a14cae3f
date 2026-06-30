@@ -53,22 +53,6 @@ function InvoicePage() {
         <div className="flex-1 truncate text-sm font-bold">
           Invoice {order ? `#${order.id.slice(0, 8).toUpperCase()}` : ""}
         </div>
-        <button
-          onClick={() => orderLike && downloadInvoiceFile(orderLike as any)}
-          disabled={!orderLike}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-2 text-xs font-bold hover:bg-white/25 disabled:opacity-50"
-          aria-label="Download"
-        >
-          <Download className="h-4 w-4" /> Download
-        </button>
-        <button
-          onClick={() => window.print()}
-          disabled={!orderLike}
-          className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-2 text-xs font-bold hover:bg-white/25 disabled:opacity-50"
-          aria-label="Print"
-        >
-          <Printer className="h-4 w-4" /> Print
-        </button>
       </div>
 
       <div className="mx-auto max-w-3xl p-4">
