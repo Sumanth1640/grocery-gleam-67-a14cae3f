@@ -1,10 +1,28 @@
 import { useState } from "react";
 import { Camera, X, ExternalLink, AlertTriangle } from "lucide-react";
 
+function resolveProofUrl(rawUrl: string): string {
+  try {
+    const parsed = new URL(rawUrl, typeof window !== "undefined" ? window.location.origin : "https://hallifresh.in");
+    const marker = "/php-backend/uploads/";
+    const markerIndex = parsed.pathname.indexOf(marker);
+    if (markerIndex >= 0) {
+      const relPath = parsed.pathname.slice(markerIndex + marker.length);
+      parsed.pathname = parsed.pathname.slice(0, markerIndex) + "/php-backend/api/uploads/file.php";
+      parsed.search = `?path=${encodeURIComponent(relPath)}`;
+      return parsed.toString();
+    }
+    return rawUrl;
+  } catch {
+    return rawUrl;
+  }
+}
+
 export function DeliveryProofPhoto({ url, label = "Delivery proof" }: { url?: string | null; label?: string }) {
   const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
   if (!url) return null;
+  const imageUrl = resolveProofUrl(url);
   return (
     <div className="rounded-xl border bg-muted/20 p-3">
       <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -17,7 +35,7 @@ export function DeliveryProofPhoto({ url, label = "Delivery proof" }: { url?: st
           className="mt-2 block overflow-hidden rounded-lg border bg-card hover:opacity-90"
         >
           <img
-            src={url}
+            src={imageUrl}
             alt={label}
             className="h-24 w-24 object-cover"
             loading="lazy"
@@ -51,7 +69,7 @@ export function DeliveryProofPhoto({ url, label = "Delivery proof" }: { url?: st
             <X className="h-4 w-4" />
           </button>
           <img
-            src={url}
+            src={imageUrl}
             alt={label}
             className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain"
             referrerPolicy="no-referrer"
