@@ -9,8 +9,7 @@ import { cartStore } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
 import { USE_PHP } from "@/lib/dual-api";
 import type { Product } from "@/lib/catalog-types";
-import { downloadInvoiceFile } from "@/lib/invoice";
-import { ChevronLeft, CheckCircle2, Download, Loader2, MapPin, Package, Phone, Repeat, Truck, XCircle, AlertCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle2, FileText, Loader2, MapPin, Package, Phone, Repeat, Truck, XCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
