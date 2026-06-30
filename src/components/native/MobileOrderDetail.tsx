@@ -76,14 +76,45 @@ export function MobileOrderDetail({ id }: { id: string }) {
     queryFn: () => refundFetchRpc({ data: { order_id: id } }),
     enabled: !!order && order.status !== "placed",
   });
+  const { user } = useAuth();
   const [showRefund, setShowRefund] = useState(false);
   const [refundReason, setRefundReason] = useState("Item missing");
   const [refundDetails, setRefundDetails] = useState("");
+  const [proofUrls, setProofUrls] = useState<string[]>([]);
+  const [uploadingProof, setUploadingProof] = useState(false);
+
+  async function handleProofUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const remaining = 5 - proofUrls.length;
+    const picked = Array.from(files).slice(0, remaining);
+    if (picked.length === 0) { toast.error("Max 5 images"); return; }
+    setUploadingProof(true);
+    try {
+      const uploaded: string[] = [];
+      for (const f of picked) {
+        if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} > 5MB`); continue; }
+        if (!user?.id) { toast.error("Please sign in again"); break; }
+        if (USE_PHP) {
+          const r = await phpUploads.refundProof(f, user.id);
+          uploaded.push(r.url);
+        } else {
+          const path = `${user.id}/${Date.now()}-${f.name.replace(/[^A-Za-z0-9._-]/g, "_")}`;
+          const { error } = await supabase.storage.from("refund-proofs").upload(path, f, { upsert: false });
+          if (error) { toast.error(error.message); continue; }
+          uploaded.push(`refund-proofs://${path}`);
+        }
+      }
+      setProofUrls((prev) => [...prev, ...uploaded]);
+    } finally {
+      setUploadingProof(false);
+    }
+  }
+
   const refundM = useMutation({
-    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0, proof_urls: [] } }),
+    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0, proof_urls: proofUrls } }),
     onSuccess: () => {
       toast.success("Refund request submitted");
-      setShowRefund(false); setRefundDetails("");
+      setShowRefund(false); setRefundDetails(""); setProofUrls([]);
       qc.invalidateQueries({ queryKey: ["refund", id] });
     },
     onError: (e: Error) => toast.error(e.message),
