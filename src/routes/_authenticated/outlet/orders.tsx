@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Clock, Search, Printer, Bike, UserCheck, X } from "lucide-react";
+import { DeliveryProofPhoto } from "@/components/DeliveryProofPhoto";
 import { myManagedOutlets, listOutletOrders, updateOutletOrderStatus } from "@/lib/outlet-managers.functions";
 import { outletListAvailableRiders, outletAssignOrder, outletGetOrderAssignment } from "@/lib/rider.functions";
 
@@ -292,6 +293,11 @@ function AssignRiderButton({ orderId, outletId, deliveryPincode }: { orderId: st
             {assigned && (
               <div className="mt-3 rounded-xl bg-emerald-50 p-3 text-xs">
                 Currently with <b>{assigned.name}</b> · {assigned.phone} ({a.status})
+              </div>
+            )}
+            {a?.proof_photo && (
+              <div className="mt-3">
+                <DeliveryProofPhoto url={a.proof_photo} />
               </div>
             )}
             <div className="mt-3 max-h-72 space-y-2 overflow-auto">

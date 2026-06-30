@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { adminListOrders, adminUpdateOrderStatus } from "@/lib/admin.functions";
 import { useAuth } from "@/lib/use-auth";
 import { Loader2, ChevronDown, ChevronRight, Search, Bike, UserCheck, X, History } from "lucide-react";
+import { DeliveryProofPhoto } from "@/components/DeliveryProofPhoto";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
@@ -334,7 +335,7 @@ function AssignRiderButton({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const a = current.data as { status?: string; riders?: { name: string; phone: string } | null } | null;
+  const a = current.data as { status?: string; proof_photo?: string | null; riders?: { name: string; phone: string } | null } | null;
   const assigned = a?.riders;
   const label = assigned ? `${assigned.name}${a?.status ? ` · ${a.status.replace(/_/g, " ")}` : ""}` : "Assign rider";
 
@@ -376,6 +377,11 @@ function AssignRiderButton({
             {assigned && (
               <div className="mt-3 rounded-xl bg-emerald-50 p-3 text-xs">
                 Currently with <b>{assigned.name}</b> · {assigned.phone} ({a?.status})
+              </div>
+            )}
+            {a?.proof_photo && (
+              <div className="mt-3">
+                <DeliveryProofPhoto url={a.proof_photo} />
               </div>
             )}
             <div className="mt-3 max-h-72 space-y-2 overflow-auto">

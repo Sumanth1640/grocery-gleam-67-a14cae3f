@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { php } from "@/lib/php-api";
 import { useMemo, useState } from "react";
 import { Loader2, ArrowLeft, Warehouse, Search, Bike, CheckCircle2, Truck, Clock, UserX } from "lucide-react";
+import { DeliveryProofPhoto } from "@/components/DeliveryProofPhoto";
 
 export const Route = createFileRoute("/_authenticated/warehouse/history")({
   head: () => ({ meta: [{ title: "Assignment history — Warehouse panel" }] }),
@@ -212,6 +213,11 @@ export function WarehouseHistoryBody({ embedded = false }: { embedded?: boolean 
                       </ul>
                     </div>
                   </div>
+                  {x.proof_photo && (
+                    <div className="mt-3">
+                      <DeliveryProofPhoto url={x.proof_photo} />
+                    </div>
+                  )}
                 </li>
               );
             })}

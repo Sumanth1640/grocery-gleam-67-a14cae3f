@@ -18,7 +18,7 @@ if (!$ids) json_ok([]);
 $in = implode(',', array_fill(0, count($ids), '?'));
 $sql = "
   SELECT a.id, a.order_id, a.rider_id, a.status,
-         a.assigned_at, a.picked_up_at, a.delivered_at,
+         a.assigned_at, a.picked_up_at, a.delivered_at, a.proof_photo,
          o.warehouse_id, o.status AS order_status, o.total, o.payment, o.created_at AS order_created_at,
          o.address,
          w.name AS warehouse_name, w.code AS warehouse_code,
@@ -48,6 +48,7 @@ foreach ($rows as $r) {
     'assigned_at'  => to_iso_utc($r['assigned_at']),
     'picked_up_at' => to_iso_utc($r['picked_up_at']),
     'delivered_at' => to_iso_utc($r['delivered_at']),
+    'proof_photo'  => $r['proof_photo'] ?? null,
     'order' => [
       'id'         => $r['order_id'],
       'status'     => $r['order_status'],
