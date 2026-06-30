@@ -48,6 +48,7 @@ foreach ($rows as $r) {
     'assigned_at'  => to_iso_utc($r['assigned_at']),
     'picked_up_at' => to_iso_utc($r['picked_up_at']),
     'delivered_at' => to_iso_utc($r['delivered_at']),
+    'proof_photo'  => $r['proof_photo'] ?? null,
     'order' => [
       'id'         => $r['order_id'],
       'status'     => $r['order_status'],
