@@ -4,6 +4,7 @@ import { php } from "@/lib/php-api";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Clock, Search, Bike, UserCheck, X, Warehouse, ArrowLeft } from "lucide-react";
+import { DeliveryProofPhoto } from "@/components/DeliveryProofPhoto";
 
 export const Route = createFileRoute("/_authenticated/warehouse")({
   head: () => ({ meta: [{ title: "Warehouse panel — hallifresh" }] }),
