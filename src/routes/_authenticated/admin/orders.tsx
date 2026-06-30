@@ -335,7 +335,7 @@ function AssignRiderButton({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const a = current.data as { status?: string; riders?: { name: string; phone: string } | null } | null;
+  const a = current.data as { status?: string; proof_photo?: string | null; riders?: { name: string; phone: string } | null } | null;
   const assigned = a?.riders;
   const label = assigned ? `${assigned.name}${a?.status ? ` · ${a.status.replace(/_/g, " ")}` : ""}` : "Assign rider";
 
