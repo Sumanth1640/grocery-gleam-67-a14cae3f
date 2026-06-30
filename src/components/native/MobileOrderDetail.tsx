@@ -327,14 +327,10 @@ export function MobileOrderDetail({ id }: { id: string }) {
       <div className="fixed inset-x-0 bottom-24 z-30 px-3">
         <div className="mx-auto flex max-w-md gap-2 rounded-3xl border border-zinc-100 bg-white/95 p-2 shadow-lg backdrop-blur">
           <button
-            onClick={() => downloadInvoiceFile({
-              ...order,
-              items: items as any,
-              address: address as any,
-            } as any)}
+            onClick={() => navigate({ to: "/orders/$id/invoice", params: { id } })}
             className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-zinc-100 py-3 text-sm font-bold text-zinc-900"
           >
-            <Download className="h-4 w-4" /> Invoice
+            <FileText className="h-4 w-4" /> Invoice
           </button>
           {canCancel && (
             <button
