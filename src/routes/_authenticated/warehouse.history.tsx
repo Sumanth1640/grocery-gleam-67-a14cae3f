@@ -212,6 +212,11 @@ export function WarehouseHistoryBody({ embedded = false }: { embedded?: boolean 
                       </ul>
                     </div>
                   </div>
+                  {x.proof_photo && (
+                    <div className="mt-3">
+                      <DeliveryProofPhoto url={x.proof_photo} />
+                    </div>
+                  )}
                 </li>
               );
             })}
