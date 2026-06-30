@@ -100,6 +100,7 @@ $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' :
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $script = $_SERVER['SCRIPT_NAME'] ?? '';
 $backendBase = preg_replace('#/api/uploads/upload\.php$#', '', $script);
-$url = $scheme . '://' . $host . $backendBase . '/uploads/' . $relPath;
+$staticUrl = $scheme . '://' . $host . $backendBase . '/uploads/' . $relPath;
+$url = $scheme . '://' . $host . $backendBase . '/api/uploads/file.php?path=' . rawurlencode($relPath);
 
-json_ok(['path' => $relPath, 'url' => $url]);
+json_ok(['path' => $relPath, 'url' => $url, 'static_url' => $staticUrl]);

@@ -36,6 +36,11 @@ export function BannerCarousel() {
   const recompute = () => {
     const el = scrollerRef.current;
     if (!el) return;
+    if (el.clientWidth <= 0) {
+      setPageCount(1);
+      setPage(0);
+      return;
+    }
     const pages = Math.max(1, Math.round(el.scrollWidth / el.clientWidth));
     setPageCount(pages);
     setPage(Math.round(el.scrollLeft / el.clientWidth));
@@ -45,7 +50,10 @@ export function BannerCarousel() {
     recompute();
     const el = scrollerRef.current;
     if (!el) return;
-    const onScroll = () => setPage(Math.round(el.scrollLeft / el.clientWidth));
+    const onScroll = () => {
+      if (el.clientWidth <= 0) return;
+      setPage(Math.round(el.scrollLeft / el.clientWidth));
+    };
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", recompute);
     return () => {
@@ -59,7 +67,7 @@ export function BannerCarousel() {
     if (pageCount <= 1) return;
     const t = setInterval(() => {
       const el = scrollerRef.current;
-      if (!el) return;
+      if (!el || el.clientWidth <= 0) return;
       const next = (Math.round(el.scrollLeft / el.clientWidth) + 1) % pageCount;
       el.scrollTo({ left: next * el.clientWidth, behavior: "smooth" });
     }, 5000);
@@ -70,7 +78,7 @@ export function BannerCarousel() {
 
   const goTo = (p: number) => {
     const el = scrollerRef.current;
-    if (!el) return;
+    if (!el || el.clientWidth <= 0) return;
     el.scrollTo({ left: p * el.clientWidth, behavior: "smooth" });
   };
 
