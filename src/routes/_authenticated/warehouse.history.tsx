@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { php } from "@/lib/php-api";
 import { useMemo, useState } from "react";
 import { Loader2, ArrowLeft, Warehouse, Search, Bike, CheckCircle2, Truck, Clock, UserX } from "lucide-react";
+import { DeliveryProofPhoto } from "@/components/DeliveryProofPhoto";
 
 export const Route = createFileRoute("/_authenticated/warehouse/history")({
   head: () => ({ meta: [{ title: "Assignment history — Warehouse panel" }] }),
