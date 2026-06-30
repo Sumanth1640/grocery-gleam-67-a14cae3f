@@ -322,9 +322,47 @@ export function MobileOrderDetail({ id }: { id: string }) {
                 value={refundDetails}
                 onChange={(e) => setRefundDetails(e.target.value)}
                 rows={3}
-                placeholder="Tell us what happened"
+                maxLength={1000}
+                placeholder="Add an optional note — tell us what happened"
                 className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm"
               />
+              <div>
+                <div className="mb-1 text-[11px] font-semibold text-zinc-500">
+                  Photo proof (optional, up to 5) — helps for damaged or missing items
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {proofUrls.map((u, i) => (
+                    <div key={i} className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
+                      {u.startsWith("refund-proofs://") ? (
+                        <div className="grid h-full w-full place-items-center text-[9px] text-zinc-500">uploaded</div>
+                      ) : (
+                        <img src={u} alt="proof" className="h-full w-full object-cover" />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setProofUrls((p) => p.filter((_, idx) => idx !== i))}
+                        className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/60 text-white"
+                        aria-label="Remove"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {proofUrls.length < 5 && (
+                    <label className="grid h-16 w-16 cursor-pointer place-items-center rounded-lg border border-dashed border-zinc-300 text-[10px] text-zinc-500">
+                      {uploadingProof ? <Loader2 className="h-4 w-4 animate-spin" /> : "+ Add"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        disabled={uploadingProof}
+                        onChange={(e) => { handleProofUpload(e.target.files); e.currentTarget.value = ""; }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
