@@ -379,6 +379,11 @@ function AssignRiderButton({
                 Currently with <b>{assigned.name}</b> · {assigned.phone} ({a?.status})
               </div>
             )}
+            {a?.proof_photo && (
+              <div className="mt-3">
+                <DeliveryProofPhoto url={a.proof_photo} />
+              </div>
+            )}
             <div className="mt-3 max-h-72 space-y-2 overflow-auto">
               {riders.isLoading && (
                 <div className="grid place-items-center py-8">
