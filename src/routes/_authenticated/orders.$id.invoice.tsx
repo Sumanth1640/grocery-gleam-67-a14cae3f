@@ -3,8 +3,8 @@ import { useDualFn } from "@/lib/use-dual-fn";
 import { php } from "@/lib/php-api";
 import { useQuery } from "@tanstack/react-query";
 import { getOrder } from "@/lib/account.functions";
-import { ArrowLeft, Download, Loader2, Printer } from "lucide-react";
-import { buildInvoiceHtml, downloadInvoiceFile } from "@/lib/invoice";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { buildInvoiceHtml } from "@/lib/invoice";
 import type { Product } from "@/lib/catalog-types";
 
 export const Route = createFileRoute("/_authenticated/orders/$id/invoice")({
