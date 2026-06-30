@@ -2,14 +2,15 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDualFn } from "@/lib/use-dual-fn";
-import { php } from "@/lib/php-api";
+import { php, phpUploads } from "@/lib/php-api";
 import { getOrder, cancelOrder } from "@/lib/account.functions";
 import { createRefundRequest, myRefundForOrder } from "@/lib/admin-extra.functions";
 import { cartStore } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
 import { USE_PHP } from "@/lib/dual-api";
+import { useAuth } from "@/lib/use-auth";
 import type { Product } from "@/lib/catalog-types";
-import { ChevronLeft, CheckCircle2, FileText, Loader2, MapPin, Package, Phone, Repeat, Truck, XCircle, AlertCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle2, FileText, Loader2, MapPin, Package, Phone, Repeat, Truck, XCircle, AlertCircle, X } from "lucide-react";
 import { toast } from "sonner";
 
 const FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" } as const;
@@ -75,14 +76,45 @@ export function MobileOrderDetail({ id }: { id: string }) {
     queryFn: () => refundFetchRpc({ data: { order_id: id } }),
     enabled: !!order && order.status !== "placed",
   });
+  const { user } = useAuth();
   const [showRefund, setShowRefund] = useState(false);
   const [refundReason, setRefundReason] = useState("Item missing");
   const [refundDetails, setRefundDetails] = useState("");
+  const [proofUrls, setProofUrls] = useState<string[]>([]);
+  const [uploadingProof, setUploadingProof] = useState(false);
+
+  async function handleProofUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const remaining = 5 - proofUrls.length;
+    const picked = Array.from(files).slice(0, remaining);
+    if (picked.length === 0) { toast.error("Max 5 images"); return; }
+    setUploadingProof(true);
+    try {
+      const uploaded: string[] = [];
+      for (const f of picked) {
+        if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} > 5MB`); continue; }
+        if (!user?.id) { toast.error("Please sign in again"); break; }
+        if (USE_PHP) {
+          const r = await phpUploads.refundProof(f, user.id);
+          uploaded.push(r.url);
+        } else {
+          const path = `${user.id}/${Date.now()}-${f.name.replace(/[^A-Za-z0-9._-]/g, "_")}`;
+          const { error } = await supabase.storage.from("refund-proofs").upload(path, f, { upsert: false });
+          if (error) { toast.error(error.message); continue; }
+          uploaded.push(`refund-proofs://${path}`);
+        }
+      }
+      setProofUrls((prev) => [...prev, ...uploaded]);
+    } finally {
+      setUploadingProof(false);
+    }
+  }
+
   const refundM = useMutation({
-    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0, proof_urls: [] } }),
+    mutationFn: () => refundCreateRpc({ data: { order_id: id, reason: refundReason, details: refundDetails, amount: 0, proof_urls: proofUrls } }),
     onSuccess: () => {
       toast.success("Refund request submitted");
-      setShowRefund(false); setRefundDetails("");
+      setShowRefund(false); setRefundDetails(""); setProofUrls([]);
       qc.invalidateQueries({ queryKey: ["refund", id] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -290,9 +322,47 @@ export function MobileOrderDetail({ id }: { id: string }) {
                 value={refundDetails}
                 onChange={(e) => setRefundDetails(e.target.value)}
                 rows={3}
-                placeholder="Tell us what happened"
+                maxLength={1000}
+                placeholder="Add an optional note — tell us what happened"
                 className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm"
               />
+              <div>
+                <div className="mb-1 text-[11px] font-semibold text-zinc-500">
+                  Photo proof (optional, up to 5) — helps for damaged or missing items
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {proofUrls.map((u, i) => (
+                    <div key={i} className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
+                      {u.startsWith("refund-proofs://") ? (
+                        <div className="grid h-full w-full place-items-center text-[9px] text-zinc-500">uploaded</div>
+                      ) : (
+                        <img src={u} alt="proof" className="h-full w-full object-cover" />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setProofUrls((p) => p.filter((_, idx) => idx !== i))}
+                        className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/60 text-white"
+                        aria-label="Remove"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {proofUrls.length < 5 && (
+                    <label className="grid h-16 w-16 cursor-pointer place-items-center rounded-lg border border-dashed border-zinc-300 text-[10px] text-zinc-500">
+                      {uploadingProof ? <Loader2 className="h-4 w-4 animate-spin" /> : "+ Add"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        disabled={uploadingProof}
+                        onChange={(e) => { handleProofUpload(e.target.files); e.currentTarget.value = ""; }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
